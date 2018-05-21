@@ -9,7 +9,7 @@ using namespace std;
 
 class MyUtility
 {
-	static stirng getCurrentTime();
+	static string getCurrentTime();
 };
 #endif // !__MY_UTILITY__
 
