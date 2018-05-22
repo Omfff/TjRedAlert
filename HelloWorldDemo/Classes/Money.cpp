@@ -11,11 +11,11 @@ void Money::update(float f)
 {
 	if (++_time % _period == 0) {
 		_money += _moneyInPeriod;
-		updateMoneyLable();
+		updateMoneyLabel();
 	}
 }
 
-void Money::updateMoneyLable()
+void Money::updateMoneyLabel()
 {
 	_moneyString = std::to_string(_money);
 	setString(_moneyString);
@@ -29,12 +29,12 @@ bool Money::checkMoney(int cost)const
 void Money::costMoney(int cost)
 {
 	_money -= cost;
-	updateMoneyLable();
+	updateMoneyLabel();
 }
 
-void Money::increaseMoney(int amount)
+void Money::addMoney(int add)
 {
-	_money += amount;
+	_money += add;
 }
 
 void Money::setMoneyInPeriod(int moneyInPeriod)
@@ -42,7 +42,12 @@ void Money::setMoneyInPeriod(int moneyInPeriod)
 	_moneyInPeriod = moneyInPeriod;
 }
 
-void Money::addMoneyInPeriod(int increase)
+void Money::addMoneyInPeriod(int add)
 {
-	_moneyInPeriod += increase;
+	_moneyInPeriod += add;
+}
+
+void Money::cutMoneyInPeriod(int cut)
+{
+	_moneyInPeriod -= cut;
 }

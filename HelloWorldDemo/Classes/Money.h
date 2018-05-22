@@ -14,21 +14,23 @@ public:
 	//set initial money
 	bool init() override;
 
-	//update _money every period
+	//update money every period
 	void update(float f);
 	
-	//when _money changed, update the lable
-	void updateMoneyLable();
+	//update the money label
+	void updateMoneyLabel();
 
 	bool checkMoney(int cost) const;
 
 	void costMoney(int cost);
 
-	void increaseMoney(int amount);
+	void addMoney(int add);
 
 	void setMoneyInPeriod(int moneyInPeriod);
 
-	void addMoneyInPeriod(int increase);
+	void addMoneyInPeriod(int add);
+
+	void cutMoneyInPeriod(int cut);
 
 private:
 	int _money = 0;
