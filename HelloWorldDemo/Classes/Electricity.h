@@ -38,5 +38,7 @@ private:
 	std::string _showElectricity;
 
 };
+
+
 #endif // !__ELECTRICITY_H__
 

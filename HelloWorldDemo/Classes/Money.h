@@ -40,5 +40,7 @@ private:
 	int _moneyInPeriod = MONEY_IN_PERIOD;
 	int _period = PERIOD;
 };
+
+
 #endif // !__MONEY_H__
 

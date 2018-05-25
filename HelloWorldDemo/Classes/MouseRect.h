@@ -6,6 +6,7 @@
 class MouseRect :public cocos2d::DrawNode
 {
 public:
+	CREATE_FUNC(MouseRect);
 
 	void setTouchStartToGL(cocos2d::Point point);
 	void setTouchEndToGL(cocos2d::Point point);
