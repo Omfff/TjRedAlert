@@ -32,6 +32,7 @@ class GridDimen
 public:
 	int _width;
 	int _height;
+	GridDimen() :_width(0), _height(0) {}
 	GridDimen(float width, float height) :_width(width), _height(height) {}
 	GridDimen(Size s) :_width(s.width), _height(s.height) {};
 	friend bool operator == (const GridDimen & size1, const GridDimen & size2);
@@ -44,6 +45,7 @@ public:
 	GridVec2 _oriPoint;
 	GridDimen _dimen;
 	//三种初始化方式
+	GridRect() {}
 	GridRect(float x, float y, float width, float height) :_oriPoint(x, y), _dimen(width, height) {}
 	GridRect(const GridVec2 & point, const GridDimen & size) :_oriPoint(point), _dimen(size) {}
 	GridRect(const Rect & rect) :_oriPoint(rect.origin), _dimen(rect.size) {};
@@ -94,5 +96,5 @@ public:
 	GridRect getEmptyRectNearby(const GridVec2 & point, const GridDimen & size)const;
 	//获取point附近大小为size且为空的区域的rect
 };
-vector<GridVec2> orientation = { GridVec2(1, 1), GridVec2(1, -1), GridVec2(-1, -1), GridVec2(-1, 1) };
+
 #endif

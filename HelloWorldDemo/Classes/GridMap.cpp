@@ -1,5 +1,5 @@
 #include"GridMap.h"
-
+vector<GridVec2> orientations = { GridVec2(1, 1), GridVec2(1, -1), GridVec2(-1, -1), GridVec2(-1, 1) };
 GridVec2::GridVec2(const Vec2 & point)
 {
 	_x = point.x;
@@ -114,7 +114,8 @@ void GridMap::unitLeavePosition(const GridRect & rect)
 void GridMap::unitCoordRemove(int unitId)
 {
 	//unitLeavePosition?????????????????????????????????????????????????????????????????????
-	_unitCoord.erase(_unitCoord.find(unitId));
+	map<int, GridVec2>::iterator iter = _unitCoord.find(unitId);
+	_unitCoord.erase(iter);
 }
 
 bool GridMap::checkPointPosition(const GridVec2 & point)const
@@ -131,8 +132,10 @@ bool GridMap::checkRectPosition(const GridRect & rect)const
 {
 	if (_worldRect.insideRect(rect))
 	{
-		for (int xBegin = rect._oriPoint._x; xBegin < rect._oriPoint._x + rect._dimen._width; xBegin++)
-			for (int yBegin = rect._oriPoint._y; xBegin < rect._oriPoint._y + rect._dimen._height; yBegin++)
+		int xEnd = rect._oriPoint._x + rect._dimen._width;
+		int yEnd = rect._oriPoint._y + rect._dimen._height;
+		for (int xBegin = rect._oriPoint._x; xBegin < xEnd; xBegin++)
+			for (int yBegin = rect._oriPoint._y; yBegin <yEnd ; yBegin++)
 			{
 				if (_barrierMap[xBegin][yBegin] != 0)
 					return true;
@@ -150,7 +153,7 @@ set<int> GridMap::getUnitIdAt(const GridRect & range)const
 {
 	set<int> idGroup;
 	for (int xBegin = range._oriPoint._x; xBegin < range._oriPoint._x + range._dimen._width; xBegin++)
-		for (int yBegin = range._oriPoint._y; xBegin < range._oriPoint._y + range._dimen._height; yBegin++)
+		for (int yBegin = range._oriPoint._y; yBegin < range._oriPoint._y + range._dimen._height; yBegin++)
 		{
 			if (_barrierMap[xBegin][yBegin] != 0)
 			{
@@ -173,7 +176,7 @@ GridVec2 GridMap::getEmptyPointNearby(const GridVec2 & position)const
 			for(int oritat=0;oritat<4;oritat++)
 				for (int k = 1; k <= i; k++)
 				{
-					tempPoint = tempPoint + orientation[oritat];
+					tempPoint = tempPoint + orientations[oritat];
 					if (!checkPointPosition(tempPoint))
 						return tempPoint;
 				}
@@ -196,7 +199,7 @@ GridRect GridMap::getEmptyRectNearby(const GridVec2 & point, const GridDimen & s
 			for (int oritat = 0; oritat<4; oritat++)
 				for (int k = 1; k <= i; k++)
 				{
-					tempPoint = tempPoint + orientation[oritat];
+					tempPoint = tempPoint + orientations[oritat];
 					if ((!checkPointPosition(tempPoint)) &&
 						(!checkRectPosition(GridRect(tempPoint, size))))
 						return GridRect(tempPoint, size);
