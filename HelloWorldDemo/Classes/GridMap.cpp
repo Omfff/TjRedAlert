@@ -208,3 +208,32 @@ GridRect GridMap::getEmptyRectNearby(const GridVec2 & point, const GridDimen & s
 	}
 	return GridRect(-100, -100, 0, 0);
 }
+void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
+{
+	for(int i=0;i<map->getMapSize().width;i++)
+		for (int j = 0; i < map->getMapSize().height; j++)
+		{
+			Vec2 tileCoord = tileCoordFromPosition(Vec2(i,j),map);
+			auto collidable = map->getLayer("collidable");
+			int tileGid = collidable->getTileGIDAt(tileCoord);
+			
+			if (tileGid > 0)
+			{
+				Value prop = map->getPropertiesForGID(tileGid);
+				ValueMap propValueMap = prop.asValueMap();
+
+				std::string collision = propValueMap["Collidable"].asString();
+
+				if (collision == "true")
+				{
+					gmap->_barrierMap[tileCoord.x][tileCoord.y] = _NO_PASS;
+				}
+			}
+		}
+}
+Vec2 tileCoordFromPosition(Vec2 pos, TMXTiledMap* map)
+{
+	int x = pos.x / map->getTileSize().width;
+	int y = ((map->getMapSize().height * map->getTileSize().height) - pos.y) / map->getTileSize().height;
+	return Vec2(x, y);
+}

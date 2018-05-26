@@ -8,6 +8,7 @@
 USING_NS_CC;
 #define _MAP_WIDTH 125
 #define _MAP_HEIGHT 62
+#define _NO_PASS 10086
 using namespace std;
 
 
@@ -61,6 +62,7 @@ public:
 //网格地图
 class GridMap
 {
+protected:
 	map<int, GridVec2> _unitCoord;
 	//储存各单位的网格坐标
 	vector <vector<int>> _barrierMap;
@@ -73,7 +75,7 @@ public:
 	bool unitCoordStore(int unitId, const GridVec2 &position);
 	bool unitCoordStore(int unitId, const GridRect & rect);
 	//存储单位的位置信息 返回true为成功
-	void unitPositionOccupy(int unitId,const GridVec2& position);
+	void unitPositionOccupy(int unitId, const GridVec2& position);
 	void unitPositionOccupy(int unitId, const GridRect & rect);
 	//在存储单位的位置信息后会自动调用单位占用网格地图上的网格
 	void unitLeavePosition(int unitId, const GridVec2& posioton);
@@ -95,6 +97,9 @@ public:
 	//获取point附近空的网格的坐标
 	GridRect getEmptyRectNearby(const GridVec2 & point, const GridDimen & size)const;
 	//获取point附近大小为size且为空的区域的rect
+	friend void setCollisionPos(TMXTiledMap* map,GridMap * gmap);
+	friend Vec2 tileCoordFromPosition(Vec2 pos, TMXTiledMap* map);
 };
+	
 
 #endif
