@@ -58,6 +58,10 @@ bool GamingScene::init()
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouseMoveEvent, 1);
 
+	auto keyBoardListener = EventListenerKeyboard::create();
+	keyBoardListener->onKeyPressed = CC_CALLBACK_2(GamingScene::onKeyPressed, this);
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyBoardListener, this);
+
 
 	return true;
 }
@@ -104,6 +108,44 @@ void GamingScene::mapScroll()
 	}
 
 
+}
+
+void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) 
+{
+	auto mapPosition = _tiledMap->getPosition();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	//W-UP, S-DOWN, A-LEFT, D-RIGHT
+	switch (keyCode)
+	{
+	case EventKeyboard::KeyCode::KEY_W:
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, 50) + visibleSize)) {
+			mapPosition += Vec2(0, -50);
+			_tiledMap->setPosition(mapPosition);
+		}
+		break;
+	case EventKeyboard::KeyCode::KEY_A:
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(-50, 0))) {
+			mapPosition += Vec2(50, 0);
+			_tiledMap->setPosition(mapPosition);
+		}
+		break;
+	case EventKeyboard::KeyCode::KEY_S:
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, -50))) {
+			mapPosition += Vec2(0, 50);
+			_tiledMap->setPosition(mapPosition);
+		}
+		break;
+	case EventKeyboard::KeyCode::KEY_D:
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(50, 0) + visibleSize)) {
+			mapPosition += Vec2(-50, 0);
+			_tiledMap->setPosition(mapPosition);
+		}
+		break;
+	default:
+		break;
+
+	}
 }
 
 bool GamingScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)

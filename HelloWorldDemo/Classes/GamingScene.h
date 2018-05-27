@@ -19,6 +19,9 @@ public:
 	//based on mouse move, scroll the map
 	void mapScroll();
 
+	//press key to change map position
+	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+
 	//get touch point
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)override;
 	//while moving the mouse, change the mouse renctangle
