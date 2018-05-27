@@ -71,14 +71,18 @@ void GamingScene::mapScroll()
 {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 	auto mapPosition = _tiledMap->getPosition();
 
 	//the scroll distance times in direction x
 	int xMove = 0;
 	//the scroll distance times in direction y
 	int yMove = 0;
+
+
 	Vec2 scroll(0, 0);
 
+	//choose scroll speed with _mousePosition
 	xMove = (origin.x + visibleSize.width - BOX_EDGE_WIDTH_SMALL < _mousePosition.x)
 		+ (origin.x + visibleSize.width - BOX_EDGE_WIDTH < _mousePosition.x)
 		- (origin.x + BOX_EDGE_WIDTH_SMALL > _mousePosition.x)
@@ -88,9 +92,11 @@ void GamingScene::mapScroll()
 		- (origin.y + BOX_EDGE_HEIGHT_SMALL > _mousePosition.y)
 		- (origin.y + BOX_EDGE_HEIGHT > _mousePosition.y);
 
+	//set the value of scroll
 	scroll += Vec2(-SCROLL_DISTANCE, 0) * xMove;
 	scroll += Vec2(0, -SCROLL_DISTANCE) * yMove;
 
+	//restrict screen view in the map
 	if (_tiledMap->getBoundingBox().containsPoint((-scroll) + visibleSize) 
 		&& (_tiledMap->getBoundingBox().containsPoint(-scroll))) {
 		mapPosition += scroll;

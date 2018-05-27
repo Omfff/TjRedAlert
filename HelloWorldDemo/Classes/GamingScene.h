@@ -36,12 +36,16 @@ private:
 
 	//int _playerID;
 
+	//mouse rectangle to choose soldiers or buildings
 	MouseRect* _mouseRect = nullptr;
 
+	//record cursor positon for map scroll
 	cocos2d::Point _mousePosition{ 0, 0 };
 
+	//display and change money label
 	Money* _money = nullptr;
 
+	//display and change electricity label
 	Electricity* _electricity = nullptr;
 
 };
