@@ -19,8 +19,81 @@ bool GamingScene::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	_tiledMap = TMXTiledMap::create("map/TjAlertMap/TjRedAlertMap.tmx");
+
+
+	_tiledMap = TMXTiledMap::create("maps/TjRedAlertMap(1).tmx");
 	addChild(_tiledMap, 0);
+
+
+
+	_manufactureMenu = ManufactureMenu::create();
+	_manufactureMenu->setPosition(Vec2(origin.x + visibleSize.width - 20, origin.y + visibleSize.height / 2));
+
+	_manufactureMenu->setGICallBack([&](Ref*)
+	{
+		if (_money->checkMoney(150)) {
+			_money->costMoney(150);
+		}
+	});
+
+	_manufactureMenu->setAttackDogCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(150)) {
+			_money->costMoney(150);
+		}
+	});
+
+	_manufactureMenu->setTankCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(150)) {
+			_money->costMoney(150);
+		}
+	});
+
+	_manufactureMenu->setBaseCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(2500)) {
+			_money->costMoney(2500);
+			_electricity->addElectricity(50);
+		}
+	});
+
+	_manufactureMenu->setPowerPlantCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(800)) {
+			_money->costMoney(800);
+			_electricity->addElectricity(200);
+		}
+	});
+
+	_manufactureMenu->setBarrackCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(800) && _electricity->checkElectricity(10)) {
+			_money->costMoney(800);
+			_electricity->costElectricity(10);
+		}
+	});
+
+	_manufactureMenu->setWarFactoryCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(2000) && _electricity->checkElectricity(50)) {
+			_money->costMoney(2000);
+			_electricity->costElectricity(50);
+		}
+	});
+
+	_manufactureMenu->setOreRefineryCallBack([&](Ref*)
+	{
+		if (_money->checkMoney(2000) && _electricity->checkElectricity(40)) {
+			_money->costMoney(2000);
+			_money->addMoneyInPeriod(50);
+			_electricity->costElectricity(40);
+		}
+	});
+
+	addChild(_manufactureMenu, 10);
+
+
 
 	auto moneyIcon = Sprite::create("ui/money/gold.png");
 	moneyIcon->setPosition(visibleSize.width - 120, 20);
@@ -32,10 +105,11 @@ bool GamingScene::init()
 	_money->schedule(schedule_selector(Money::update));
 	addChild(_money, 1);
 	
-
 	_electricity = Electricity::create();
 	_electricity->setPosition(visibleSize.width - 80, 80);
 	addChild(_electricity, 1);
+
+
 
 	_mouseRect = MouseRect::create();
 	_mouseRect->setVisible(false);
@@ -57,6 +131,7 @@ bool GamingScene::init()
 		_mousePosition = Vec2(mouseEvent->getCursorX(), mouseEvent->getCursorY());
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouseMoveEvent, 1);
+
 
 	auto keyBoardListener = EventListenerKeyboard::create();
 	keyBoardListener->onKeyPressed = CC_CALLBACK_2(GamingScene::onKeyPressed, this);
@@ -142,6 +217,9 @@ void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 			_tiledMap->setPosition(mapPosition);
 		}
 		break;
+	/*case EventKeyboard::KeyCode::KEY_SPACE:
+		focusOnBase();*/
+
 	default:
 		break;
 

@@ -5,6 +5,7 @@
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
+#include"ManufactureMenu.h"
 
 class GamingScene : public cocos2d::Layer
 {
@@ -21,6 +22,8 @@ public:
 
 	//press key to change map position
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+
+	//void focusOnBase();
 
 	//get touch point
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)override;
@@ -50,6 +53,9 @@ private:
 
 	//display and change electricity label
 	Electricity* _electricity = nullptr;
+
+	//menu to manufacture buildings and soldiers
+	ManufactureMenu* _manufactureMenu = nullptr;
 
 };
 
