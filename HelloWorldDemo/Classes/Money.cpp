@@ -4,6 +4,7 @@ bool Money::init()
 {
 	_money = INITIAL_MONEY;
 	_moneyString = std::to_string(_money);
+
 	return initWithString(_moneyString, "fonts/MoneyFont.fnt");
 }
 

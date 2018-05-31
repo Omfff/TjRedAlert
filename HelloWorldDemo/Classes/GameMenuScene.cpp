@@ -4,6 +4,7 @@
 #include "AudioControlScene.h"
 #include "HelpScene.h"
 #include "HelloWorldScene.h"
+#include "GamingScene.h"
 
 USING_NS_CC;
 using namespace ui;
@@ -110,9 +111,13 @@ bool GameMenu::init() {
 
 void GameMenu::menuItemStartCallback(Ref*pSender)
 {
-	auto PreLoadScene = HelloWorld::createScene();
-	auto transition = TransitionFadeTR::create(1.0, PreLoadScene);
+	auto gamingScene = GamingScene::createScene();
+	auto transition = TransitionFadeTR::create(1.0, gamingScene);
 	Director::getInstance()->pushScene(transition);
+
+	/*auto PreLoadScene = HelloWorld::createScene();
+	auto transition = TransitionFadeTR::create(1.0, PreLoadScene);
+	Director::getInstance()->pushScene(transition);*/
 }
 
 void GameMenu::menuItemSetCallback(Ref*pSender)

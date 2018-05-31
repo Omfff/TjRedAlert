@@ -2,9 +2,13 @@
 #define __GAMING_SCENE_H__
 
 #include"cocos2d.h"
+#include"SystemHeader.h"
+#include"GridMap.h"
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
+#include"ManufactureMenu.h"
+#include"Building.h"
 
 class GamingScene : public cocos2d::Layer
 {
@@ -19,6 +23,11 @@ public:
 	//based on mouse move, scroll the map
 	void mapScroll();
 
+	//press key to change map position
+	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+
+	//void focusOnBase();
+
 	//get touch point
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)override;
 	//while moving the mouse, change the mouse renctangle
@@ -32,17 +41,27 @@ public:
 private:
 
 	cocos2d::TMXTiledMap* _tiledMap;
-	//cocos2d::TMXLayer* _collidable;
+	
+	GridMap* _gridMap;
 
 	//int _playerID;
 
+	//mouse rectangle to choose soldiers or buildings
 	MouseRect* _mouseRect = nullptr;
 
+	//record cursor positon for map scroll
 	cocos2d::Point _mousePosition{ 0, 0 };
 
+	//display and change money label
 	Money* _money = nullptr;
 
+	//display and change electricity label
 	Electricity* _electricity = nullptr;
+
+	//menu to manufacture buildings and soldiers
+	ManufactureMenu* _manufactureMenu = nullptr;
+
+	Layer* _menuSpriteLayer = nullptr;
 
 };
 
