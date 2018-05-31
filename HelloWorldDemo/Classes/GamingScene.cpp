@@ -1,4 +1,6 @@
 #include"GamingScene.h"
+#include"Buliding.h"
+#include"unitManager.h"
 
 USING_NS_CC;
 
@@ -19,23 +21,45 @@ bool GamingScene::init()
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	_tiledMap = TMXTiledMap::create("map/TjAlertMap/TjRedAlertMap.tmx");
+	_tiledMap = TMXTiledMap::create("maps/TjRedAlertMap(1).tmx");
 	addChild(_tiledMap, 0);
 
-	auto moneyIcon = Sprite::create("ui/money/gold.png");
+	auto moneyIcon = Sprite::create("CloseNormal.png");
 	moneyIcon->setPosition(visibleSize.width - 120, 20);
 	moneyIcon->setScale(0.04);
 	addChild(moneyIcon, 1);
 
-	_money = Money::create();
+
+	_gridMap = new GridMap;
+	_msgs = new GameMessageGroup;
+	_unitManager = UnitManager::create();	
+	_unitManager->setMessageGrop(_msgs);
+	_unitManager->setPlayerCamp(RED);
+	_unitManager->setGridmap(_gridMap);
+	_unitManager->setTileMap(_tiledMap);
+	_unitManager->setNextId(RED);
+	addChild(_unitManager);
+	unit=_unitManager->creatUnit(RED, BASE, Vec2(visibleSize.width / 3, visibleSize.height / 3));
+	unit->setPosition(Vec2(visibleSize.width / 3, visibleSize.height / 3));
+	_tiledMap->addChild(unit, 10);
+
+	_unitManager->creatProduceMessage(BASE, Vec2(visibleSize.width / 4, visibleSize.height / 3));
+	_unitManager->updateUnitState();
+
+	/*unit = Base::create("base_0.png");
+	unit->
+	bool init(int id, CampTypes camp, BuildingTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap);
+	unit->init(1, RED, BASE, Vec2(visibleSize.width / 64, visibleSize.height / 96), _tiledMap, _gridMap);
+	*/
+	/*_money = Money::create();
 	_money->setPosition(visibleSize.width - 80, 20);
 	_money->schedule(schedule_selector(Money::update));
-	addChild(_money, 1);
+	addChild(_money, 1);*/
 	
 
-	_electricity = Electricity::create();
+	/*_electricity = Electricity::create();
 	_electricity->setPosition(visibleSize.width - 80, 80);
-	addChild(_electricity, 1);
+	addChild(_electricity, 1);*/
 
 	_mouseRect = MouseRect::create();
 	_mouseRect->setVisible(false);
@@ -96,8 +120,6 @@ void GamingScene::mapScroll()
 		mapPosition += scroll;
 		_tiledMap->setPosition(mapPosition);
 	}
-
-
 }
 
 bool GamingScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
@@ -124,6 +146,8 @@ void GamingScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
 
 void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	Rect mRect=_mouseRect->getMouseRect();
+	_unitManager->selectUnits(transferRectToGridRect(mRect));
 	_mouseRect->reset();
 	/*Point touchEnded = touch->getLocation();
 

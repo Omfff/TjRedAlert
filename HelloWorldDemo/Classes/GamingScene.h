@@ -5,6 +5,11 @@
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
+#include"Unit.h"
+#include"Buliding.h"
+#include"GridMap.h"
+#include"UnitManager.h"
+#include"GameMessages.pb.h"
 
 class GamingScene : public cocos2d::Layer
 {
@@ -31,10 +36,14 @@ public:
 
 private:
 
-	cocos2d::TMXTiledMap* _tiledMap;
+	cocos2d::TMXTiledMap* _tiledMap=nullptr;
 	//cocos2d::TMXLayer* _collidable;
 
 	//int _playerID;
+	Unit * unit=nullptr;
+	UnitManager * _unitManager= nullptr;
+	GridMap * _gridMap= nullptr;
+	GameMessageGroup * _msgs= nullptr;
 
 	MouseRect* _mouseRect = nullptr;
 

@@ -15,5 +15,25 @@
 
 #define SCROLL_DISTANCE 10
 
+typedef enum {
+	BASE = 0,
+	POWERPLANT,
+	BARRACKS,
+	WARFACTORY,
+	OREREFINERY,
+	GI,
+	ATTACKDOG,
+	TANK
+}UnitTypes;
+typedef enum {
+	NULLCAMP = 0,
+	RED,
+	BLUE,
+	GREEN,
+	YELLOW
+}CampTypes;
+
+
+
 #endif // !__SYSTEM_HEADER_H__
 

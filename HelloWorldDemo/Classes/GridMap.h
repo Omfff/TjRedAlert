@@ -20,6 +20,7 @@ public:
 	int _x;
 	int _y;
 	GridVec2():_x(0),_y(0){}
+	GridVec2(const int x, const int y) :_x(x), _y(y) {}
 	GridVec2(float x, float y):_x(x), _y(y) {}
 	GridVec2(const Vec2 &point);
 	friend GridVec2 operator +(const GridVec2 & point1,const GridVec2 &point2);
@@ -89,10 +90,10 @@ public:
 	set <int> getUnitIdAt(const GridRect & range)const;
 	//获取一定范围内的所有单位id
 	bool checkPointPosition(const GridVec2 & point)const;
-	//判断point在网格地图上是否为空 若为空则返回true！！！！若不为空则返回false 
+	//判断point在网格地图上是否为空 若不为空则返回true！！！！若为空则返回false 
 	//（若point超出地图则也返回true！！！）
 	bool checkRectPosition(const GridRect & rect)const;
-	//判断rect在网格地图上是否为空 若为空则返回true！！！（若rect不在地图中则也返回true）
+	//判断rect在网格地图上是否为空 若不为空则返回true！！！（若rect不在地图中则也返回true）
 	GridVec2 getEmptyPointNearby(const GridVec2 & position)const;
 	//获取point附近空的网格的坐标
 	GridRect getEmptyRectNearby(const GridVec2 & point, const GridDimen & size)const;

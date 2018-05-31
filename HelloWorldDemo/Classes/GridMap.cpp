@@ -152,8 +152,8 @@ int GridMap::getUnitIdAt(const GridVec2& position)const
 set<int> GridMap::getUnitIdAt(const GridRect & range)const
 {
 	set<int> idGroup;
-	for (int xBegin = range._oriPoint._x; xBegin < range._oriPoint._x + range._dimen._width; xBegin++)
-		for (int yBegin = range._oriPoint._y; yBegin < range._oriPoint._y + range._dimen._height; yBegin++)
+	for (int xBegin = range._oriPoint._x; xBegin <= range._oriPoint._x + range._dimen._width; xBegin++)
+		for (int yBegin = range._oriPoint._y; yBegin <=range._oriPoint._y + range._dimen._height; yBegin++)
 		{
 			if (_barrierMap[xBegin][yBegin] != 0)
 			{
