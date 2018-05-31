@@ -3,6 +3,8 @@
 
 #include"cocos2d.h"
 
+USING_NS_CC;
+
 class ManufactureMenu :public cocos2d::Menu
 {
 public:
@@ -22,7 +24,12 @@ public:
 	void setWarFactoryCallBack(std::function<void(Ref*)>);
 	void setOreRefineryCallBack(std::function<void(Ref*)>);
 
-private:
+	void setBuildingCallBack(std::function<void(Ref*)>);
+	void setArmCallBack(std::function<void(Ref*)>);
+
+	cocos2d::MenuItemFont* _buildingButton;
+	cocos2d::MenuItemFont* _armButton;
+
 
 	cocos2d::MenuItemImage* _GIButton;
 	cocos2d::MenuItemImage* _attackDogButton;

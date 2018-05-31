@@ -6,13 +6,31 @@ bool ManufactureMenu::init()
 		return false;
 	}
 
-	_GIButton = cocos2d::MenuItemImage::create();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	_buildingButton = MenuItemFont::create("Building");
+	_buildingButton->setAnchorPoint(Vec2(1, 1));
+	_buildingButton->setScale(0.6);
+	_buildingButton->setPosition(visibleSize.width, visibleSize.height - 2 * _buildingButton->getContentSize().height);
+	//buildingButton->setPosition(getContentSize().width, getContentSize().height - _buildingButton->getContentSize().height);
+
+	addChild(_buildingButton);
+
+	alignItemsVertically();
+
+	/*_GIButton = cocos2d::MenuItemImage::create();
 
 	_attackDogButton = cocos2d::MenuItemImage::create();
 
 	_tankButton = cocos2d::MenuItemImage::create();
 
-	_baseButton = cocos2d::MenuItemImage::create();
+	_baseButton = cocos2d::MenuItemImage::create("units/base_1.png",
+												"units/base_1.png",
+												"units/base_1.png");
+	_baseButton->setScale(0.8);
+	_baseButton->setAnchorPoint(Vec2(1,1));
+	_baseButton->setPosition(getContentSize().width, getContentSize().height - _baseButton->getContentSize().height);
+
 
 	_powerPlantButton = cocos2d::MenuItemImage::create();
 
@@ -34,9 +52,19 @@ bool ManufactureMenu::init()
 	addChild(_warFactoryButton);
 	addChild(_oreRefineryButton);
 
-	alignItemsVertically();
+	alignItemsVertically();*/
 
 	return true;
+}
+
+void ManufactureMenu::setBuildingCallBack(std::function<void(Ref*)> callBack)
+{
+	_buildingButton->setCallback(callBack);
+}
+
+void ManufactureMenu::setArmCallBack(std::function<void(Ref*)> callBack)
+{
+	_armButton->setCallback(callBack);
 }
 
 void ManufactureMenu::setGICallBack(std::function<void(Ref*)> callBack)

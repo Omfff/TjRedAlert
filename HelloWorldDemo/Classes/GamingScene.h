@@ -2,10 +2,13 @@
 #define __GAMING_SCENE_H__
 
 #include"cocos2d.h"
+#include"SystemHeader.h"
+#include"GridMap.h"
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
 #include"ManufactureMenu.h"
+#include"Building.h"
 
 class GamingScene : public cocos2d::Layer
 {
@@ -38,7 +41,8 @@ public:
 private:
 
 	cocos2d::TMXTiledMap* _tiledMap;
-	//cocos2d::TMXLayer* _collidable;
+	
+	GridMap* _gridMap;
 
 	//int _playerID;
 
@@ -56,6 +60,8 @@ private:
 
 	//menu to manufacture buildings and soldiers
 	ManufactureMenu* _manufactureMenu = nullptr;
+
+	Layer* _menuSpriteLayer = nullptr;
 
 };
 
