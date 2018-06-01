@@ -15,6 +15,7 @@ public:
 	//update the electricity lable
 	void updateLabel();
 
+	//check if electricity is enough
 	bool checkElectricity(int cost);
 
 	//cost electricity for building
@@ -32,9 +33,14 @@ public:
 
 private:
 	int _electricity = 0;
+
+	//the electricity that has been distributed
 	int _usedElectricity = 0;
+
 	std::string _electricityString;
 	std::string _usedElectricityString;
+
+	//combine _usedElectricityString with _electricityString
 	std::string _showElectricity;
 
 };
