@@ -115,6 +115,7 @@ void GameMenu::menuItemStartCallback(Ref*pSender)
 	auto transition = TransitionFadeTR::create(1.0, gamingScene);
 	Director::getInstance()->pushScene(transition);
 
+
 	/*auto PreLoadScene = HelloWorld::createScene();
 	auto transition = TransitionFadeTR::create(1.0, PreLoadScene);
 	Director::getInstance()->pushScene(transition);*/
