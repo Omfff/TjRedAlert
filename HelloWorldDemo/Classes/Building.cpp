@@ -1,14 +1,18 @@
 #include"Buliding.h"
+
 USING_NS_CC;
-void Base::getDamage(int hurt)
+bool Base::getDamage(int hurt)
 {
-	Unit::getDamage(hurt);
-	if (_currentHp <= 0)
+	if(!Unit::getDamage(hurt))
 	{
+		unschedule(schedule_selector(Base::update));
 		Unit::removeFromMap();
 		_tiledMap->removeChild(this);
+		return false;
 	}
+	return true;
 }
+
 void Base::startProduce()
 {
 log("money++");
@@ -31,9 +35,9 @@ Base* Base::create(const std::string& filename)
 
 	return nullptr;
 }
-bool Base::init(int id, CampTypes camp, BuildingTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap)
+bool Base::init( CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id)
 {
-	BuildingUnit::init(id, camp, buildingType, point, map, gridmap);
+	BuildingUnit::init( camp, buildingType, point, map, gridmap,id);
 	schedule(schedule_selector(Base::update), 0.1f, kRepeatForever, 0);
 	return true;
 }

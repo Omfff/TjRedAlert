@@ -7,8 +7,10 @@
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
+#include"UnitManager.h"
 #include"ManufactureMenu.h"
-#include"Building.h"
+#include"Buliding.h"
+
 
 class GamingScene : public cocos2d::Layer
 {
@@ -40,11 +42,16 @@ public:
 
 private:
 
+
 	cocos2d::TMXTiledMap* _tiledMap;
 	
-	GridMap* _gridMap;
+
 
 	//int _playerID;
+	Unit * unit=nullptr;
+	UnitManager * _unitManager= nullptr;
+	GridMap * _gridMap= nullptr;
+	GameMessageGroup * _msgs= nullptr;
 
 	//mouse rectangle to choose soldiers or buildings
 	MouseRect* _mouseRect = nullptr;

@@ -2,6 +2,8 @@
 #define __MOUNSE_RECT_H__
 
 #include"cocos2d.h"
+#include"GridMap.h"
+using namespace std;
 
 class MouseRect :public cocos2d::DrawNode
 {
@@ -20,11 +22,10 @@ public:
 
 	//covert _touchEndToGL to _touchEndToMap by passing the mapPonit
 	void setTouchEndToMap(cocos2d::Point mapPoint);
-
+	Rect getMouseRect();
 	//update mouse renctangle by changing touchEndToMap
 	void update(float f) override;
-
-	//stop update and clear 
+	
 	void reset();
 
 private:

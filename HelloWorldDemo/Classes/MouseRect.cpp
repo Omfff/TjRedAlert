@@ -1,3 +1,4 @@
+
 #include"MouseRect.h"
 
 void MouseRect::setTouchStartToGL(cocos2d::Point point)
@@ -49,4 +50,16 @@ void MouseRect::reset()
 	setTouchStartToMap(_touchStartToGL);
 	setTouchEndToMap(_touchEndToGL);
 
+
+}
+Rect MouseRect::getMouseRect()
+{
+	Point originPoint;
+	Size rectSize;
+	originPoint.x = (_touchEndToMap.x > _touchStartToMap.x ? _touchStartToMap.x : _touchEndToMap.x);
+	originPoint.y = (_touchEndToMap.y > _touchStartToMap.y ? _touchStartToMap.y : _touchEndToMap.y);
+
+	rectSize.height = fabs(_touchEndToMap.y - _touchStartToMap.y);
+	rectSize.width = fabs(_touchEndToMap.x - _touchStartToMap.x);
+	return Rect(originPoint, rectSize);
 }
