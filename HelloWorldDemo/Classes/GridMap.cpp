@@ -155,7 +155,7 @@ set<int> GridMap::getUnitIdAt(const GridRect & range)const
 	for (int xBegin = range._oriPoint._x; xBegin <= range._oriPoint._x + range._dimen._width; xBegin++)
 		for (int yBegin = range._oriPoint._y; yBegin <=range._oriPoint._y + range._dimen._height; yBegin++)
 		{
-			if (_barrierMap[xBegin][yBegin] != 0)
+			if (_barrierMap[xBegin][yBegin] != 0&& _barrierMap[xBegin][yBegin] != _NO_PASS)
 			{
 				idGroup.insert(_barrierMap[xBegin][yBegin]);
 			}
@@ -210,24 +210,25 @@ GridRect GridMap::getEmptyRectNearby(const GridVec2 & point, const GridDimen & s
 }
 void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 {
+	auto collidable = map->getLayer("collidable");
+	Value prop;
+	ValueMap propValueMap;
+	string collision;
 	for(int i=0;i<map->getMapSize().width;i++)
-		for (int j = 0; i < map->getMapSize().height; j++)
+		for (int j = 0; j< map->getMapSize().height; j++)
 		{
-			Vec2 tileCoord = tileCoordFromPosition(Vec2(i,j),map);
-			auto collidable = map->getLayer("collidable");
+			Vec2 tileCoord = Vec2(i, j);// tileCoordFromPosition(Vec2(i, j), map);
 			int tileGid = collidable->getTileGIDAt(tileCoord);
 			
 			if (tileGid > 0)
 			{
-				Value prop = map->getPropertiesForGID(tileGid);
-				ValueMap propValueMap = prop.asValueMap();
+				/*prop = map->getPropertiesForGID(tileGid);
+				propValueMap = prop.asValueMap();
 
-				std::string collision = propValueMap["Collidable"].asString();
+				collision = propValueMap["Collidable"].asString();*/
 
-				if (collision == "true")
-				{
-					gmap->_barrierMap[tileCoord.x][tileCoord.y] = _NO_PASS;
-				}
+				gmap->_barrierMap[tileCoord.x][62-tileCoord.y-1] = _NO_PASS;
+				
 			}
 		}
 }

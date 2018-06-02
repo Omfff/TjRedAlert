@@ -15,12 +15,12 @@ const int HEALTH[5] = { 2000,750,900,1200,1000 };
 //每种建筑单位的发电/耗电量（默认顺序）
 const int POWER[5] = { 50,200,-10,-50,-40 };
 //每种建筑单位的金钱产量（默认顺序）
-const int MONEY_PRODUCE[5] = { 0,0,0,0,0 };
+const int MONEY_PRODUCE[5] = { 50,0,0,0,0 };
 //每种建筑单位的SIZE
-const GridDimen SIZES[5] = { GridDimen(2,2),GridDimen(0,0),
-GridDimen(0,0),GridDimen(0,0),GridDimen(0,0) };
+const GridDimen SIZES[5] = { GridDimen(3,2),GridDimen(2,2),
+GridDimen(2,2),GridDimen(3,2),GridDimen(3,2) };
 const int FIGHTER_HEALTH[3] = {};
-const GridDimen FIGHTER_SIZES[3] = { GridDimen(1,1),GridDimen(1,1),GridDimen(1,1) };
+const GridDimen FIGHTER_SIZES[3] = { GridDimen(1,1),GridDimen(2,2),GridDimen(2,2) };
 const float UNIT_MOVE_SPEED[3] = { 3,5,6 };
 const int ATTACK_FORCE[3] = { 0,0,0 };
 const int ATTACK_SPEED[3] = { 0,0,0 };
@@ -38,6 +38,7 @@ class Unit:public Sprite
 	/*CC_SYNTHESIZE定义变量，并且直接定义默认的get/set方法。
 	protected: varType varName;\
 */
+	CC_SYNTHESIZE(UnitTypes, _unitType, UnitType);
 	CC_SYNTHESIZE(int, _id, ID);
 	CC_SYNTHESIZE(CampTypes, _camp, Camp);
 	CC_SYNTHESIZE(int, _health, Health);
@@ -48,6 +49,7 @@ class Unit:public Sprite
 	CC_SYNTHESIZE(GridRect, _unitRect, UnitRect);
 	CC_SYNTHESIZE(GridVec2, _unitCoord, UnitCoord);
 	CC_SYNTHESIZE(Vec2, _destination, Destination);
+
 	//CC_SYNTHESIZE(UnitManager*，_unitManager, unitManager);
 public:
 	UnitManager * _unitManager = nullptr;
@@ -69,7 +71,7 @@ public:
 	void hideHpBar();
 	void displayHpBar();
 	virtual void deleteUnit() {}
-	virtual void move() {}
+	virtual void move();
 	
 };
 class BuildingUnit :public Unit

@@ -7,12 +7,10 @@
 #include"MouseRect.h"
 #include"Money.h"
 #include"Electricity.h"
-<<<<<<< HEAD
-
-=======
+#include"UnitManager.h"
 #include"ManufactureMenu.h"
-#include"Building.h"
->>>>>>> 811e07a2a5ccddf952ecec83099d7bb6bd148848
+#include"Buliding.h"
+
 
 class GamingScene : public cocos2d::Layer
 {
@@ -44,13 +42,10 @@ public:
 
 private:
 
-<<<<<<< HEAD
 
-=======
 	cocos2d::TMXTiledMap* _tiledMap;
 	
-	GridMap* _gridMap;
->>>>>>> 811e07a2a5ccddf952ecec83099d7bb6bd148848
+
 
 	//int _playerID;
 	Unit * unit=nullptr;

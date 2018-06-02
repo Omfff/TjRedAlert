@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 
-=======
 #include"GamingScene.h"
 
 USING_NS_CC;
@@ -28,6 +26,18 @@ bool GamingScene::init()
 	_tiledMap->setAnchorPoint(Vec2(0, 0));
 	addChild(_tiledMap, 0);
 
+	_gridMap = new GridMap;
+	setCollisionPos(_tiledMap, _gridMap);
+
+	_msgs = new GameMessageGroup;
+
+	_unitManager = UnitManager::create();
+	_unitManager->setMessageGrop(_msgs);
+	_unitManager->setPlayerCamp(RED);
+	_unitManager->setGridmap(_gridMap);
+	_unitManager->setTileMap(_tiledMap);
+	_unitManager->setNextId(RED);
+	addChild(_unitManager);
 
 	_menuSpriteLayer = Layer::create();
 	addChild(_menuSpriteLayer, 2);
@@ -36,7 +46,7 @@ bool GamingScene::init()
 	_manufactureMenu->setPosition(Vec2(origin.x + visibleSize.width - 20, origin.y + visibleSize.height / 2));
 
 	_manufactureMenu->setBuildingCallBack([&](Ref*) {
-		auto base = Sprite::create("units/Base.png");
+		auto base = Sprite::create("units/Base_0.png");
 		base->setPosition(100, 100);
 		base->setScale(0.5);
 		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
@@ -93,6 +103,7 @@ bool GamingScene::init()
 
 			if (rect.containsPoint(locationInNode)) {
 				target->setOpacity(50);
+				target->setScale(1.0);
 				if (!baseRect.containsPoint(baseLocation)) {
 					_menuSpriteLayer->removeChildByTag(BASE_TAG);
 				}
@@ -121,17 +132,31 @@ bool GamingScene::init()
 		buildingAttachedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
-			Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
+			Vec2 positionInMap =_tiledMap->convertToNodeSpace( touch->getLocation());
 			Size size = target->getContentSize();
-			Rect rect = Rect(0, 0, size.width / 32, size.height / 32);
+			Rect rect = Rect(positionInMap.x/32.0, positionInMap.y/32.0, size.width / 32.0, size.height / 32.0);
 
-			target->setOpacity(255);
-
-			/*if (!_gridMap->checkRectPosition(rect)) {
+			//target->setOpacity(255);
+			UnitTypes unittype = UnitTypes(target->getTag() - 101);
+			_menuSpriteLayer->removeChildByTag(target->getTag());
+			
+			if (!_gridMap->checkRectPosition(rect)) {
 
 			_money->costMoney(2500);
 			_electricity->addElectricity(50);
-			}*/
+
+			_unitManager->creatProduceMessage(unittype, positionInMap);
+			auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
+			if (tempUnit->getUnitType() < 5)
+			{
+				_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
+				if (POWER[tempUnit->getUnitType()] > 0)
+					_electricity->addElectricity(POWER[tempUnit->getUnitType()]);
+				else
+					_electricity->costElectricity(-POWER[tempUnit->getUnitType()]);
+			}
+			
+			}
 		};
 		buildingAttachedToMouse->setSwallowTouches(true);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse, base);
@@ -155,7 +180,8 @@ bool GamingScene::init()
 	addChild(_money, 1);
 	
 	_electricity = Electricity::create();
-	_electricity->setPosition(visibleSize.width - 80, 80);
+	//_electricity->setPosition(visibleSize.width - 100, 80);
+	_electricity->setPosition(visibleSize.width - 100, 80);
 	_electricity->setScale(0.5);
 	addChild(_electricity, 1);
 
@@ -194,6 +220,7 @@ bool GamingScene::init()
 void GamingScene::update(float f)
 {
 	mapScroll();
+	//_unitManager->updateUnitState();
 }
 
 void GamingScene::mapScroll()
@@ -300,7 +327,15 @@ void GamingScene::onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event)
 
 void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 {
+	Rect mRect = _mouseRect->getMouseRect();
 	_mouseRect->reset();
+	if (mRect.size.height == 0)
+		_unitManager->choosePosOrUnit(mRect.origin);
+	else
+	{
+		_unitManager->selectUnits(transferRectToGridRect(mRect));
+		_mouseRect->reset();
+	}
 	/*Point touchEnded = touch->getLocation();
 
 	//contain buildings in the mouse renctangle
@@ -311,5 +346,5 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 	}
 	_mouseRect->setTouchEndToMap(_tiledMap->getPosition());*/
 
->>>>>>> 811e07a2a5ccddf952ecec83099d7bb6bd148848
+
 }

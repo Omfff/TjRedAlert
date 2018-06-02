@@ -18,7 +18,19 @@ Unit* Unit::create(const std::string& filename)
 }
 bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap,int id)
 {
+	setUnitType(Type);
 	return true;
+}
+void Unit::move()
+{
+	float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
+		pow(_destination.y / 32.0 - _unitCoord._y, 2)) / 8;//_moveSpeed;
+	auto actionMove = MoveTo::create(moveTime, _destination);
+	this->runAction(actionMove);
+	_battleMap->unitLeavePosition(_unitRect);
+	setUnitCoord(GridVec2(float(_destination.x / 32.0), float(_destination.y / 32.0)));
+	_unitRect._oriPoint = _unitCoord;
+	_battleMap->unitCoordStore(_id, _unitRect);
 }
 /*BuildingUnit* BuildingUnit::create(const std::string& filename)
 {
@@ -69,9 +81,12 @@ void BuildingUnit::initHpBar(UnitTypes type)
 	hpBGSprite = Sprite::create(BUILDING_BG_BAR[type]);
 	hpBGSprite->setPosition(Point(this->getContentSize().width / 2,
 		this->getContentSize().height));
+	hpBGSprite->setScaleX(this->getContentSize().width/hpBGSprite->getContentSize().width );
+	hpBGSprite->setScaleY(2.0);
 	this->addChild(hpBGSprite);
 
 	_hpBar = LoadingBar::create(BUILDING_HP_BAR[type]);
+	//_hpBar->setScaleX(this->getContentSize().width / hpBGSprite->getContentSize().width);
 	_hpBar->setDirection(LoadingBar::Direction::LEFT);
 	_hpBar->setPercent(100);
 	_hpBar->setPosition(Point(_hpBar->getContentSize().width/2,

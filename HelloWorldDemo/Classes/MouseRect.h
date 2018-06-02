@@ -25,9 +25,7 @@ public:
 	Rect getMouseRect();
 	//update mouse renctangle by changing touchEndToMap
 	void update(float f) override;
-<<<<<<< HEAD
-=======
->>>>>>> 811e07a2a5ccddf952ecec83099d7bb6bd148848
+	
 	void reset();
 
 private:

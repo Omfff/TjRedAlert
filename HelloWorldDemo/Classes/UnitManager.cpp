@@ -31,9 +31,7 @@ void UnitManager::updateUnitState()
 				int id = receiveMessage.unit_id1();
 				GridVec2  pos = GridVec2(receiveMessage.position().x(), receiveMessage.position().y());
 				Unit * newUnit = creatUnit( CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()),pos, receiveMessage.unit_id1());
-				_unitIdMap[id] = newUnit;
-				newUnit->setPosition(Vec2(receiveMessage.position().x(), receiveMessage.position().y()));
-				_tileMap->addChild(newUnit, 10);
+				//_unitIdMap[id] = newUnit;
 			}
 			else if (receiveMessage.cmd() == MESSAGEMOV)
 			{
@@ -90,7 +88,7 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	if (id == 0)
 		id = _nextId;
 	Unit * unit;
-	vector<string >picPath = {"base_","","","","","","",""};
+	vector<string >picPath = {"units/base_","","","","","","",""};
 	int transType = type;
 	string unitPic = picPath[type] + to_string(transType) + ".png";
 	switch (type)
@@ -117,6 +115,8 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	}
 	unit->init( camp, type, pos, _tileMap, _gridMap,id);
 	_unitIdMap[id] = unit;
+	unit->setPosition(Vec2(pos._x, pos._y));
+	_tileMap->addChild(unit, 10);
 	return unit;
 }
 GridVec2 UnitManager::getUnitPos(int id)
@@ -190,8 +190,13 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (1)//_unitIdMap[unitid]->getUnitType()>=5//是可移动单位
-					_unitIdMap[unitid]->move();	
+				if (1)//_unitIdMap[unitid]->getUnitType() >= 5)//_unitIdMap[unitid]->getUnitType()>=5//是可移动单位
+				{
+					//寻路
+					//产生移动消息
+					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
+					_unitIdMap[unitid]->move();
+				}
 			}
 		}
 		else

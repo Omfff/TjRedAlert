@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 
-
-=======
 #ifndef __SYSTEM_HEADER_H__
 #define __SYSTEM_HEADER_H__
 
@@ -19,6 +16,34 @@ const int BOX_EDGE_HEIGHT = 40;
 
 const int SCROLL_DISTANCE = 10;
 
+//GamingScene.cpp--bool init()--manufacturemenu
+enum {
+	BASE_TAG = 101,
+	POWER_PLANT_TAG,
+	BARRACK_TAG,
+	WAR_FACTORY_TAG,
+	ORE_REFINERY_TAG
+};
+
+
+typedef enum {
+	BASE = 0,
+	POWERPLANT,
+	BARRACKS,
+	WARFACTORY,
+	OREREFINERY,
+	GI,
+	ATTACKDOG,
+	TANK
+}UnitTypes;
+typedef enum {
+	NULLCAMP = 0,
+	RED,
+	BLUE,
+	GREEN,
+	YELLOW
+}CampTypes;
+
 #endif // !__SYSTEM_HEADER_H__
 
->>>>>>> 811e07a2a5ccddf952ecec83099d7bb6bd148848
+
