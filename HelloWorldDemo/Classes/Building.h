@@ -23,4 +23,3 @@ public:
 	bool getDamage(int hurt);//建筑物的getdamage函数可以用函数模板来写
 
 };
-
