@@ -24,6 +24,24 @@ enum {
 	ORE_REFINERY_TAG
 };
 
+typedef enum {
+	BASE = 0,
+	POWERPLANT,
+	BARRACKS,
+	WARFACTORY,
+	OREREFINERY,
+	GI,
+	ATTACKDOG,
+	TANK
+}UnitTypes;
+typedef enum {
+	NULLCAMP = 0,
+	RED,
+	BLUE,
+	GREEN,
+	YELLOW
+}CampTypes;
+
 const int TILED_PIXEL = 32;
 
 //PathFinder
@@ -33,4 +51,3 @@ const int STRAIGHT_PATH = 10;
 const int OBLIQUE_PATH = 14;
 
 #endif // !__SYSTEM_HEADER_H__
-
