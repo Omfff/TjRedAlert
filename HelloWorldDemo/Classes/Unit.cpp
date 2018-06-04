@@ -1,7 +1,7 @@
 #include"cocos2d.h"
 #include"Unit.h"
-#include"Building.h"
 #include<cmath>
+//#include"Buliding.h"
 #include"UnitManager.h"
 USING_NS_CC;
 Unit* Unit::create(const std::string& filename)

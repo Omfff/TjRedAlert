@@ -1,4 +1,3 @@
-
 #include"GamingScene.h"
 
 USING_NS_CC;

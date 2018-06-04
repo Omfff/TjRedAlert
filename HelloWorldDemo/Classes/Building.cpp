@@ -1,4 +1,4 @@
-#include"Building.h"
+#include"Buliding.h"
 
 USING_NS_CC;
 bool Base::getDamage(int hurt)
