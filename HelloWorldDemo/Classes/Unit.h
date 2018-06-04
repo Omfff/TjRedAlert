@@ -18,7 +18,7 @@ const int MONEY_PRODUCE[5] = { 0,0,0,0,0 };
 const GridDimen SIZES[5] = { GridDimen(2,2),GridDimen(0,0),
 							GridDimen(0,0),GridDimen(0,0),GridDimen(0,0) };
 typedef enum {
-	BASE = 0,
+	BASE = 100,
 	POWERPLANT,
 	BARRACKS,
 	WARFACTORY,

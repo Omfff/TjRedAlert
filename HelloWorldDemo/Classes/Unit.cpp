@@ -1,6 +1,6 @@
 #include"cocos2d.h"
 #include"Unit.h"
-#include"Buliding.h"
+#include"Building.h"
 USING_NS_CC;
 
 Unit* Unit::create(const std::string& filename)
