@@ -1,4 +1,3 @@
-
 #include"GamingScene.h"
 
 USING_NS_CC;
@@ -46,7 +45,7 @@ bool GamingScene::init()
 	_manufactureMenu->setPosition(Vec2(origin.x + visibleSize.width - 20, origin.y + visibleSize.height / 2));
 
 	_manufactureMenu->setBuildingCallBack([&](Ref*) {
-		auto base = Sprite::create("units/Base_0.png");
+		auto base = Sprite::create("units/Base.png");
 		base->setPosition(100, 100);
 		base->setScale(0.5);
 		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
