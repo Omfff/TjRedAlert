@@ -62,4 +62,3 @@ Rect MouseRect::getMouseRect()
 	rectSize.width = fabs(_touchEndToMap.x - _touchStartToMap.x);
 	return Rect(originPoint, rectSize);
 }
->>>>>>> refs/remotes/origin/master

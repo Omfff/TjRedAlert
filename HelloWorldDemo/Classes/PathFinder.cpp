@@ -200,7 +200,7 @@ void PathFinder::searchPath()
 {
 	Grid * currentGrid = nullptr;
 	_openList.push_back(_start);
-	while (_end->getStatus != INCLOSELIST && !_openList.empty()) {
+	while (_end->getStatus() != INCLOSELIST && !_openList.empty()) {
 		currentGrid = selectNextGrid();
 		checkSurroundGrid(*currentGrid);
 		currentGrid->setStatus(INCLOSELIST);
