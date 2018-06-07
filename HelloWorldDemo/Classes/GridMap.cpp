@@ -111,9 +111,10 @@ void GridMap::unitLeavePosition(const GridRect & rect)
 		for (int y = rect._oriPoint._y; y < rect._oriPoint._y + rect._dimen._height; y++)
 			_barrierMap[x][y] = 0;
 }
-void GridMap::unitCoordRemove(int unitId)
+void GridMap::unitCoordRemove(int unitId,GridRect unitRect )
 {
 	//unitLeavePosition?????????????????????????????????????????????????????????????????????
+	unitLeavePosition(unitRect);
 	map<int, GridVec2>::iterator iter = _unitCoord.find(unitId);
 	_unitCoord.erase(iter);
 }
@@ -214,9 +215,20 @@ void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 	Value prop;
 	ValueMap propValueMap;
 	string collision;
+	auto barrier = Sprite::create("barrier.png");
+	barrier->setAnchorPoint(Point(0, 0));
+	barrier->setPosition(Vec2(0,0));
+	gmap->addChild(barrier);
 	for(int i=0;i<map->getMapSize().width;i++)
 		for (int j = 0; j< map->getMapSize().height; j++)
 		{
+			if (i == 0 || j == 0||i==124||j==61)
+			{
+				auto barrier = Sprite::create("barrier.png");
+				barrier->setAnchorPoint(Point(0, 0));
+				barrier->setPosition(Vec2(i * 32, (62 - j - 1) * 32));
+				gmap->addChild(barrier);
+			}
 			Vec2 tileCoord = Vec2(i, j);// tileCoordFromPosition(Vec2(i, j), map);
 			int tileGid = collidable->getTileGIDAt(tileCoord);
 			
@@ -226,6 +238,10 @@ void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 				propValueMap = prop.asValueMap();
 
 				collision = propValueMap["Collidable"].asString();*/
+				auto barrier = Sprite::create("barrier.png");
+				barrier->setAnchorPoint(Point(0,0));
+				barrier->setPosition(Vec2(i * 32, (62-j-1) * 32));
+				gmap->addChild(barrier);
 
 				gmap->_barrierMap[tileCoord.x][62-tileCoord.y-1] = _NO_PASS;
 				
