@@ -16,7 +16,7 @@ public:
 	void updateLabel();
 
 	//check if electricity is enough
-	bool checkElectricity(int cost);
+	bool checkElectricity(int cost) const;
 
 	//cost electricity for building
 	void costElectricity(int cost);

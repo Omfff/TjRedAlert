@@ -4,6 +4,7 @@
 #include<cocos2d.h>
 #include "ui/UILoadingBar.h"
 #include "UnitManager.h"
+#include"PathFinder.h"
 #include"SystemHeader.h"
 USING_NS_CC;
 using namespace ui;
@@ -113,6 +114,13 @@ public:
 		TMXTiledMap* map, GridMap * gridmap,int id );
 	//bool setPositionInTiledMap();
 	bool setPositionInGirdMap(GridRect rectPos, int id);
+	
+	//brief try to find path
+	void tryToFindPath();
+
+	//find a path to the destination
+	//std::vector<GridVec2> findPath(const GridVec2 & destination) const;
+
 	void move();
 	virtual void attack();
 	void initHpBar(UnitTypes type) {}

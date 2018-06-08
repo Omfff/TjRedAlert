@@ -16,11 +16,12 @@ Unit* Unit::create(const std::string& filename)
 
 	return nullptr;
 }
-bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap,int id)
+bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id)
 {
 	setUnitType(Type);
 	return true;
 }
+
 void Unit::move()
 {
 	float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
@@ -191,6 +192,29 @@ bool FightUnit::setPositionInGirdMap(GridRect rectPos, int id)
 	else
 		return false;
 }
+
+void FightUnit::tryToFindPath()
+{
+	if (_camp != _unitManager->getPlayerCamp())
+	{
+		return;
+	}
+	GridVec2 destination = GridVec2(_destination.x / 32, _destination.y / 32);
+	if (_battleMap->checkPointPosition(destination)) {
+		destination = _battleMap->getEmptyPointNearby(destination);
+		_destination.x = destination._x * 32 + 16;
+		_destination.y = destination._y * 32 + 16;
+	}
+	//std::vector<GridVec2> gridPath = findPath(destination);
+
+	
+}
+
+/*std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination) const
+{
+	PathFinder pathFinder();
+}*/
+
 void FightUnit::searchNearEnemy()
 {
 	const auto & autoAtkRect = GridRect(GridVec2((_unitCoord._x - _autoAttackScope._width )/ 2, (_unitCoord._y - _autoAttackScope._height) / 2 ),
@@ -219,6 +243,11 @@ void FightUnit::attack()
 void FightUnit::move()
 {
 	//根据寻路算法找到路径
+	/*GridVec2 destination(_destination.x / 32, _destination.y / 32);
+	if (_battleMap->checkPointPosition(destination)) {
+		destination = _battleMap->getEmptyPointNearby(destination);
+		_destination = GridVec2(destination._x, destination._y);
+	}*/
 	//产生移动的消息
 	
 	float moveTime = sqrt(pow((_destination.x/32.0 - _unitCoord._x), 2) +

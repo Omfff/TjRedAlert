@@ -3,7 +3,7 @@
 
 //Money.h
 const int INITIAL_MONEY = 10000;
-const int MONEY_IN_PERIOD = 100;
+const int MONEY_IN_PERIOD = 0;
 const int PERIOD = 20;
 
 
@@ -21,7 +21,10 @@ enum {
 	POWER_PLANT_TAG,
 	BARRACK_TAG,
 	WAR_FACTORY_TAG,
-	ORE_REFINERY_TAG
+	ORE_REFINERY_TAG,
+	GI_TAG,
+	ATTACK_DOG_TAG,
+	TANK_TAG
 };
 
 typedef enum {

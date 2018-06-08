@@ -1,7 +1,8 @@
 #include"UnitManager.h"
 #include"GameMessages.pb.h"
-#include"Buliding.h"
+#include"Building.h"
 #include"Unit.h"
+#include"Fighter.h"
 #include<vector>
 #include<string>
 USING_NS_CC;
@@ -13,7 +14,7 @@ using namespace std;
 
 bool UnitManager::init()
 {
-	
+
 	return true;
 }
 void UnitManager::updateUnitState()
@@ -25,12 +26,12 @@ void UnitManager::updateUnitState()
 	{
 		for (int i = 0; i < receiveMessNum; i++)
 		{
-			auto receiveMessage=_msgGroup->game_message(i);
+			auto receiveMessage = _msgGroup->game_message(i);
 			if (receiveMessage.cmd() == MESSAGECRT)
 			{
 				int id = receiveMessage.unit_id1();
 				GridVec2  pos = GridVec2(receiveMessage.position().x(), receiveMessage.position().y());
-				Unit * newUnit = creatUnit( CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()),pos, receiveMessage.unit_id1());
+				Unit * newUnit = creatUnit(CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()), pos, receiveMessage.unit_id1());
 				//_unitIdMap[id] = newUnit;
 			}
 			else if (receiveMessage.cmd() == MESSAGEMOV)
@@ -39,7 +40,7 @@ void UnitManager::updateUnitState()
 				if (_unitIdMap.count(id))
 				{
 					Unit * unit = _unitIdMap[id];
-					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//这个position的参数都是int的
+					unit->setDestination(Vec2(receiveMessage.position().x()*32.0, receiveMessage.position().y()*32.0));//这个position的参数都是int的
 					unit->move();
 				}
 				else
@@ -77,43 +78,60 @@ void UnitManager::destoryUnit(int id)
 	Unit * unit = _unitIdMap[id];
 	if (unit)
 	{
-		//unit->removeFromMap();
+		if (unit->getUnitType() == WARFACTORY)
+			_warFactoryId.erase(unit->getID());
+		if (unit->getUnitType() == BARRACKS)
+			_barracksId.erase(unit->getID());
+		unit->removeFromMap();
 		//unit->deleteUnit();
-		_unitIdMap.erase(id);	
+		_tileMap->removeChild(unit);
+		_unitIdMap.erase(id);
+
 	}
 }
 //BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY,GI,ATTACKDOG,TANK
-Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& pos, int id )
+Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& pos, int id)
 {
 	if (id == 0)
 		id = _nextId;
 	Unit * unit;
-	vector<string >picPath = {"units/base_","","","","","","",""};
+	vector<string >picPath = { "units/Base(","units/PowerPlant(","units/Barrack(","units/WarFactory(","units/OreRefinery(","","","" };
+	vector<string>picColor = { "","red","blue","green","yellow" };
+
 	int transType = type;
-	string unitPic = picPath[type] + to_string(transType) + ".png";
+	string unitPic = picPath[type] + picColor[camp] + ").png";
 	switch (type)
 	{
-		case BASE:
-			unit = Base::create(unitPic);
-			break;
-		case POWERPLANT:
-			break;
-		case BARRACKS:
-			break;
-		case WARFACTORY:
-			break;
-		case OREREFINERY:
-			break;
-		case GI:
-			break;
-		case ATTACKDOG:
-			break;
-		case TANK:
-			break;
-		default:
-			break;
+	case BASE:
+		unit = Base::create(unitPic);
+		setMyBaseId(id);
+		break;
+	case POWERPLANT:
+		unit = PowerPlant::create(unitPic);
+		break;
+	case BARRACKS:
+		_barracksId[id] = 0;
+		unit = Barracks::create(unitPic);
+		break;
+	case WARFACTORY:
+		_warFactoryId[id] = 0;
+		unit = WarFactory::create(unitPic);
+		break;
+	case OREREFINERY:
+		unit = OreRefinery::create(unitPic);
+		break;
+	case GI:
+		unit = Solider::create("solider.png");
+		break;
+	case ATTACKDOG:
+		break;
+	case TANK:
+		break;
+	default:
+		break;
 	}
-	unit->init( camp, type, pos, _tileMap, _gridMap,id);
+	unit->init(camp, type, pos, _tileMap, _gridMap, id);
+	unit->setUnitManager(this);
 	_unitIdMap[id] = unit;
 	unit->setPosition(Vec2(pos._x, pos._y));
 	_tileMap->addChild(unit, 10);
@@ -138,7 +156,7 @@ CampTypes UnitManager::getUnitCamp(int id)
 void UnitManager::selectUnits(const GridRect &range)
 {
 	deselectAllUnits();
-	set<int> choosedUnitId=_gridMap->getUnitIdAt(range);
+	set<int> choosedUnitId = _gridMap->getUnitIdAt(range);
 	for (auto id : choosedUnitId)
 	{
 		if (_unitIdMap[id]->getCamp() == _playerCamp)
@@ -157,7 +175,7 @@ void UnitManager::deselectAllUnits()
 		_selectedUnitID.clear();
 	}
 }
-void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
+void UnitManager::creatProduceMessage(UnitTypes unitType, const GridVec2 &pos)
 {
 	auto newMessage = _msgGroup->add_game_message();
 	newMessage->set_camp(_playerCamp);
@@ -165,9 +183,9 @@ void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
 	newMessage->set_unit_type(unitType);
 	newMessage->set_unit_id1(_nextId);//单位id的设置？？？
 	_nextId += 4;
-	GridPoint * posPoint =newMessage->mutable_position();
-	posPoint->set_x(  pos._x);
-	posPoint->set_y( pos._y);
+	GridPoint * posPoint = newMessage->mutable_position();
+	posPoint->set_x(pos._x);
+	posPoint->set_y(pos._y);
 	//怎么设置坐标？？
 }
 void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
@@ -180,20 +198,35 @@ void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
 	posPoint->set_x(pos.x);
 	posPoint->set_y(pos.y);
 }
+void UnitManager::createAttackMessage(int id1, int id2, int damage)
+{
+	auto newMessage = _msgGroup->add_game_message();
+	//newMessage->set_camp(_playerCamp);
+	newMessage->set_cmd(MESSAGEATK);
+	newMessage->set_unit_id1(id1);
+	newMessage->set_unit_id2(id2);
+	newMessage->set_damage(damage);
+}
 //本地移动和攻击的消息怎么生成？？
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
+	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
 	if (!_selectedUnitID.empty())
 	{
-		if (_gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32)) == 0||
-			_gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32)) ==_NO_PASS)
+		if (idAtPos == 0 || idAtPos == _NO_PASS)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (1)//_unitIdMap[unitid]->getUnitType() >= 5)//_unitIdMap[unitid]->getUnitType()>=5//是可移动单位
+				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可移动单位
 				{
 					//寻路
 					//产生移动消息
+					if (attackingUnit.count(unitid) > 0)
+					{
+						_unitIdMap[unitid]->stopAttackUpdate();
+						_unitIdMap[unitid]->setAttackID(0);
+					}
+					//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
 					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
 					_unitIdMap[unitid]->move();
 				}
@@ -201,20 +234,183 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		}
 		else
 		{
-			if (1)//选择了我方的单位 则显示血条
+			if (_unitIdMap[idAtPos]->getCamp() == _playerCamp)//选择了我方的单位 则显示血条
 			{
+				/*deselectAllUnits();
+				_selectedUnitID.push_back(idAtPos);
+				_unitIdMap[idAtPos]->displayHpBar();*/
+				for (auto unitid : _selectedUnitID)
+				{
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//是可攻击单位
+					{
+						if (_unitIdMap[idAtPos] != nullptr)
+						{
+							newAttackUnit[unitid] = idAtPos;
 
+							/*_unitIdMap[unitid]->setAttackID(idAtPos);
+							_unitIdMap[unitid]->attack();
+							_unitIdMap[idAtPos]->getDamage(100);
+							_unitIdMap[idAtPos]->displayHpBar();
+							if (_unitIdMap[idAtPos]->getCurrentHp() <= 0)
+							{
+							destoryUnit(idAtPos);
+							}*/
+						}
+
+					}
+				}
 			}
 			else////选择了敌方单位
 			{
 				//1敌方建筑 到达 攻击
 				//2敌方兵种 跟踪 攻击
+				/*for (auto unitid : _selectedUnitID)
+				{
+				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可攻击单位
+				{
+				_unitIdMap[unitid]->setAttackID(idAtPos);
+				_unitIdMap[unitid]->attack();
+				_unitIdMap[idAtPos]->getDamage(100);
+				_unitIdMap[idAtPos]->displayHpBar();
+				if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
+				{
+				destoryUnit(idAtPos);
+				}
+				}
+				}*/
 			}
 		}
+	}
+}
+void UnitManager::unitAttackUpdate()
+{
+	if (!newAttackUnit.empty())
+	{
+		for (auto battleUnit : newAttackUnit)
+		{
+			if (attackingUnit.count(battleUnit.first) > 0 && attackingUnit[battleUnit.first] == battleUnit.second)
+				continue;
+
+			if (attackingUnit.count(battleUnit.first) > 0 && attackingUnit[battleUnit.first] != battleUnit.second)
+				_unitIdMap[battleUnit.first]->stopAttackUpdate();
+			//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+
+			attackingUnit[battleUnit.first] = battleUnit.second;
+			_unitIdMap[battleUnit.first]->setAttackID(battleUnit.second);
+			_unitIdMap[battleUnit.first]->startAttackUpdate();
+			//this->schedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate),0.5f);
+		}
+		newAttackUnit.clear();
+	}
+	if (!attackingUnit.empty())
+	{
+		map<int, int> ::iterator ite = attackingUnit.begin();
+		vector<int> deleUnitId;
+		while (ite != attackingUnit.end())
+		{
+			if (_unitIdMap[ite->second] != nullptr&&_unitIdMap[ite->second]->getCurrentHp() <= 0)
+			{
+				_unitIdMap[ite->first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				_unitIdMap[ite->first]->setAttackID(0);
+				destoryUnit(ite->second);
+				ite = attackingUnit.erase(ite);
+				//deleUnitId.push_back(ite->first);
+			}
+			else if (_unitIdMap[ite->second] == nullptr)
+			{
+				_unitIdMap[ite->first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				_unitIdMap[ite->first]->setAttackID(0);
+				ite = attackingUnit.erase(ite);
+			}
+			else
+			{
+				ite++;
+			}
+		}
+	}
+
+}
+void UnitManager::fighterUnitProductionUpdate()
+{
+	auto ite = _fighterProduceSeq.begin();
+	int mark = 0;
+	while (ite != _fighterProduceSeq.end())
+	{
+		if (*ite == GI && _barracksId.empty() != true)
+		{
+			for (auto & id : _barracksId)
+			{
+				if (id.second == 0)
+				{
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(GI, GridVec2(producePos._x / 32, producePos._y / 32));
+					creatUnit(_playerCamp, GI, producePos);
+					_waitingGINum--;
+					id.second = 1;
+					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
+					break;
+				}
+			}
+		}
+		else if (*ite == ATTACKDOG && _barracksId.empty() != true)
+		{
+			for (auto & id : _barracksId)
+			{
+				if (id.second == 0)
+				{
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(ATTACKDOG, GridVec2(producePos._x / 32, producePos._y / 32));
+					creatUnit(_playerCamp, ATTACKDOG, producePos);
+					_waitingAttackDogNum--;
+					id.second = 1;
+					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
+					break;
+				}
+			}
+		}
+		else //(*ite == TANK && _warFactoryId.empty() != true)
+		{
+			if (*ite == TANK && _warFactoryId.empty() != true)
+			{
+				for (auto & id : _warFactoryId)
+				{
+					if (id.second == 0)
+					{
+						GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceTank();
+						creatProduceMessage(TANK, GridVec2(producePos._x / 32, producePos._y / 32));
+						creatUnit(_playerCamp, TANK, producePos);
+						_waitingTankNum--;
+						id.second = 1;
+						mark = 1;
+						ite = _fighterProduceSeq.erase(ite);
+						break;
+					}
+				}
+			}
+		}
+		if (mark == 1)
+			mark = 0;
+		else
+			ite++;
 	}
 }
 GridRect transferRectToGridRect(const Rect & rect)
 {
 	return GridRect(GridVec2((float)(rect.origin.x) / 32.0, (float)(rect.origin.y / 32.0)),
-		GridDimen(rect.size.width/32.0, rect.size.height/32.0));
+		GridDimen(rect.size.width / 32.0, rect.size.height / 32.0));
+}
+Unit * UnitManager::getUnitPtr(int id)
+{
+	return _unitIdMap[id];
+}
+Vec2 UnitManager::getMyBasePos()
+{
+	GridVec2 basePos;
+	if (_myBaseId != 0)
+		basePos = _unitIdMap[_myBaseId]->getUnitCoord();
+	return Vec2(basePos._x * 32, basePos._y * 32);
 }
