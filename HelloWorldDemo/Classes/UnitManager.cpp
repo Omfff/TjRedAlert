@@ -1,3 +1,4 @@
+
 #include"UnitManager.h"
 #include"GameMessages.pb.h"
 #include"Building.h"
@@ -40,7 +41,7 @@ void UnitManager::updateUnitState()
 				if (_unitIdMap.count(id))
 				{
 					Unit * unit = _unitIdMap[id];
-					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//Õâ¸öpositionµÄ²ÎÊı¶¼ÊÇintµÄ
+					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//è¿™ä¸ªpositionçš„å‚æ•°éƒ½æ˜¯intçš„
 					unit->move();
 				}
 				else
@@ -50,7 +51,7 @@ void UnitManager::updateUnitState()
 			}
 			else
 			{
-				if (receiveMessage.cmd() == MESSAGEATK)//unit1ÊÕµ½unit2¹¥»÷
+				if (receiveMessage.cmd() == MESSAGEATK)//unit1æ”¶åˆ°unit2æ”»å‡»
 				{
 					int unitId1 = receiveMessage.unit_id1();
 					int unitId2 = receiveMessage.unit_id2();
@@ -180,12 +181,12 @@ void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
 	newMessage->set_camp(_playerCamp);
 	newMessage->set_cmd(MESSAGECRT);
 	newMessage->set_unit_type(unitType);
-	newMessage->set_unit_id1(_nextId);//µ¥Î»idµÄÉèÖÃ£¿£¿£¿
+	newMessage->set_unit_id1(_nextId);//å•ä½idçš„è®¾ç½®ï¼Ÿï¼Ÿï¼Ÿ
 	_nextId += 4;
 	GridPoint * posPoint =newMessage->mutable_position();
 	posPoint->set_x(  pos._x);
 	posPoint->set_y( pos._y);
-	//ÔõÃ´ÉèÖÃ×ø±ê£¿£¿
+	//æ€ä¹ˆè®¾ç½®åæ ‡ï¼Ÿï¼Ÿ
 }
 void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
 {
@@ -206,7 +207,7 @@ void UnitManager::createAttackMessage(int id1, int id2, int damage)
 	newMessage->set_unit_id2(id2);
 	newMessage->set_damage(damage);
 }
-//±¾µØÒÆ¶¯ºÍ¹¥»÷µÄÏûÏ¢ÔõÃ´Éú³É£¿£¿
+//æœ¬åœ°ç§»åŠ¨å’Œæ”»å‡»çš„æ¶ˆæ¯æ€ä¹ˆç”Ÿæˆï¼Ÿï¼Ÿ
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
 	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
@@ -216,10 +217,10 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (_unitIdMap[unitid]->getUnitType()>=5)//ÊÇ¿ÉÒÆ¶¯µ¥Î»
+				if (_unitIdMap[unitid]->getUnitType()>=5)//æ˜¯å¯ç§»åŠ¨å•ä½
 				{
-					//Ñ°Â·
-					//²úÉúÒÆ¶¯ÏûÏ¢
+					//å¯»è·¯
+					//äº§ç”Ÿç§»åŠ¨æ¶ˆæ¯
 					if (attackingUnit.count(unitid) > 0)
 					{
 						_unitIdMap[unitid]->stopAttackUpdate();
@@ -233,14 +234,14 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		}
 		else
 		{
-			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//Ñ¡ÔñÁËÎÒ·½µÄµ¥Î» ÔòÏÔÊ¾ÑªÌõ
+			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ¡
 			{
 				/*deselectAllUnits();
 				_selectedUnitID.push_back(idAtPos);
 				_unitIdMap[idAtPos]->displayHpBar();*/
 				for (auto unitid : _selectedUnitID)
 				{
-					if (_unitIdMap[unitid]->getUnitType() >= 5)//ÊÇ¿É¹¥»÷µ¥Î»
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
 					{
 						if (_unitIdMap[idAtPos] != nullptr)
 						{
@@ -259,13 +260,13 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 					}
 				}
 			}
-			else////Ñ¡ÔñÁËµĞ·½µ¥Î»
+			else////é€‰æ‹©äº†æ•Œæ–¹å•ä½
 			{
-				//1µĞ·½½¨Öş µ½´ï ¹¥»÷
-				//2µĞ·½±øÖÖ ¸ú×Ù ¹¥»÷
+				//1æ•Œæ–¹å»ºç­‘ åˆ°è¾¾ æ”»å‡»
+				//2æ•Œæ–¹å…µç§ è·Ÿè¸ª æ”»å‡»
 				/*for (auto unitid : _selectedUnitID)
 				{
-					if (_unitIdMap[unitid]->getUnitType() >= 5)//ÊÇ¿É¹¥»÷µ¥Î»
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
 					{
 						_unitIdMap[unitid]->setAttackID(idAtPos);
 						_unitIdMap[unitid]->attack();

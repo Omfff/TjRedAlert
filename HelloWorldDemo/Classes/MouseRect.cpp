@@ -1,4 +1,3 @@
-
 #include"MouseRect.h"
 
 void MouseRect::setTouchStartToGL(cocos2d::Point point)

@@ -14,7 +14,7 @@ const int BOX_EDGE_WIDTH = 40;
 const int BOX_EDGE_HEIGHT_SMALL = 20;
 const int BOX_EDGE_HEIGHT = 40;
 
-const int SCROLL_DISTANCE = 10;
+const int SCROLL_DISTANCE = 4;
 
 //GamingScene.cpp--bool init()--manufacturemenu
 enum {
@@ -22,12 +22,8 @@ enum {
 	POWER_PLANT_TAG,
 	BARRACK_TAG,
 	WAR_FACTORY_TAG,
-	ORE_REFINERY_TAG,
-	GI_TAG,
-	ATTACK_DOG_TAG,
-	TANK_TAG
+	ORE_REFINERY_TAG
 };
-
 
 typedef enum {
 	BASE = 0,
@@ -47,6 +43,13 @@ typedef enum {
 	YELLOW
 }CampTypes;
 
-#endif // !__SYSTEM_HEADER_H__
+const int TILED_PIXEL = 32;
 
+//PathFinder
+enum { UNOCCUPIED, OCCUPIED, START, END, INOPENLIST, INCLOSELIST };
+const int DIRECTION[8][2] = { { 1, 0 },{ 1, -1 },{ 0, -1 },{ -1, -1 },{ -1, 0 },{ -1, 1 },{ 0, 1 },{ 1, 1 } };
+const int STRAIGHT_PATH = 10;
+const int OBLIQUE_PATH = 14;
+
+#endif // !__SYSTEM_HEADER_H__
 

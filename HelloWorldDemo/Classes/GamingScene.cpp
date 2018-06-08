@@ -1,4 +1,5 @@
 
+
 #include"GamingScene.h"
 
 USING_NS_CC;
@@ -515,3 +516,4 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 
 
 }
+
