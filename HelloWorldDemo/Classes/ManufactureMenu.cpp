@@ -8,15 +8,21 @@ bool ManufactureMenu::init()
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 
-	_buildingButton = MenuItemFont::create("Building");
-	_buildingButton->setAnchorPoint(Vec2(1, 1));
+	_buildingButton = MenuItemImage::create("ui/menu/NormalBuildingButton.png", "ui/menu/SelectedBuildingButton.png");
+	_buildingButton->setAnchorPoint(Vec2(1, 0.5));
 	_buildingButton->setScale(0.6);
-	_buildingButton->setPosition(visibleSize.width, visibleSize.height - 2 * _buildingButton->getContentSize().height);
+	_buildingButton->setPosition(visibleSize.width, visibleSize.height * 0.4);
 	//buildingButton->setPosition(getContentSize().width, getContentSize().height - _buildingButton->getContentSize().height);
 
-	addChild(_buildingButton);
+	_armyButton = MenuItemImage::create("ui/menu/NormalArmyButton.png", "ui/menu/SelectedArmyButton.png");
+	_armyButton->setAnchorPoint(Vec2(1, 0.5));
+	_armyButton->setScale(0.6);
+	_armyButton->setPosition(visibleSize.width, visibleSize.height * 0.6);
 
-	alignItemsVertically();
+	addChild(_buildingButton);
+	addChild(_armyButton);
+
+	alignItemsVerticallyWithPadding(visibleSize.height * 0.2);
 
 	/*_GIButton = cocos2d::MenuItemImage::create();
 
@@ -62,9 +68,9 @@ void ManufactureMenu::setBuildingCallBack(std::function<void(Ref*)> callBack)
 	_buildingButton->setCallback(callBack);
 }
 
-void ManufactureMenu::setArmCallBack(std::function<void(Ref*)> callBack)
+void ManufactureMenu::setArmyCallBack(std::function<void(Ref*)> callBack)
 {
-	_armButton->setCallback(callBack);
+	_armyButton->setCallback(callBack);
 }
 
 void ManufactureMenu::setGICallBack(std::function<void(Ref*)> callBack)
