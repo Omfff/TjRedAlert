@@ -211,6 +211,7 @@ bool GamingScene::init()
 
 			if (!_gridMap->checkRectPosition(rect)) {
 				_unitManager->creatProduceMessage(unittype, positionInMap);
+					
 				auto tempUnit = _unitManager->creatUnit(_unitManager->getPlayerCamp(), unittype, positionInMap);
 				if (tempUnit->getUnitType() < 5)
 				{

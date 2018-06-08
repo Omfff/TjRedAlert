@@ -3,7 +3,7 @@
 #include"cocos2d.h"
 #include"Unit.h"
 #include"Fighter.h"
-#include"Buliding.h"
+#include"Building.h"
 
 
 #define _GI_BULLET_SPEED 10;

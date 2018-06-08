@@ -9,7 +9,7 @@
 #include"Electricity.h"
 #include"UnitManager.h"
 #include"ManufactureMenu.h"
-#include"Buliding.h"
+#include"Building.h"
 
 
 class GamingScene : public cocos2d::Layer

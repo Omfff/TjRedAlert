@@ -21,15 +21,23 @@ class UnitManager :public Node
 	CC_SYNTHESIZE(GridMap *, _gridMap, Gridmap);
 	CC_SYNTHESIZE(TMXTiledMap *, _tileMap, TileMap);
 	CC_SYNTHESIZE(int, _nextId, NextId);
-	map<int, Unit *>_unitIdMap;
+	CC_SYNTHESIZE(int, _waitingGINum, WaitingGINum);
+	CC_SYNTHESIZE(int, _waitingTankNum, WaitingTankNum);
+	CC_SYNTHESIZE(int, _waitingAttackDogNum, WaitingAttackDogNum);
 	vector<int> _selectedUnitID;
-
+	map<int, int> _barracksId;
+	map<int,int> _warFactoryId;
+	map<int, int>newAttackUnit;
+	map<int, int>attackingUnit;
 	//Base * base = nullptr;
 public:
+	vector<UnitTypes>_fighterProduceSeq;
+	map<int, Unit *>_unitIdMap;
 	CREATE_FUNC(UnitManager);
 	bool init();
 	GridVec2 getUnitPos(int id);
 	CampTypes getUnitCamp(int id);
+	Unit * getUnitPtr(int id);
 	//void produceFighter(int type ,int id);
 	void updateUnitState();
 	void destoryUnit(int id);
@@ -37,12 +45,14 @@ public:
 	Unit * creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& pos, int id = 0);
 	void creatProduceMessage(UnitTypes unitType, const GridVec2 & pos);
 	void creatMoveMessage(int id, const Vec2 & pos);
+	void createAttackMessage(int id1,int id2 ,int damage);
 	void selectUnits(const GridRect &range);
 	void choosePosOrUnit(const GridVec2 & pos);
 	void deselectAllUnits();
 	friend GridRect transferRectToGridRect(const Rect & rect);
-	
-};
+	void unitAttackUpdate();
+	void fighterUnitProductionUpdate();
+};	
 
 
 
