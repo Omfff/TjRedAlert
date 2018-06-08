@@ -104,6 +104,7 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	{
 		case BASE:
 			unit = Base::create(unitPic);
+			setMyBaseId(id);
 			break;
 		case POWERPLANT:
 			unit = PowerPlant::create(unitPic);
@@ -405,4 +406,11 @@ GridRect transferRectToGridRect(const Rect & rect)
 Unit * UnitManager::getUnitPtr(int id)
 {
 	return _unitIdMap[id];
+}
+Vec2 UnitManager::getMyBasePos()
+{
+	GridVec2 basePos;
+	if (_myBaseId != 0)
+		basePos = _unitIdMap[_myBaseId]->getUnitCoord();
+	return Vec2(basePos._x * 32, basePos._y * 32);
 }
