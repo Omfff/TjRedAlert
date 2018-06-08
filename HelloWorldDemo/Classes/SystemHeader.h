@@ -1,3 +1,4 @@
+
 #ifndef __SYSTEM_HEADER_H__
 #define __SYSTEM_HEADER_H__
 
@@ -51,3 +52,4 @@ const int STRAIGHT_PATH = 10;
 const int OBLIQUE_PATH = 14;
 
 #endif // !__SYSTEM_HEADER_H__
+

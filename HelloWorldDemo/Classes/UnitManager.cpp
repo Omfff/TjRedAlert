@@ -1,7 +1,9 @@
+
 #include"UnitManager.h"
 #include"GameMessages.pb.h"
-#include"Buliding.h"
+#include"Building.h"
 #include"Unit.h"
+#include"Fighter.h"
 #include<vector>
 #include<string>
 USING_NS_CC;
@@ -39,7 +41,7 @@ void UnitManager::updateUnitState()
 				if (_unitIdMap.count(id))
 				{
 					Unit * unit = _unitIdMap[id];
-					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//Õâ¸öpositionµÄ²ÎÊý¶¼ÊÇintµÄ
+					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//è¿™ä¸ªpositionçš„å‚æ•°éƒ½æ˜¯intçš„
 					unit->move();
 				}
 				else
@@ -49,7 +51,7 @@ void UnitManager::updateUnitState()
 			}
 			else
 			{
-				if (receiveMessage.cmd() == MESSAGEATK)//unit1ÊÕµ½unit2¹¥»÷
+				if (receiveMessage.cmd() == MESSAGEATK)//unit1æ”¶åˆ°unit2æ”»å‡»
 				{
 					int unitId1 = receiveMessage.unit_id1();
 					int unitId2 = receiveMessage.unit_id2();
@@ -77,9 +79,15 @@ void UnitManager::destoryUnit(int id)
 	Unit * unit = _unitIdMap[id];
 	if (unit)
 	{
-		//unit->removeFromMap();
+		if (unit->getUnitType() == WARFACTORY)
+			_warFactoryId.erase(unit->getID());
+		if (unit->getUnitType() == BARRACKS)
+			_barracksId.erase(unit->getID());
+		unit->removeFromMap();
 		//unit->deleteUnit();
+		_tileMap->removeChild(unit);
 		_unitIdMap.erase(id);	
+		
 	}
 }
 //BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY,GI,ATTACKDOG,TANK
@@ -88,23 +96,32 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	if (id == 0)
 		id = _nextId;
 	Unit * unit;
-	vector<string >picPath = {"units/base_","","","","","","",""};
+	vector<string >picPath = {"units/Base(","units/PowerPlant(","units/Barrack(","units/WarFactory(","units/OreRefinery(","","",""};
+	vector<string>picColor = { "","red","blue","green","yellow" };
+	
 	int transType = type;
-	string unitPic = picPath[type] + to_string(transType) + ".png";
+	string unitPic = picPath[type] + picColor[camp] + ").png";
 	switch (type)
 	{
 		case BASE:
 			unit = Base::create(unitPic);
 			break;
 		case POWERPLANT:
+			unit = PowerPlant::create(unitPic);
 			break;
 		case BARRACKS:
+			_barracksId[id]=0;
+			unit = Barracks::create(unitPic);
 			break;
 		case WARFACTORY:
+			_warFactoryId[id]=0;
+			unit = WarFactory::create(unitPic);
 			break;
 		case OREREFINERY:
+			unit = OreRefinery::create(unitPic);
 			break;
 		case GI:
+			unit = Solider::create("solider.png");
 			break;
 		case ATTACKDOG:
 			break;
@@ -114,6 +131,7 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 			break;
 	}
 	unit->init( camp, type, pos, _tileMap, _gridMap,id);
+	unit->setUnitManager(this);
 	_unitIdMap[id] = unit;
 	unit->setPosition(Vec2(pos._x, pos._y));
 	_tileMap->addChild(unit, 10);
@@ -163,12 +181,12 @@ void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
 	newMessage->set_camp(_playerCamp);
 	newMessage->set_cmd(MESSAGECRT);
 	newMessage->set_unit_type(unitType);
-	newMessage->set_unit_id1(_nextId);//µ¥Î»idµÄÉèÖÃ£¿£¿£¿
+	newMessage->set_unit_id1(_nextId);//å•ä½idçš„è®¾ç½®ï¼Ÿï¼Ÿï¼Ÿ
 	_nextId += 4;
 	GridPoint * posPoint =newMessage->mutable_position();
 	posPoint->set_x(  pos._x);
 	posPoint->set_y( pos._y);
-	//ÔõÃ´ÉèÖÃ×ø±ê£¿£¿
+	//æ€Žä¹ˆè®¾ç½®åæ ‡ï¼Ÿï¼Ÿ
 }
 void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
 {
@@ -180,20 +198,35 @@ void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
 	posPoint->set_x(pos.x);
 	posPoint->set_y(pos.y);
 }
-//±¾µØÒÆ¶¯ºÍ¹¥»÷µÄÏûÏ¢ÔõÃ´Éú³É£¿£¿
+void UnitManager::createAttackMessage(int id1, int id2, int damage)
+{
+	auto newMessage = _msgGroup->add_game_message();
+	//newMessage->set_camp(_playerCamp);
+	newMessage->set_cmd(MESSAGEATK);
+	newMessage->set_unit_id1(id1);
+	newMessage->set_unit_id2(id2);
+	newMessage->set_damage(damage);
+}
+//æœ¬åœ°ç§»åŠ¨å’Œæ”»å‡»çš„æ¶ˆæ¯æ€Žä¹ˆç”Ÿæˆï¼Ÿï¼Ÿ
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
+	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
 	if (!_selectedUnitID.empty())
 	{
-		if (_gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32)) == 0||
-			_gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32)) ==_NO_PASS)
+		if (idAtPos == 0||idAtPos ==_NO_PASS)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (1)//_unitIdMap[unitid]->getUnitType() >= 5)//_unitIdMap[unitid]->getUnitType()>=5//ÊÇ¿ÉÒÆ¶¯µ¥Î»
+				if (_unitIdMap[unitid]->getUnitType()>=5)//æ˜¯å¯ç§»åŠ¨å•ä½
 				{
-					//Ñ°Â·
-					//²úÉúÒÆ¶¯ÏûÏ¢
+					//å¯»è·¯
+					//äº§ç”Ÿç§»åŠ¨æ¶ˆæ¯
+					if (attackingUnit.count(unitid) > 0)
+					{
+						_unitIdMap[unitid]->stopAttackUpdate();
+						_unitIdMap[unitid]->setAttackID(0);
+					}
+						//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
 					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
 					_unitIdMap[unitid]->move();
 				}
@@ -201,20 +234,176 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		}
 		else
 		{
-			if (1)//Ñ¡ÔñÁËÎÒ·½µÄµ¥Î» ÔòÏÔÊ¾ÑªÌõ
+			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ¡
 			{
+				/*deselectAllUnits();
+				_selectedUnitID.push_back(idAtPos);
+				_unitIdMap[idAtPos]->displayHpBar();*/
+				for (auto unitid : _selectedUnitID)
+				{
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
+					{
+						if (_unitIdMap[idAtPos] != nullptr)
+						{
+							newAttackUnit[unitid] = idAtPos;
 
+							/*_unitIdMap[unitid]->setAttackID(idAtPos);
+							_unitIdMap[unitid]->attack();
+							_unitIdMap[idAtPos]->getDamage(100);
+							_unitIdMap[idAtPos]->displayHpBar();
+							if (_unitIdMap[idAtPos]->getCurrentHp() <= 0)
+							{
+								destoryUnit(idAtPos);
+							}*/
+						}
+						
+					}
+				}
 			}
-			else////Ñ¡ÔñÁËµÐ·½µ¥Î»
+			else////é€‰æ‹©äº†æ•Œæ–¹å•ä½
 			{
-				//1µÐ·½½¨Öþ µ½´ï ¹¥»÷
-				//2µÐ·½±øÖÖ ¸ú×Ù ¹¥»÷
+				//1æ•Œæ–¹å»ºç­‘ åˆ°è¾¾ æ”»å‡»
+				//2æ•Œæ–¹å…µç§ è·Ÿè¸ª æ”»å‡»
+				/*for (auto unitid : _selectedUnitID)
+				{
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
+					{
+						_unitIdMap[unitid]->setAttackID(idAtPos);
+						_unitIdMap[unitid]->attack();
+						_unitIdMap[idAtPos]->getDamage(100);
+						_unitIdMap[idAtPos]->displayHpBar();
+						if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
+						{
+							destoryUnit(idAtPos);
+						}
+					}
+				}*/
 			}
 		}
+	}
+}
+void UnitManager::unitAttackUpdate()
+{
+	if (!newAttackUnit.empty())
+	{
+		for (auto battleUnit : newAttackUnit)
+		{
+			if (attackingUnit.count(battleUnit.first) > 0&& attackingUnit[battleUnit.first] == battleUnit.second)
+				continue;
+
+			if (attackingUnit.count(battleUnit.first) > 0 && attackingUnit[battleUnit.first] != battleUnit.second)
+				_unitIdMap[battleUnit.first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				
+			attackingUnit[battleUnit.first] = battleUnit.second;
+			_unitIdMap[battleUnit.first]->setAttackID(battleUnit.second);
+			_unitIdMap[battleUnit.first]->startAttackUpdate();
+			//this->schedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate),0.5f);
+		}
+		newAttackUnit.clear();
+	}
+	if (!attackingUnit.empty())
+	{
+		map<int, int> ::iterator ite = attackingUnit.begin();
+		vector<int> deleUnitId;
+		while (ite != attackingUnit.end())
+		{
+			if (_unitIdMap[ite->second] != nullptr&&_unitIdMap[ite->second]->getCurrentHp() <= 0)
+			{
+				_unitIdMap[ite->first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				_unitIdMap[ite->first]->setAttackID(0);
+				destoryUnit(ite->second);
+				ite = attackingUnit.erase(ite);
+				//deleUnitId.push_back(ite->first);
+			}
+			else if (_unitIdMap[ite->second] == nullptr)
+			{
+				_unitIdMap[ite->first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				_unitIdMap[ite->first]->setAttackID(0);
+				ite = attackingUnit.erase(ite);
+			}
+			else
+			{
+				ite++;
+			}
+		}
+	}
+
+}
+void UnitManager::fighterUnitProductionUpdate()
+{
+	auto ite = _fighterProduceSeq.begin();
+	int mark = 0;
+	while (ite != _fighterProduceSeq.end())
+	{
+		if (*ite==GI&& _barracksId.empty() != true)
+		{
+			for (auto & id : _barracksId)
+			{
+				if (id.second == 0)
+				{
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(GI, GridVec2(producePos._x / 32, producePos._y/32));
+					creatUnit(_playerCamp, GI, producePos);
+					_waitingGINum--;
+					id.second = 1;
+					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
+					break;
+				}
+			}
+		}
+		else if(*ite==ATTACKDOG&& _barracksId.empty() != true)
+		{
+			for (auto & id : _barracksId)
+			{
+				if (id.second == 0)
+				{
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(ATTACKDOG, GridVec2(producePos._x / 32, producePos._y/32));
+					creatUnit(_playerCamp, ATTACKDOG, producePos);
+					_waitingAttackDogNum--;
+					id.second = 1;
+					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
+					break;
+				}
+			}
+		}
+		else //(*ite == TANK && _warFactoryId.empty() != true)
+		{
+			if (*ite == TANK && _warFactoryId.empty() != true)
+			{
+				for (auto & id : _warFactoryId)
+				{
+					if (id.second == 0)
+					{
+						GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceTank();
+						creatProduceMessage(TANK, GridVec2(producePos._x / 32, producePos._y / 32));
+						creatUnit(_playerCamp, TANK, producePos);
+						_waitingTankNum--;
+						id.second = 1;
+						mark = 1;
+						ite = _fighterProduceSeq.erase(ite);
+						break;
+					}
+				}
+			}
+		}
+		if (mark == 1)
+			mark = 0;
+		else
+			ite++;
 	}
 }
 GridRect transferRectToGridRect(const Rect & rect)
 {
 	return GridRect(GridVec2((float)(rect.origin.x) / 32.0, (float)(rect.origin.y / 32.0)),
 		GridDimen(rect.size.width/32.0, rect.size.height/32.0));
+}
+Unit * UnitManager::getUnitPtr(int id)
+{
+	return _unitIdMap[id];
 }

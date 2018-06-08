@@ -2,6 +2,7 @@
 #define _Grid_H_
 
 #include"cocos2d.h"
+#include"SystemHeader.h"
 #include<map>
 #include<vector>
 #include<set>
@@ -61,7 +62,7 @@ public:
 	bool insideRect(const GridRect &rect)const;
 };
 //网格地图
-class GridMap
+class GridMap:public Layer
 {
 protected:
 	map<int, GridVec2> _unitCoord;
@@ -71,6 +72,7 @@ protected:
 	GridRect _worldRect;
 	//（0，0） width=125 height=62
 public:
+	CREATE_FUNC(GridMap);
 	GridMap();
 	//初始化
 	bool unitCoordStore(int unitId, const GridVec2 &position);
@@ -83,7 +85,7 @@ public:
 	void unitLeavePosition(const GridRect & rect);
 	//在移除单位的位置信息后会自动调用单位占用网格的清空
 	//（自动调用还没写！！！！）
-	void unitCoordRemove(int unitId);
+	void unitCoordRemove(int unitId,GridRect unitRect);
 	//移除单位信息（一般是在单位灭亡时调用）
 	int getUnitIdAt(const GridVec2& position)const;
 	//获取position位置上的单位信息

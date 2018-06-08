@@ -14,7 +14,7 @@ void Electricity::updateLabel()
 {
 	_electricityString = std::to_string(_electricity);
 	_usedElectricityString = std::to_string(_usedElectricity);
-	_showElectricity = _electricityString + " / " + _usedElectricityString;
+	_showElectricity = _usedElectricityString+ " / "+_electricityString ;
 	setString(_showElectricity);
 }
 

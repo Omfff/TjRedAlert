@@ -25,10 +25,10 @@ public:
 	void setOreRefineryCallBack(std::function<void(Ref*)>);
 
 	void setBuildingCallBack(std::function<void(Ref*)>);
-	void setArmCallBack(std::function<void(Ref*)>);
+	void setArmyCallBack(std::function<void(Ref*)>);
 
-	cocos2d::MenuItemFont* _buildingButton;
-	cocos2d::MenuItemFont* _armButton;
+	cocos2d::MenuItemImage* _buildingButton;
+	cocos2d::MenuItemImage* _armyButton;
 
 
 	cocos2d::MenuItemImage* _GIButton;
