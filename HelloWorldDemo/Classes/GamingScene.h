@@ -37,6 +37,11 @@ public:
 	//get end point, and call select function
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)override;
 
+	//check if we can manufacture some buildings to set opacity
+	void updateBuildingMenu(float f);
+
+	//check if we can manufacture some fight units to set opacity
+	void updateArmyMenu(float f);
 
 	CREATE_FUNC(GamingScene);
 

@@ -45,30 +45,49 @@ bool GamingScene::init()
 	_manufactureMenu->setPosition(Vec2(origin.x + visibleSize.width - 20, origin.y + visibleSize.height / 2));
 
 	_manufactureMenu->setBuildingCallBack([&](Ref*) {
-		auto base = Sprite::create("units/Base.png");
-		base->setPosition(100, 100);
-		base->setScale(0.5);
+		_menuSpriteLayer->removeAllChildren();
+
+		auto base = Sprite::create("units/Base(red).png");
+		base->setPosition(Director::getInstance()->getVisibleSize().width - 200, 
+						  Director::getInstance()->getVisibleSize().height * 0.8);
+		//base->setPosition(100, 100);
+		base->setScale(1);
+		//base->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
 
-		auto powerPlant = Sprite::create("units/PowerPlant.png");
-		powerPlant->setPosition(200, 200);
-		powerPlant->setScale(0.5);
+		auto powerPlant = Sprite::create("units/PowerPlant(red).png");
+		powerPlant->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+								Director::getInstance()->getVisibleSize().height * 0.7);
+		//powerPlant->setPosition(200, 200);
+		powerPlant->setScale(1);
+		//powerPlant->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(powerPlant, 10, POWER_PLANT_TAG);
 
-		auto barrack = Sprite::create("units/Barrack.png");
-		barrack->setPosition(300, 300);
-		barrack->setScale(0.5);
+		auto barrack = Sprite::create("units/Barrack(red).png");
+		barrack->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+							 Director::getInstance()->getVisibleSize().height * 0.6);
+		//barrack->setPosition(300, 300);
+		barrack->setScale(1);
+		//barrack->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(barrack, 10, BARRACK_TAG);
 
-		auto warFactory = Sprite::create("units/WarFactory.png");
-		warFactory->setPosition(400, 400);
-		warFactory->setScale(0.5);
+		auto warFactory = Sprite::create("units/WarFactory(red).png");
+		warFactory->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+								Director::getInstance()->getVisibleSize().height * 0.5);
+		//warFactory->setPosition(400, 400);
+		warFactory->setScale(1);
+		//warFactory->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(warFactory, 10, WAR_FACTORY_TAG);
 
-		auto oreRefinery = Sprite::create("units/OreRefinery.png");
-		oreRefinery->setPosition(500, 500);
-		oreRefinery->setScale(0.5);
+		auto oreRefinery = Sprite::create("units/OreRefinery(red).png");
+		oreRefinery->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+								 Director::getInstance()->getVisibleSize().height * 0.4);
+		//oreRefinery->setPosition(500, 500);
+		oreRefinery->setScale(1);
+		//oreRefinery->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(oreRefinery, 10, ORE_REFINERY_TAG);
+
+		schedule(schedule_selector(GamingScene::updateBuildingMenu));
 
 		auto buildingAttachedToMouse = EventListenerTouchOneByOne::create();
 		buildingAttachedToMouse->onTouchBegan = [&](Touch* touch, Event* event)->bool
@@ -120,13 +139,31 @@ bool GamingScene::init()
 				}
 				return true;
 			}
+			if (!baseRect.containsPoint(baseLocation)
+				&& !powerPlantRect.containsPoint(powerPlantLocation)
+				&& !barrackRect.containsPoint(barrackLocation)
+				&& !warFactoryRect.containsPoint(warFactoryLocation)
+				&& !oreRefineryRect.containsPoint(oreRefineryLocation)) {
+				_menuSpriteLayer->removeAllChildren();
+			}
 
 			return false;
 		};
 		buildingAttachedToMouse->onTouchMoved = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
+
 			target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
+			Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
+			Size size = target->getContentSize();
+			Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
+			if (_gridMap->checkRectPosition(rect)) {
+				target->setColor(Color3B::RED);
+			}
+			else {
+				target->setColor(Color3B(255, 255, 255));
+			}
+
 		};
 		buildingAttachedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
@@ -140,30 +177,111 @@ bool GamingScene::init()
 			_menuSpriteLayer->removeChildByTag(target->getTag());
 			
 			if (!_gridMap->checkRectPosition(rect)) {
-
-			_money->costMoney(2500);
-			_electricity->addElectricity(50);
-
-			_unitManager->creatProduceMessage(unittype, positionInMap);
-			auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
-			if (tempUnit->getUnitType() < 5)
-			{
-				_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
-				if (POWER[tempUnit->getUnitType()] > 0)
-					_electricity->addElectricity(POWER[tempUnit->getUnitType()]);
-				else
-					_electricity->costElectricity(-POWER[tempUnit->getUnitType()]);
-			}
+				_unitManager->creatProduceMessage(unittype, positionInMap);
+				auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
+				if (tempUnit->getUnitType() < 5)
+				{
+					_money->costMoney(COST[tempUnit->getUnitType()]);
+					_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
+					if (POWER[tempUnit->getUnitType()] > 0)
+						_electricity->addElectricity(POWER[tempUnit->getUnitType()]);
+					else
+						_electricity->costElectricity(-POWER[tempUnit->getUnitType()]);
+				}
 			
 			}
 		};
 		buildingAttachedToMouse->setSwallowTouches(true);
+
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse, base);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse->clone(), powerPlant);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse->clone(), barrack);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse->clone(), warFactory);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse->clone(), oreRefinery);
+	});
+	_manufactureMenu->setArmyCallBack([&](Ref*) {
+		_menuSpriteLayer->removeAllChildren();
 
+		auto GIFrame = SpriteFrame::create("units/GI(red).png", Rect(0, 0, 35, 37));
+		auto GI = Sprite::createWithSpriteFrame(GIFrame);
+		GI->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+						Director::getInstance()->getVisibleSize().height * 0.5);
+		GI->setScale(2);
+		_menuSpriteLayer->addChild(GI, 10, GI_TAG);
+
+		auto attackDogFrame = SpriteFrame::create("units/AttackDog(red).png", Rect(0, 0, 49, 50));
+		auto attackDog = Sprite::createWithSpriteFrame(attackDogFrame);
+		attackDog->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+							   Director::getInstance()->getVisibleSize().height * 0.4);
+		attackDog->setScale(1.4);
+		_menuSpriteLayer->addChild(attackDog, 10, ATTACK_DOG_TAG);
+
+		auto tankFrame = SpriteFrame::create("units/Tank(red).png", Rect(0, 0, 35, 37));
+		auto tank = Sprite::Sprite::createWithSpriteFrame(tankFrame);
+		tank->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+						  Director::getInstance()->getVisibleSize().height * 0.28);
+		tank->setScale(2);
+		_menuSpriteLayer->addChild(tank, 10, TANK_TAG);
+
+		schedule(schedule_selector(GamingScene::updateArmyMenu));
+
+		auto armyAttatchedToMouse = EventListenerTouchOneByOne::create();
+		armyAttatchedToMouse->onTouchBegan = [&](Touch* touch, Event* event)->bool
+		{
+			auto target = static_cast<Sprite*>(event->getCurrentTarget());
+
+			Vec2 locationInNode = target->convertToNodeSpace(touch->getLocation());
+			Size size = target->getContentSize();
+			Rect rect = Rect(0, 0, size.width, size.height);
+
+			Size GISize = _menuSpriteLayer->getChildByTag(GI_TAG)->getContentSize();
+			Rect GIRect = Rect(0, 0, GISize.width, GISize.height);
+			Vec2 GILocation = _menuSpriteLayer->getChildByTag(GI_TAG)->convertToNodeSpace(touch->getLocation());
+
+			Size attackDogSize = _menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->getContentSize();
+			Rect attackDogRect = Rect(0, 0, attackDogSize.width, attackDogSize.height);
+			Vec2 attackDogLocation = _menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->convertToNodeSpace(touch->getLocation());
+
+			Size tankSize = _menuSpriteLayer->getChildByTag(TANK_TAG)->getContentSize();
+			Rect tankRect = Rect(0, 0, tankSize.width, tankSize.height);
+			Vec2 tankLocation = _menuSpriteLayer->getChildByTag(TANK_TAG)->convertToNodeSpace(touch->getLocation());
+
+			if (rect.containsPoint(locationInNode)) {
+				target->setScale(2);
+				return true;
+			}
+			if (!GIRect.containsPoint(GILocation)
+				&& !attackDogRect.containsPoint(attackDogLocation)
+				&& !tankRect.containsPoint(tankLocation)) {
+				_menuSpriteLayer->removeAllChildren();
+			}
+			return false;
+		};
+		armyAttatchedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
+		{
+			auto target = static_cast<Sprite*>(event->getCurrentTarget());
+			Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
+			Size size = target->getContentSize();
+			Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
+
+			UnitTypes unittype = UnitTypes(target->getTag() - 101);
+
+			/*if (!_gridMap->checkRectPosition(rect)) {
+				_unitManager->creatProduceMessage(unittype, positionInMap);
+				auto tempUnit = _unitManager->creatUnit(_unitManager->getPlayerCamp(), unittype, positionInMap);
+				if (tempUnit->getUnitType() >= 5 && tempUnit->getUnitType() < 8)
+				{
+					_money->costMoney(COST[tempUnit->getUnitType()]);
+					//_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
+				}
+			}*/
+
+		};
+
+		armyAttatchedToMouse->setSwallowTouches(true);
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse, GI);
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse->clone(), attackDog);
+		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse->clone(), tank);
 	});
 
 	addChild(_manufactureMenu, 10);
@@ -174,14 +292,13 @@ bool GamingScene::init()
 	addChild(moneyIcon, 1);
 
 	_money = Money::create();
-	_money->setPosition(visibleSize.width - 100, 20);
+	_money->setPosition(visibleSize.width - 80, 20);
 	_money->schedule(schedule_selector(Money::update));
 	addChild(_money, 1);
 	
 	_electricity = Electricity::create();
-	//_electricity->setPosition(visibleSize.width - 100, 80);
-	_electricity->setPosition(visibleSize.width - 100, 80);
-	_electricity->setScale(0.5);
+	_electricity->setPosition(visibleSize.width - 80, 60);
+	_electricity->setScale(0.42);
 	addChild(_electricity, 1);
 
 
@@ -293,9 +410,8 @@ void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 			_tiledMap->setPosition(mapPosition);
 		}
 		break;
-	/*case EventKeyboard::KeyCode::KEY_SPACE:
-		focusOnBase();*/
-
+	case EventKeyboard::KeyCode::KEY_SPACE:
+		_tiledMap->setPosition(_unitManager->getMyBasePos());
 	default:
 		break;
 
@@ -345,5 +461,89 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 	}
 	_mouseRect->setTouchEndToMap(_tiledMap->getPosition());*/
 
+
+}
+
+void GamingScene::updateBuildingMenu(float f)
+{
+	if (!_menuSpriteLayer->getChildrenCount()) {
+		unschedule(schedule_selector(GamingScene::updateBuildingMenu));
+	}
+
+	//only one base
+
+	if (_menuSpriteLayer->getChildByTag(BASE_TAG)) {
+		if (!_money->checkMoney(2500)) {
+			_menuSpriteLayer->getChildByTag(BASE_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(BASE_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)) {
+		if (!_money->checkMoney(800)) {
+			_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(BARRACK_TAG)) {
+		if (!_money->checkMoney(800) || !_electricity->checkElectricity(10)) {
+			_menuSpriteLayer->getChildByTag(BARRACK_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(BARRACK_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)) {
+		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(50)) {
+			_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)) {
+		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(40)) {
+			_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->setOpacity(255);
+		}
+	}
+
+}
+
+void GamingScene::updateArmyMenu(float f)
+{
+	if (_menuSpriteLayer->getChildrenCount()) {
+		unschedule(schedule_selector(GamingScene::updateArmyMenu));
+	}
+
+	if (_menuSpriteLayer->getChildByTag(GI_TAG)) {
+		if (!_money->checkMoney(150)) {
+			_menuSpriteLayer->getChildByTag(GI_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(GI_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)) {
+		if (!_money->checkMoney(150)) {
+			_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->setOpacity(255);
+		}
+	}
+	if (_menuSpriteLayer->getChildByTag(TANK_TAG)) {
+		if (!_money->checkMoney(300)) {
+			_menuSpriteLayer->getChildByTag(TANK_TAG)->setOpacity(100);
+		}
+		else {
+			_menuSpriteLayer->getChildByTag(TANK_TAG)->setOpacity(255);
+		}
+	}
 
 }

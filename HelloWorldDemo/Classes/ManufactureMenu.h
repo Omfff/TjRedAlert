@@ -2,6 +2,7 @@
 #define __MANUFACTURE_MENU_H__
 
 #include"cocos2d.h"
+#include"SystemHeader.h"
 
 USING_NS_CC;
 
@@ -25,22 +26,23 @@ public:
 	void setOreRefineryCallBack(std::function<void(Ref*)>);
 
 	void setBuildingCallBack(std::function<void(Ref*)>);
-	void setArmCallBack(std::function<void(Ref*)>);
+	void setArmyCallBack(std::function<void(Ref*)>);
+	
 
-	cocos2d::MenuItemFont* _buildingButton;
-	cocos2d::MenuItemFont* _armButton;
+	MenuItemImage* _buildingButton;
+	MenuItemImage* _armyButton;
 
 
-	cocos2d::MenuItemImage* _GIButton;
-	cocos2d::MenuItemImage* _attackDogButton;
+	MenuItemImage* _GIButton;
+	MenuItemImage* _attackDogButton;
 
-	cocos2d::MenuItemImage* _tankButton;
+	MenuItemImage* _tankButton;
 
-	cocos2d::MenuItemImage* _baseButton;
-	cocos2d::MenuItemImage* _powerPlantButton;
-	cocos2d::MenuItemImage* _barrackButton;
-	cocos2d::MenuItemImage* _warFactoryButton;
-	cocos2d::MenuItemImage* _oreRefineryButton;
+	MenuItemImage* _baseButton;
+	MenuItemImage* _powerPlantButton;
+	MenuItemImage* _barrackButton;
+	MenuItemImage* _warFactoryButton;
+	MenuItemImage* _oreRefineryButton;
 
 };
 
