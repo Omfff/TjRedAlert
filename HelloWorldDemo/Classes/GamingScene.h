@@ -10,7 +10,8 @@
 #include"UnitManager.h"
 #include"ManufactureMenu.h"
 #include"Building.h"
-
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 
 class GamingScene : public cocos2d::Layer
 {

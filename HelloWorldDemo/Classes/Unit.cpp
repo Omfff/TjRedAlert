@@ -26,6 +26,7 @@ void Unit::move()
 	float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
 		pow(_destination.y / 32.0 - _unitCoord._y, 2)) / 8;//_moveSpeed;
 	auto actionMove = MoveTo::create(moveTime, _destination);
+	SimpleAudioEngine::getInstance()->playEffect("Music/On my way.wav");//音效
 	this->runAction(actionMove);
 	_battleMap->unitLeavePosition(_unitRect);
 	setUnitCoord(GridVec2(float(_destination.x / 32.0), float(_destination.y / 32.0)));
@@ -105,7 +106,7 @@ void Unit::displayHpBar()
 }
 void BuildingUnit::deleteUnit()
 {
-	//_tiledMap->removeChild(this);
+	_tiledMap->removeChild(this);
 }
 bool ExplosionEffect::init()
 {
@@ -129,6 +130,7 @@ void Unit::removeFromMap()
 	auto explosion_effect = ExplosionEffect::create();
 	explosion_effect->setPosition(this->getPosition());
 	getParent()->addChild(explosion_effect, 20);
+	SimpleAudioEngine::getInstance()->playEffect("Music/Explosion.wav");//音效
 	//unschedule(schedule_selector(update));
 	_battleMap->unitCoordRemove(_id,_unitRect);
 	//_tiledMap->removeChild(this, 1);
@@ -148,6 +150,9 @@ bool Unit::getDamage(int hurt)
 		_hpBar->setPercent(percent*100);
 		return true;
 	}
+}
+void Unit::getDamage() {
+	SimpleAudioEngine::getInstance()->playEffect("Music/Solider explosion.wav");
 }
 bool FightUnit::init(CampTypes camp, UnitTypes types, GridVec2 coord,
 	TMXTiledMap* map, GridMap * gridmap, int id)
@@ -208,7 +213,6 @@ void FightUnit::searchNearEnemy()
 void FightUnit::attack()
 {
 	shootBullet();
-	
 }
 /*void FightUnit::autoAttack()
 {
@@ -222,6 +226,7 @@ void FightUnit::move()
 	float moveTime = sqrt(pow((_destination.x/32.0 - _unitCoord._x), 2) +
 		pow(_destination.y/32.0 - _unitCoord._y, 2))/_moveSpeed;
 	auto actionMove = MoveTo::create(moveTime, _destination);
+	SimpleAudioEngine::getInstance()->playEffect("Music/On my way.wav");//音效
 	this->runAction(actionMove);
 	_battleMap->unitLeavePosition(_unitRect);
 	setUnitCoord(GridVec2(float(_destination.x/32.0),float(_destination.y/32.0)));
@@ -231,4 +236,5 @@ void FightUnit::move()
 }
 void FightUnit::shootBullet()
 {
+	SimpleAudioEngine::getInstance()->playEffect("Music/Tank attack.wav");//音效
 }

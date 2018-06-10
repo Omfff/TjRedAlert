@@ -10,6 +10,8 @@
 #include"GridMap.h"
 #include"GameMessages.pb.h"
 #include"SystemHeader.h"
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 using namespace std;
 USING_NS_CC;
 class Unit;
@@ -53,6 +55,8 @@ public:
 	friend GridRect transferRectToGridRect(const Rect & rect);
 	void unitAttackUpdate();
 	void fighterUnitProductionUpdate();
+	virtual void onEnter();
+	virtual void onExit();
 };	
 
 

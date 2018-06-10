@@ -194,6 +194,7 @@ bool GamingScene::init()
 
 			return false;
 		};
+		SimpleAudioEngine::getInstance()->playEffect("Music/Build.wav");//音效
 		buildingAttachedToMouse->onTouchMoved = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
@@ -226,6 +227,7 @@ bool GamingScene::init()
 
 			}
 		};
+		SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 		buildingAttachedToMouse->setSwallowTouches(true);
 
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse, base);
@@ -299,6 +301,7 @@ bool GamingScene::init()
 			}
 			return false;
 		};
+		SimpleAudioEngine::getInstance()->playEffect("Music/Unit training.wav");//音效
 		armyAttatchedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
@@ -326,7 +329,7 @@ bool GamingScene::init()
 			}*/
 
 		};
-
+		SimpleAudioEngine::getInstance()->playEffect("Music/Unit ready.wav");//音效
 		armyAttatchedToMouse->setSwallowTouches(true);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse, GI);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse->clone(), attackDog);

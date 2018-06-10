@@ -79,11 +79,12 @@ void UnitManager::destoryUnit(int id)
 	Unit * unit = _unitIdMap[id];
 	if (unit)
 	{
-		if (unit->getUnitType() == WARFACTORY)
+		if (unit->getUnitType() == WARFACTORY) 
 			_warFactoryId.erase(unit->getID());
 		if (unit->getUnitType() == BARRACKS)
 			_barracksId.erase(unit->getID());
 		unit->removeFromMap();
+		SimpleAudioEngine::getInstance()->playEffect("Music/Unit lost.wav");//音效
 		//unit->deleteUnit();
 		_tileMap->removeChild(unit);
 		_unitIdMap.erase(id);	
@@ -105,27 +106,35 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	{
 		case BASE:
 			unit = Base::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 			break;
 		case POWERPLANT:
 			unit = PowerPlant::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 			break;
 		case BARRACKS:
 			_barracksId[id]=0;
 			unit = Barracks::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 			break;
 		case WARFACTORY:
 			_warFactoryId[id]=0;
 			unit = WarFactory::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 			break;
 		case OREREFINERY:
 			unit = OreRefinery::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
 			break;
 		case GI:
 			unit = Solider::create("solider.png");
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//音效
 			break;
 		case ATTACKDOG:
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//音效
 			break;
 		case TANK:
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//音效
 			break;
 		default:
 			break;
@@ -406,4 +415,13 @@ GridRect transferRectToGridRect(const Rect & rect)
 Unit * UnitManager::getUnitPtr(int id)
 {
 	return _unitIdMap[id];
+}
+void UnitManager::onEnter() {
+	Layer::onEnter();
+	SimpleAudioEngine::getInstance()->preloadEffect("Music/Unit lost.wav");
+	
+}
+void UnitManager::onExit() {
+	Layer::onExit();
+	SimpleAudioEngine::getInstance()->stopAllEffects();
 }

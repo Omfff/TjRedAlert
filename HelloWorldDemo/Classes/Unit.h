@@ -5,9 +5,8 @@
 #include "ui/UILoadingBar.h"
 #include "UnitManager.h"
 #include"SystemHeader.h"
-
-
-
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 USING_NS_CC;
 using namespace ui;
 //Ä¬ÈÏË³Ðò£º°´BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY
