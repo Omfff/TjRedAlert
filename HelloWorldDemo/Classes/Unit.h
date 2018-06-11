@@ -9,6 +9,7 @@
 
 
 
+
 USING_NS_CC;
 using namespace ui;
 //Ä¬ÈÏË³Ðò£º°´BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY
@@ -78,10 +79,13 @@ public:
 	virtual void deleteUnit() {}
 
 	//brief try to find path
-	virtual void tryToFindPath();
+	virtual void tryToFindPath() {};
 
 	//find a path to the destination
-	virtual std::vector<GridVec2> findPath(const GridVec2 & destination) const;
+	virtual std::vector<GridVec2> findPath(const GridVec2 & destination) const { return _gridPath; };
+
+	//optimize path 
+	virtual void optimizePath() {};
 
 	virtual void move();
 	virtual void attack() {}
@@ -135,8 +139,11 @@ public:
 	//brief try to find path
 	void tryToFindPath();
 
+	//optimize path 
+	void optimizePath();
+
 	//find a path to the destination
-	std::vector<GridVec2> findPath(const GridVec2 & destination) const;
+	std::vector<GridVec2> findPath(const GridVec2 & destination);
 
 	void move();
 	virtual void shootBullet();

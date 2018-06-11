@@ -24,14 +24,14 @@ bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map
 
 void Unit::move()
 {
-	float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
+	/*float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
 		pow(_destination.y / 32.0 - _unitCoord._y, 2)) / 8;//_moveSpeed;
 	auto actionMove = MoveTo::create(moveTime, _destination);
 	this->runAction(actionMove);
 	_battleMap->unitLeavePosition(_unitRect);
 	setUnitCoord(GridVec2(float(_destination.x / 32.0), float(_destination.y / 32.0)));
 	_unitRect._oriPoint = _unitCoord;
-	_battleMap->unitCoordStore(_id, _unitRect);
+	_battleMap->unitCoordStore(_id, _unitRect);*/
 }
 /*BuildingUnit* BuildingUnit::create(const std::string& filename)
 {
@@ -203,10 +203,11 @@ void FightUnit::tryToFindPath()
 		_destination.y = destination._y * 32 + 16;
 	}
 	_gridPath = findPath(destination);
+	optimizePath();
 
 }
 
-std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination) const
+std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination)
 {
 	std::vector<std::vector<int>> & gridMap = _battleMap->_findPathMap;
 	GridVec2 start = getUnitCoord();
@@ -216,6 +217,55 @@ std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination) const
 	pathFinder.generatePath();
 	std::vector<GridVec2> gridPath = pathFinder.getPath();
 	return gridPath;
+}
+
+void FightUnit::optimizePath()
+{
+	int pathLength = _gridPath.size();
+	if (pathLength < 3) {
+		return;
+	}
+
+	std::vector<GridVec2> optimizingPath;
+	GridVec2 previousPosition = _gridPath[0];
+	GridVec2 previousDirection(2, 3);
+
+	for (int i = 1; i < pathLength - 1; ++i) {
+		const auto & p = _gridPath[i];
+		GridVec2 dir;
+
+		if ((p - previousPosition)._x < 0) {
+			dir._x = -1;
+		}
+		else if ((p - previousPosition)._x == 0) {
+			dir._x = 0;
+		}
+		else {
+			dir._x = 1;
+		}
+
+		if ((p - previousPosition)._y < 0) {
+			dir._y = -1;
+		}
+		else if ((p - previousPosition)._y == 0) {
+			dir._y = 0;
+		}
+		else {
+			dir._y = 1;
+		}
+
+		if (!(dir == previousDirection)) {
+			optimizingPath.push_back(previousPosition);
+			previousDirection = dir;
+		}
+		previousPosition = p;
+	}
+
+	optimizingPath.push_back(_gridPath[pathLength - 1]);
+	_gridPath.clear();
+	for (auto grid : optimizingPath) {
+		_gridPath.push_back(grid);
+	}
 }
 
 void FightUnit::searchNearEnemy()
@@ -253,23 +303,41 @@ void FightUnit::move()
 		_destination = GridVec2(destination._x, destination._y);
 	}*/
 	//产生移动的消息
-	for (vector<GridVec2>::iterator it = _gridPath.begin(); it != _gridPath.end() - 1; ++it) {
-		int distance = abs((*it)._x - (*(it + 1))._x) + abs((*it)._y - (*(it + 1))._y);
-		int moveTime;
-		if (distance == 2) {
-			moveTime = 140;
-		}
-		else {
-			moveTime = 100;
-		}
-		auto actionMove = MoveTo::create(moveTime, _destination);
-		this->runAction(actionMove);
+
+
+	if (_gridPath.size() == 1) {
+		float distance = sqrt(pow(this->getUnitCoord()._x - _gridPath[0]._x, 2) + pow(this->getUnitCoord()._y - _gridPath[0]._y, 2));
+		float moveTime = distance / (UNIT_MOVE_SPEED[this->getUnitType() - 5] * 3);
+		Vec2 endPosition(_gridPath[0]._x * 32 + 16, _gridPath[0]._y * 32 + 16);
+
+		this->runAction(MoveTo::create(moveTime, endPosition));
 		_battleMap->unitLeavePosition(this->getUnitRect());
-		setUnitCoord(*(_gridPath.end() - 1));
+		setUnitCoord(_gridPath[0]);
 		_unitRect._oriPoint = _unitCoord;
 		_battleMap->unitCoordStore(_id, _unitRect);
+
 	}
-	
+	else {
+		Vector<FiniteTimeAction*> actionSequence;
+
+		for (vector<GridVec2>::reverse_iterator it = _gridPath.rbegin(); it != _gridPath.rend() - 1; ++it) {
+			GridVec2 start(*it);
+			GridVec2 end(*(it + 1));
+			float distance = sqrt(pow(start._x - end._x, 2) + pow(start._y - end._y, 2));
+			float moveTime = distance / (UNIT_MOVE_SPEED[this->getUnitType() - 5] * 3);
+			Vec2 endPosition(end._x * 32 + 16, end._y * 32 + 16);
+
+			actionSequence.pushBack(MoveTo::create(moveTime, endPosition));
+			_battleMap->unitLeavePosition(this->getUnitRect());
+			setUnitCoord(end);
+			_unitRect._oriPoint = _unitCoord;
+			_battleMap->unitCoordStore(_id, _unitRect);
+		}
+
+		auto moveSequence = Sequence::create(actionSequence);
+		this->runAction(moveSequence);
+
+	}
 }
 void FightUnit::shootBullet()
 {
