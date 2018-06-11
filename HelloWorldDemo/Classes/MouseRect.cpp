@@ -28,6 +28,19 @@ void MouseRect::update(float f)
 	Node* parent = getParent();
 	setTouchEndToMap(parent->getPosition());
 
+	if (_touchEndToMap.x < 0) {
+		_touchEndToMap.x = 0;
+	}
+	if (_touchEndToMap.x > _MAP_WIDTH * TILED_PIXEL) {
+		_touchEndToMap.x = _MAP_WIDTH * TILED_PIXEL;
+	}
+	if (_touchEndToMap.y < 0) {
+		_touchEndToMap.y = 0;
+	}
+	if (_touchEndToMap.y > _MAP_HEIGHT * TILED_PIXEL) {
+		_touchEndToMap.x = _MAP_HEIGHT * TILED_PIXEL;
+	}
+
 	//drawRect with the position to map
 	drawRect(_touchStartToMap, _touchEndToMap, cocos2d::Color4F(0, 1, 0, 1));
 }
@@ -51,6 +64,7 @@ void MouseRect::reset()
 
 
 }
+
 Rect MouseRect::getMouseRect()
 {
 	Point originPoint;
