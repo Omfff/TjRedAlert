@@ -10,6 +10,8 @@
 #include"UnitManager.h"
 #include"ManufactureMenu.h"
 #include"Building.h"
+#include"Fighter.h"
+#include<map>
 
 
 class GamingScene : public cocos2d::Layer
@@ -27,6 +29,10 @@ public:
 
 	//press key to change map position
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+	//release key to change _keyStatus
+	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+
+	void keyPressedToMove(EventKeyboard::KeyCode keyCode);
 
 	//void focusOnBase();
 
@@ -75,7 +81,11 @@ private:
 
 	Layer* _menuSpriteLayer = nullptr;
 
-};
+	//record key status
+	map<EventKeyboard::KeyCode, bool> _keyStatus;
 
+	bool _keyUpdate = true;
+
+};
 
 #endif

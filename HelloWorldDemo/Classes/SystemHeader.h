@@ -8,12 +8,12 @@ const int PERIOD = 20;
 
 
 //GamingScene.cpp --void scroll()
-const int BOX_EDGE_WIDTH_SMALL = 20;
-const int BOX_EDGE_WIDTH = 40;
-const int BOX_EDGE_HEIGHT_SMALL = 20;
-const int BOX_EDGE_HEIGHT = 40;
+const int BOX_EDGE_WIDTH_SMALL = 30;
+const int BOX_EDGE_WIDTH = 60;
+const int BOX_EDGE_HEIGHT_SMALL = 30;
+const int BOX_EDGE_HEIGHT = 60;
 
-const int SCROLL_DISTANCE = 4;
+const int SCROLL_DISTANCE = 6;
 
 //GamingScene.cpp--bool init()--manufacturemenu
 enum {
@@ -54,3 +54,4 @@ const int STRAIGHT_PATH = 10;
 const int OBLIQUE_PATH = 14;
 
 #endif // !__SYSTEM_HEADER_H__
+

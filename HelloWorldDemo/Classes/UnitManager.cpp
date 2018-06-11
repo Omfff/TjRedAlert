@@ -211,6 +211,7 @@ void UnitManager::createAttackMessage(int id1, int id2, int damage)
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
 	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
+	Vec2 destination = Vec2(pos._x, pos._y);
 	if (!_selectedUnitID.empty())
 	{
 		if (idAtPos == 0 || idAtPos == _NO_PASS)
@@ -219,16 +220,29 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 			{
 				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可移动单位
 				{
-					//寻路
+					if (destination != _unitIdMap[unitid]->getDestination()) {
+						_unitIdMap[unitid]->stopAllActions();
+
+						GridVec2 unitCoord(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32);
+						GridRect unitRect(GridRect(GridVec2(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32), GridDimen(1, 1)));
+						_unitIdMap[unitid]->_battleMap->unitLeavePosition(_unitIdMap[unitid]->getUnitRect());
+						_unitIdMap[unitid]->setUnitCoord(unitCoord);
+						_unitIdMap[unitid]->setUnitRect(unitRect);
+						_unitIdMap[unitid]->_battleMap->unitCoordStore(_unitIdMap[unitid]->getID(), unitRect);
+					}
+
+					_unitIdMap[unitid]->setDestination(destination);
+					_unitIdMap[unitid]->tryToFindPath();
+					_unitIdMap[unitid]->move();
 					//产生移动消息
-					if (attackingUnit.count(unitid) > 0)
+					/*if (attackingUnit.count(unitid) > 0)
 					{
 						_unitIdMap[unitid]->stopAttackUpdate();
 						_unitIdMap[unitid]->setAttackID(0);
 					}
 					//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
 					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
-					_unitIdMap[unitid]->move();
+					_unitIdMap[unitid]->move();*/
 				}
 			}
 		}
@@ -410,7 +424,12 @@ Unit * UnitManager::getUnitPtr(int id)
 Vec2 UnitManager::getMyBasePos()
 {
 	GridVec2 basePos;
-	if (_myBaseId != 0)
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	if (_myBaseId != 0) {
 		basePos = _unitIdMap[_myBaseId]->getUnitCoord();
-	return Vec2(basePos._x * 32, basePos._y * 32);
+		return Vec2(basePos._x * 32, basePos._y * 32);
+	}
+	else {
+		return Vec2(visibleSize.width / 2, visibleSize.height / 2);
+	}
 }

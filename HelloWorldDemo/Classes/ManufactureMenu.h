@@ -48,4 +48,3 @@ public:
 
 
 #endif // !__MANUFACTURE_MENU_H__
-

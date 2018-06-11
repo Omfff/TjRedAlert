@@ -25,8 +25,12 @@ bool GamingScene::init()
 	_tiledMap->setAnchorPoint(Vec2(0, 0));
 	addChild(_tiledMap, 0);
 
-	_gridMap = new GridMap;
+	_gridMap = GridMap::create();
+	_gridMap->setContentSize(Size(4000, 1984));
+	_gridMap->setPosition(0, 0);
+	_tiledMap->addChild(_gridMap, 10);
 	setCollisionPos(_tiledMap, _gridMap);
+	_gridMap->setVisible(false);
 
 	_msgs = new GameMessageGroup;
 
@@ -54,6 +58,9 @@ bool GamingScene::init()
 		base->setScale(1);
 		//base->setAnchorPoint(Vec2(0, 0));
 		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
+		if (_unitManager->getMyBaseId()) {
+			base->setOpacity(100);
+		}
 
 		auto powerPlant = Sprite::create("units/PowerPlant(red).png");
 		powerPlant->setPosition(Director::getInstance()->getVisibleSize().width - 200,
@@ -118,8 +125,8 @@ bool GamingScene::init()
 			Rect oreRefineryRect = Rect(0, 0, oreRefinerySize.width, oreRefinerySize.height);
 			Vec2 oreRefineryLocation = _menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->convertToNodeSpace(touch->getLocation());
 
-
-			if (rect.containsPoint(locationInNode)) {
+			unschedule(schedule_selector(GamingScene::updateBuildingMenu));
+			if (rect.containsPoint(locationInNode) && target->getOpacity() == 255) {
 				target->setOpacity(50);
 				target->setScale(1.0);
 				if (!baseRect.containsPoint(baseLocation)) {
@@ -152,16 +159,18 @@ bool GamingScene::init()
 		buildingAttachedToMouse->onTouchMoved = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
-
-			target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
-			Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
-			Size size = target->getContentSize();
-			Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
-			if (_gridMap->checkRectPosition(rect)) {
-				target->setColor(Color3B::RED);
-			}
-			else {
-				target->setColor(Color3B(255, 255, 255));
+			if (target->getOpacity() == 50) {
+				target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
+				Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
+				Size size = target->getContentSize();
+				//Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
+				Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
+				if (_gridMap->checkRectPosition(rect)) {
+					target->setColor(Color3B::RED);
+				}
+				else {
+					target->setColor(Color3B(255, 255, 255));
+				}
 			}
 
 		};
@@ -170,7 +179,8 @@ bool GamingScene::init()
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
 			Vec2 positionInMap =_tiledMap->convertToNodeSpace( touch->getLocation());
 			Size size = target->getContentSize();
-			Rect rect = Rect(positionInMap.x/32.0, positionInMap.y/32.0, size.width / 32.0, size.height / 32.0);
+			//Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
+			Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
 
 			//target->setOpacity(255);
 			UnitTypes unittype = UnitTypes(target->getTag() - 101);
@@ -266,15 +276,13 @@ bool GamingScene::init()
 
 			UnitTypes unittype = UnitTypes(target->getTag() - 101);
 
-			/*if (!_gridMap->checkRectPosition(rect)) {
-				_unitManager->creatProduceMessage(unittype, positionInMap);
-				auto tempUnit = _unitManager->creatUnit(_unitManager->getPlayerCamp(), unittype, positionInMap);
-				if (tempUnit->getUnitType() >= 5 && tempUnit->getUnitType() < 8)
-				{
-					_money->costMoney(COST[tempUnit->getUnitType()]);
-					//_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
-				}
-			}*/
+			_unitManager->_fighterProduceSeq.push_back(unittype);
+			if (int(unittype) == 5)
+				_unitManager->setWaitingGINum(_unitManager->getWaitingGINum() + 1);
+			else if (int(unittype) == 6)
+				_unitManager->setWaitingAttackDogNum(_unitManager->getWaitingAttackDogNum() + 1);
+			else
+				_unitManager->setWaitingTankNum(_unitManager->getWaitingTankNum() + 1);
 
 		};
 
@@ -285,6 +293,12 @@ bool GamingScene::init()
 	});
 
 	addChild(_manufactureMenu, 10);
+
+	auto unit1 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
+
+	/*auto unit2 = _unitManager->creatUnit(RED, GI, Vec2(3 * visibleSize.width / 4, 3 * visibleSize.height / 4));
+	_unitManager->creatProduceMessage(GI, Vec2(3 * visibleSize.width / 4, 3 * visibleSize.height / 4));*/
 
 	auto moneyIcon = Sprite::create("ui/money/gold.png");
 	moneyIcon->setPosition(visibleSize.width - 140, 20);
@@ -324,10 +338,15 @@ bool GamingScene::init()
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseMoveEvent, this);
 
-
+	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_W, false));
+	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_A, false));
+	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_S, false));
+	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_D, false));
 	auto keyBoardListener = EventListenerKeyboard::create();
 	keyBoardListener->onKeyPressed = CC_CALLBACK_2(GamingScene::onKeyPressed, this);
+	keyBoardListener->onKeyReleased = CC_CALLBACK_2(GamingScene::onKeyReleased, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyBoardListener, this);
+	
 
 
 	return true;
@@ -336,6 +355,15 @@ bool GamingScene::init()
 void GamingScene::update(float f)
 {
 	mapScroll();
+
+	for (auto keyCode : _keyStatus) {
+		if (keyCode.second) {
+			keyPressedToMove(keyCode.first);
+		}
+	}
+
+	_unitManager->unitAttackUpdate();
+	_unitManager->fighterUnitProductionUpdate();
 	//_unitManager->updateUnitState();
 }
 
@@ -380,41 +408,93 @@ void GamingScene::mapScroll()
 
 void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) 
 {
-	auto mapPosition = _tiledMap->getPosition();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Point focusPosition = _unitManager->getMyBasePos();
+	Size size = _tiledMap->getContentSize();
 
-	//W-UP, S-DOWN, A-LEFT, D-RIGHT
+	switch (keyCode)
+	{
+	case EventKeyboard::KeyCode::KEY_SPACE:
+		focusPosition -= visibleSize / 2;
+		if (_tiledMap->getContentSize().width < focusPosition.x + visibleSize.width) {
+			focusPosition.x = _tiledMap->getContentSize().width - visibleSize.width;
+		}
+		if (_tiledMap->getContentSize().height < focusPosition.y + visibleSize.height) {
+			focusPosition.y = _tiledMap->getContentSize().height - visibleSize.height;
+		}
+		if (focusPosition.x < 0) {
+			focusPosition = 0;
+		}
+		if (focusPosition.y < 0) {
+			focusPosition.y = 0;
+		}
+		focusPosition = Point(0, 0) - focusPosition;
+		_tiledMap->setPosition(focusPosition);
+		break;
+	case EventKeyboard::KeyCode::KEY_W:
+		_keyStatus[EventKeyboard::KeyCode::KEY_W] = true;
+		break;
+	case EventKeyboard::KeyCode::KEY_A:
+		_keyStatus[EventKeyboard::KeyCode::KEY_A] = true;
+		break;
+	case EventKeyboard::KeyCode::KEY_S:
+		_keyStatus[EventKeyboard::KeyCode::KEY_S] = true;
+		break;
+	case EventKeyboard::KeyCode::KEY_D:
+		_keyStatus[EventKeyboard::KeyCode::KEY_D] = true;
+		break;
+	default:
+		break;
+	}
+
+}
+
+void GamingScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
+{
+	_keyStatus[keyCode] = false;
+}
+
+void GamingScene::keyPressedToMove(EventKeyboard::KeyCode keyCode)
+{
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Size size = _tiledMap->getContentSize();
+
 	switch (keyCode)
 	{
 	case EventKeyboard::KeyCode::KEY_W:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, 50) + visibleSize)) {
-			mapPosition += Vec2(0, -50);
-			_tiledMap->setPosition(mapPosition);
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, 5))) {
+			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(0, -5)));
+			if (_tiledMap->getPosition().y <= visibleSize.height - size.height + 10) {
+			_tiledMap->stopAllActions();
+			}
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_A:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(-50, 0))) {
-			mapPosition += Vec2(50, 0);
-			_tiledMap->setPosition(mapPosition);
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(-5, 0))) {
+			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(5, 0)));
+			if (_tiledMap->getPosition().x >= -10) {
+			_tiledMap->stopAllActions();
+			}
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_S:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, -50))) {
-			mapPosition += Vec2(0, 50);
-			_tiledMap->setPosition(mapPosition);
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, -5))) {
+			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(0, 5)));
+			if (_tiledMap->getPosition().y >= -10) {
+			_tiledMap->stopAllActions();
+			}
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_D:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(50, 0) + visibleSize)) {
-			mapPosition += Vec2(-50, 0);
-			_tiledMap->setPosition(mapPosition);
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(5, 0))) {
+			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(-5, 0)));
+			if (_tiledMap->getPosition().x <= visibleSize.width - size.width + 10) {
+			_tiledMap->stopAllActions();
+			}
 		}
 		break;
-	case EventKeyboard::KeyCode::KEY_SPACE:
-		_tiledMap->setPosition(_unitManager->getMyBasePos());
 	default:
 		break;
-
 	}
 }
 
@@ -470,9 +550,7 @@ void GamingScene::updateBuildingMenu(float f)
 		unschedule(schedule_selector(GamingScene::updateBuildingMenu));
 	}
 
-	//only one base
-
-	if (_menuSpriteLayer->getChildByTag(BASE_TAG)) {
+	if (_menuSpriteLayer->getChildByTag(BASE_TAG) && !_unitManager->getMyBaseId()) {
 		if (!_money->checkMoney(2500)) {
 			_menuSpriteLayer->getChildByTag(BASE_TAG)->setOpacity(100);
 		}

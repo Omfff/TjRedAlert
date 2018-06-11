@@ -1,25 +1,47 @@
+
 #pragma once
 #include"cocos2d.h"
 #include"Unit.h"
 
-//class UnitManager;
+
 class Base :public BuildingUnit
 {
 public:
-	void startProduce();
 	//CREATE_FUNC(Base);
-	void update(float f);
 	static Base* Base::create(const std::string& filename);
 	bool init( CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id=0);
-	bool getDamage(int hurt);
+	//bool getDamage(int hurt);
 };
+
 class PowerPlant :public BuildingUnit
 {
 public:
-	void startProduce();
-	void update(float f);
+	//void update(float f);
 	static PowerPlant*PowerPlant::create(const std::string& filename);
-	bool init(CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id = 0);
-	bool getDamage(int hurt);//½¨ÖşÎïµÄgetdamageº¯Êı¿ÉÒÔÓÃº¯ÊıÄ£°åÀ´Ğ´
+	//bool init(CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id = 0);
+	//bool getDamage(int hurt);//å»ºç­‘ç‰©çš„getdamageå‡½æ•°å¯ä»¥ç”¨å‡½æ•°æ¨¡æ¿æ¥å†™
 
 };
+
+class OreRefinery :public BuildingUnit
+{
+public:
+	static OreRefinery * OreRefinery::create(const std::string& filename);
+	//bool getDamage(int hurt);//å»ºç­‘ç‰©çš„getdamageå‡½æ•°å¯ä»¥ç”¨å‡½æ•°æ¨¡æ¿æ¥å†™
+};
+
+
+class Barracks :public BuildingUnit
+{
+public:
+	GridVec2 findEmptyPosToProduceSolider();
+	static Barracks * Barracks::create(const std::string & filename);
+};
+
+class WarFactory :public BuildingUnit
+{
+public:
+	GridVec2 findEmptyPosToProduceTank();
+	static WarFactory * WarFactory::create(const std::string &filename);
+};
+

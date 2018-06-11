@@ -1,7 +1,7 @@
 #include"cocos2d.h"
 #include"Unit.h"
 #include<cmath>
-//#include"Buliding.h"
+//#include"Building.h"
 #include"UnitManager.h"
 USING_NS_CC;
 Unit* Unit::create(const std::string& filename)
@@ -49,7 +49,7 @@ bool BuildingUnit::init( CampTypes camp,UnitTypes buildingType,GridVec2 point, T
 {
 	setID(id);
 	setCamp(camp);
-	setBuildingType(buildingType);
+	setUnitType(buildingType);
 	setUnderAttack(false);
 	setHealth(HEALTH[buildingType]);
 	setMoneyCost(COST[buildingType]);
@@ -77,13 +77,13 @@ bool BuildingUnit::setPositionInGridMap(GridRect rectPos, GridMap * map)
 	else
 		return false;
 }
-void BuildingUnit::initHpBar(UnitTypes type)
+void Unit::initHpBar(UnitTypes type)
 {
 	hpBGSprite = Sprite::create(BUILDING_BG_BAR[type]);
 	hpBGSprite->setPosition(Point(this->getContentSize().width / 2,
 		this->getContentSize().height));
 	hpBGSprite->setScaleX(this->getContentSize().width/hpBGSprite->getContentSize().width );
-	hpBGSprite->setScaleY(2.0);
+	hpBGSprite->setScaleY(1.5);
 	this->addChild(hpBGSprite);
 
 	_hpBar = LoadingBar::create(BUILDING_HP_BAR[type]);
@@ -106,7 +106,7 @@ void Unit::displayHpBar()
 }
 void BuildingUnit::deleteUnit()
 {
-	_tiledMap->removeChild(this);
+	//_tiledMap->removeChild(this);
 }
 bool ExplosionEffect::init()
 {
@@ -131,7 +131,7 @@ void Unit::removeFromMap()
 	explosion_effect->setPosition(this->getPosition());
 	getParent()->addChild(explosion_effect, 20);
 	//unschedule(schedule_selector(update));
-	_battleMap->unitCoordRemove(_id);
+	_battleMap->unitCoordRemove(_id,_unitRect);
 	//_tiledMap->removeChild(this, 1);
 }
 bool Unit::getDamage(int hurt)
@@ -139,8 +139,8 @@ bool Unit::getDamage(int hurt)
 	setCurrentHp(_currentHp - hurt);
 	if (_currentHp <= 0)
 	{
-		//unschedule(schedule_selector(Base::update));
 		_hpBar->setPercent(0);
+		//removeFromMap();
 		return false;
 	}
 	else
@@ -150,15 +150,11 @@ bool Unit::getDamage(int hurt)
 		return true;
 	}
 }
-bool FightUnit::init(GridVec2 coord, CampTypes camp, UnitTypes types,
- TMXTiledMap* map, GridMap * gridmap,int id)
+bool FightUnit::init(CampTypes camp, UnitTypes types, GridVec2 coord,
+	TMXTiledMap* map, GridMap * gridmap, int id)
 {
 	int type = types;
 	type -= 5;
-	if (!Sprite::init())
-	{
-		return false;
-	}
 	setID(id);
 	setCamp(camp);
 	setHealth(FIGHTER_HEALTH[type]);
@@ -167,11 +163,11 @@ bool FightUnit::init(GridVec2 coord, CampTypes camp, UnitTypes types,
 	setUnitSize(FIGHTER_SIZES[type]);
 	_battleMap = gridmap;
 	_tiledMap = map;
-	int x = coord._x / _tiledMap->getTileSize().width;
-	int y = ((_tiledMap->getMapSize().height * _tiledMap->getTileSize().height) - coord._y) / _tiledMap->getTileSize().height;
+	int x = coord._x / 32.0;
+	int y = coord._y / 32.0;
 	setUnitCoord(GridVec2(x, y));
 	setUnitRect(GridRect(_unitCoord, _unitSize));
-	setFighterType(types);
+	setUnitType(types);
 	setAttacking(false);
 	setMoveSpeed(UNIT_MOVE_SPEED[type]);
 	setAttackSpeed(ATTACK_SPEED[type]);
@@ -181,7 +177,8 @@ bool FightUnit::init(GridVec2 coord, CampTypes camp, UnitTypes types,
 	setManualAttackScope(MANUAL_ATTACK_RANGE[type]);
 	setAutoAttackScope(AUTO_ATTACK_RANGE[type]);
 
-	setPositionInGirdMap(_unitRect,id);
+	setPositionInGirdMap(_unitRect, id);
+	initHpBar(UnitTypes(type));
 	//_tiledMap->addChild(this, 1);
 	return true;
 }
@@ -205,15 +202,21 @@ void FightUnit::tryToFindPath()
 		_destination.x = destination._x * 32 + 16;
 		_destination.y = destination._y * 32 + 16;
 	}
-	//std::vector<GridVec2> gridPath = findPath(destination);
+	_gridPath = findPath(destination);
 
-	
 }
 
-/*std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination) const
+std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination) const
 {
-	PathFinder pathFinder();
-}*/
+	std::vector<std::vector<int>> & gridMap = _battleMap->_findPathMap;
+	GridVec2 start = getUnitCoord();
+
+	PathFinder pathFinder(gridMap, start._x, start._y, destination._x, destination._y);
+	pathFinder.searchPath();
+	pathFinder.generatePath();
+	std::vector<GridVec2> gridPath = pathFinder.getPath();
+	return gridPath;
+}
 
 void FightUnit::searchNearEnemy()
 {
@@ -234,7 +237,8 @@ void FightUnit::searchNearEnemy()
 }
 void FightUnit::attack()
 {
-
+	shootBullet();
+	
 }
 /*void FightUnit::autoAttack()
 {
@@ -249,14 +253,24 @@ void FightUnit::move()
 		_destination = GridVec2(destination._x, destination._y);
 	}*/
 	//产生移动的消息
+	for (vector<GridVec2>::iterator it = _gridPath.begin(); it != _gridPath.end() - 1; ++it) {
+		int distance = abs((*it)._x - (*(it + 1))._x) + abs((*it)._y - (*(it + 1))._y);
+		int moveTime;
+		if (distance == 2) {
+			moveTime = 140;
+		}
+		else {
+			moveTime = 100;
+		}
+		auto actionMove = MoveTo::create(moveTime, _destination);
+		this->runAction(actionMove);
+		_battleMap->unitLeavePosition(this->getUnitRect());
+		setUnitCoord(*(_gridPath.end() - 1));
+		_unitRect._oriPoint = _unitCoord;
+		_battleMap->unitCoordStore(_id, _unitRect);
+	}
 	
-	float moveTime = sqrt(pow((_destination.x/32.0 - _unitCoord._x), 2) +
-		pow(_destination.y/32.0 - _unitCoord._y, 2))/_moveSpeed;
-	auto actionMove = MoveTo::create(moveTime, _destination);
-	this->runAction(actionMove);
-	_battleMap->unitLeavePosition(_unitRect);
-	setUnitCoord(GridVec2(float(_destination.x/32.0),float(_destination.y/32.0)));
-	_unitRect._oriPoint = _unitCoord;
-	_battleMap->unitCoordStore(_id,_unitRect);
-	
+}
+void FightUnit::shootBullet()
+{
 }
