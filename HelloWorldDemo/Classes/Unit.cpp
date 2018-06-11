@@ -56,6 +56,7 @@ bool BuildingUnit::init( CampTypes camp,UnitTypes buildingType,GridVec2 point, T
 	setPowerCost(POWER[buildingType]);
 	setMoneyProduce(MONEY_PRODUCE[buildingType]);
 	setUnitSize(SIZES[buildingType]);
+	setProducingState(0);
 	_battleMap = gridmap;
 	_tiledMap = map;
 	int x = point._x / 32.0;//_tiledMap->getTileSize().width;
@@ -172,14 +173,22 @@ bool FightUnit::init(CampTypes camp, UnitTypes types, GridVec2 coord,
 	setAttackSpeed(ATTACK_SPEED[type]);
 	setAttackForce(ATTACK_FORCE[type]);
 	setAttackID(0);
+	setAutoAttack(true);
+	setEnermyId(0);
 	//setAtkIDPosition()
 	setManualAttackScope(MANUAL_ATTACK_RANGE[type]);
 	setAutoAttackScope(AUTO_ATTACK_RANGE[type]);
-
-	setPositionInGirdMap(_unitRect, id);
+	setPositionInGridMap(_unitRect, gridmap);
 	initHpBar(UnitTypes(type));
 	//_tiledMap->addChild(this, 1);
 	return true;
+}
+bool FightUnit::setPositionInGridMap(GridRect rectPos, GridMap * map)
+{
+	if (map->unitCoordStore(_id, rectPos))
+		return true;
+	else
+		return false;
 }
 bool FightUnit::setPositionInGirdMap(GridRect rectPos, int id)
 {
@@ -188,22 +197,35 @@ bool FightUnit::setPositionInGirdMap(GridRect rectPos, int id)
 	else
 		return false;
 }
-void FightUnit::searchNearEnemy()
+bool FightUnit::searchNearEnemy()
 {
-	const auto & autoAtkRect = GridRect(GridVec2((_unitCoord._x - _autoAttackScope._width )/ 2, (_unitCoord._y - _autoAttackScope._height) / 2 ),
+	auto  autoAtkRect = GridRect(GridVec2(_unitCoord._x - _autoAttackScope._width/ 2, _unitCoord._y - _autoAttackScope._height/ 2 ),
 		_autoAttackScope);
-	const auto & unitIDs = _battleMap->getUnitIdAt(autoAtkRect);
-	for (auto itsID : unitIDs)
-	{
-		int camp=_unitManager->getUnitCamp(itsID);
-		if (camp!= 0 && camp != _camp)
+	auto  unitIDs = _battleMap->getUnitIdAt(autoAtkRect);
+	int distance = 0;
+	int minDistance = 10000;
+	int mark = 0;
+	if(unitIDs.empty()!=true)
+		for (auto itsID : unitIDs)
 		{
-			_attackID = itsID;
-			_autoAttack = true;
-			return;
+			int camp=_unitManager->getUnitCamp(itsID);
+			if (camp!= 0 && camp != _camp)//&&itsID!=_id )//
+			{
+				GridVec2 enermyPos=_unitManager->getUnitPos(itsID);
+				distance = (enermyPos._x - _unitCoord._x)*(enermyPos._x - _unitCoord._x) +
+							(enermyPos._y - _unitCoord._y)*(enermyPos._y - _unitCoord._y);
+				if (distance < minDistance)
+				{
+					_attackID = itsID;
+					mark = 1;
+					//_autoAttack = true;
+				}
+			}
 		}
-	}
-	return;
+	if (mark == 1)
+		return true;
+	else
+		return false;
 }
 void FightUnit::attack()
 {
@@ -228,6 +250,38 @@ void FightUnit::move()
 	_unitRect._oriPoint = _unitCoord;
 	_battleMap->unitCoordStore(_id,_unitRect);
 	
+}
+void BuildingUnit::startProduceUnit(UnitTypes proUnitType)
+{
+	setProducingState(1);
+	_produceProcess = 0;
+	_producingUnitType = proUnitType;
+	if (_producingUnitType == GI)
+		_produceTime = PRODUCEGITIME;
+	else if (_producingUnitType == ATTACKDOG)
+		_produceTime = PRODUCEATTACKDOGTIME;
+	else
+		_produceTime = PRODUCETANKTIME;
+	this->schedule(schedule_selector(BuildingUnit::produceUpdate));
+}
+void BuildingUnit::stopProduceUnit()
+{
+	this->unschedule(schedule_selector(BuildingUnit::produceUpdate));
+}
+void BuildingUnit::produceUpdate(float ft)
+{
+	if (_producingState == 1)
+	{
+		if (++_produceProcess >= _produceTime)
+		{
+			_producingState = 0;
+			_produceProcess = 0;
+			GridVec2 producePos = findEmptyPosToProduce();
+			_unitManager->creatProduceMessage(_producingUnitType, GridVec2(producePos._x / 32, producePos._y / 32));
+			_unitManager->creatUnit(_unitManager->getPlayerCamp(), _producingUnitType, producePos);
+			stopProduceUnit();
+		}
+	}
 }
 void FightUnit::shootBullet()
 {

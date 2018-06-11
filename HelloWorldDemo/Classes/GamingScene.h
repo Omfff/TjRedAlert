@@ -11,7 +11,7 @@
 #include"ManufactureMenu.h"
 #include"Building.h"
 
-
+USING_NS_CC;
 class GamingScene : public cocos2d::Layer
 {
 public:

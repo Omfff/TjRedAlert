@@ -88,12 +88,12 @@ WarFactory *  WarFactory::create(const std::string& filename)
 
 	return nullptr;
 }
-GridVec2 Barracks::findEmptyPosToProduceSolider()
+GridVec2 Barracks::findEmptyPosToProduce()
 {
 	GridVec2 tempPos = _battleMap->getEmptyPointNearby(_unitCoord);
 	return GridVec2(tempPos._x * 32, tempPos._y * 32);
 }
-GridVec2 WarFactory::findEmptyPosToProduceTank()
+GridVec2 WarFactory::findEmptyPosToProduce()
 {
 	GridVec2 tempPos = _battleMap->getEmptyPointNearby(_unitCoord);
 	return GridVec2(tempPos._x * 32, tempPos._y * 32);

@@ -1,4 +1,5 @@
 
+
 #include"GamingScene.h"
 
 USING_NS_CC;
@@ -306,14 +307,17 @@ bool GamingScene::init()
 			Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
 
 			UnitTypes unittype = UnitTypes(target->getTag() - 101);
-
-			_unitManager->_fighterProduceSeq.push_back(unittype);
-			if (int(unittype) == 5)
-				_unitManager->setWaitingGINum(_unitManager->getWaitingGINum() + 1);
-			else if (int(unittype) == 6)
-				_unitManager->setWaitingAttackDogNum(_unitManager->getWaitingAttackDogNum() + 1);
-			else
-				_unitManager->setWaitingTankNum(_unitManager->getWaitingTankNum() + 1);
+			if (_money->checkMoney(COST[unittype]))
+			{
+				_unitManager->_fighterProduceSeq.push_back(unittype);
+				_money->costMoney(COST[unittype]);
+				if (int(unittype) == 5)
+					_unitManager->setWaitingGINum(_unitManager->getWaitingGINum() + 1);
+				else if (int(unittype) == 6)
+					_unitManager->setWaitingAttackDogNum(_unitManager->getWaitingAttackDogNum() + 1);
+				else
+					_unitManager->setWaitingTankNum(_unitManager->getWaitingTankNum() + 1);
+			}
 			/*if (!_gridMap->checkRectPosition(rect)) {
 			_unitManager->creatProduceMessage(unittype, positionInMap);
 			auto tempUnit = _unitManager->creatUnit(_unitManager->getPlayerCamp(), unittype, positionInMap);
@@ -515,3 +519,4 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 
 
 }
+

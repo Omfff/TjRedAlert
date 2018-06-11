@@ -68,6 +68,13 @@ GridMap::GridMap():_worldRect(0, 0, _MAP_WIDTH, _MAP_HEIGHT)
 	for (auto & e : _barrierMap)
 		for (auto & ie : e)
 			ie = 0;
+	_ladderRect1 = GridRect(13,5,4,5);
+	_ladderRect2 = GridRect(107,5,4,5);
+	_ladderRect3 = GridRect(107,51,4,5);
+	_ladderRect4 = GridRect(13,51,4,5);
+	for (int i = 0; i < 125; i++)
+		for (int j = 0; j < 62; j++)
+			_findPathMap[i][j] = 0;
 }
 bool GridMap::unitCoordStore(int unitId, const GridVec2 &position)
 {
@@ -94,22 +101,31 @@ bool GridMap::unitCoordStore(int unitId, const GridRect & rect)
 void GridMap::unitPositionOccupy(int unitId, const GridVec2& position)
 {
 	_barrierMap[position._x][position._y] = unitId;
+	_findPathMap[position._x][position._y] = 1;
 }
 void GridMap::unitPositionOccupy(int unitId, const GridRect & rect)
 {
 	for (int x = rect._oriPoint._x; x < rect._oriPoint._x + rect._dimen._width; x++)
 		for (int y = rect._oriPoint._y; y < rect._oriPoint._y + rect._dimen._height; y++)
+		{
 			_barrierMap[x][y] = unitId;
+			_findPathMap[x][y] = 1;
+		}
 }
 void GridMap::unitLeavePosition(int unitId, const GridVec2& position)
 {
 	_barrierMap[position._x][position._y] = 0;
+	_findPathMap[position._x][position._y] = 0;
+
 }
 void GridMap::unitLeavePosition(const GridRect & rect)
 {
 	for (int x = rect._oriPoint._x; x < rect._oriPoint._x + rect._dimen._width; x++)
 		for (int y = rect._oriPoint._y; y < rect._oriPoint._y + rect._dimen._height; y++)
+		{
 			_barrierMap[x][y] = 0;
+			_findPathMap[x][y] = 0;
+		}
 }
 void GridMap::unitCoordRemove(int unitId,GridRect unitRect )
 {
@@ -126,6 +142,27 @@ bool GridMap::checkPointPosition(const GridVec2 & point)const
 			return true;
 		else
 			return false;
+	else
+		return true;
+}
+bool GridMap::checkBuildingRectPosition(const GridRect & rect)const
+{
+	if (_worldRect.insideRect(rect))
+	{
+		if (rect.intersectsRect(_ladderRect1) || rect.intersectsRect(_ladderRect2)
+			|| rect.intersectsRect(_ladderRect3) || rect.intersectsRect(_ladderRect4))
+			return true;
+
+		int xEnd = rect._oriPoint._x + rect._dimen._width;
+		int yEnd = rect._oriPoint._y + rect._dimen._height;
+		for (int xBegin = rect._oriPoint._x; xBegin < xEnd; xBegin++)
+			for (int yBegin = rect._oriPoint._y; yBegin <yEnd; yBegin++)
+			{
+				if (_barrierMap[xBegin][yBegin] != 0)
+					return true;
+			}
+		return false;
+	}
 	else
 		return true;
 }
@@ -153,8 +190,10 @@ int GridMap::getUnitIdAt(const GridVec2& position)const
 set<int> GridMap::getUnitIdAt(const GridRect & range)const
 {
 	set<int> idGroup;
-	for (int xBegin = range._oriPoint._x; xBegin <= range._oriPoint._x + range._dimen._width; xBegin++)
-		for (int yBegin = range._oriPoint._y; yBegin <=range._oriPoint._y + range._dimen._height; yBegin++)
+	int xEnd = (range._oriPoint._x + range._dimen._width) > _MAP_WIDTH ? _MAP_WIDTH : (range._oriPoint._x + range._dimen._width);
+	int yEnd = (range._oriPoint._y + range._dimen._height) > _MAP_HEIGHT ? _MAP_HEIGHT : (range._oriPoint._y + range._dimen._height);
+	for (int xBegin = range._oriPoint._x; xBegin <=xEnd; xBegin++)
+		for (int yBegin = range._oriPoint._y; yBegin <=yEnd; yBegin++)
 		{
 			if (_barrierMap[xBegin][yBegin] != 0&& _barrierMap[xBegin][yBegin] != _NO_PASS)
 			{
@@ -244,6 +283,7 @@ void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 				gmap->addChild(barrier);
 
 				gmap->_barrierMap[tileCoord.x][62-tileCoord.y-1] = _NO_PASS;
+				gmap->_findPathMap[(int)tileCoord.x][int(62 - tileCoord.y - 1)] = 1;
 				
 			}
 		}

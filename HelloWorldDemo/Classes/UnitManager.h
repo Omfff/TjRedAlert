@@ -1,3 +1,4 @@
+
 #ifndef _UNITMANAGER_H_
 #define _UNITMANAGER_H_
 
@@ -31,7 +32,10 @@ class UnitManager :public Node
 	map<int,int> _warFactoryId;
 	map<int, int>newAttackUnit;
 	map<int, int>attackingUnit;
-	
+	map<vector<UnitTypes>::iterator, UnitTypes> _producingFightUnit;
+	map<int, vector<UnitTypes>::iterator> _buildingProducingIte;
+	map<int, int> _produceTime;
+	vector<vector<UnitTypes>::iterator>_deleteFighterProduceSeqIte;
 public:
 	vector<UnitTypes>_fighterProduceSeq;
 	map<int, Unit *>_unitIdMap;
@@ -60,5 +64,6 @@ public:
 
 
 #endif // !_UNITMANAGER_H
+
 
 

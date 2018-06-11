@@ -5,12 +5,18 @@ Solider* Solider::create(const std::string& filename)
 	if (ret && ret->initWithFile(filename))
 	{
 		ret->autorelease();
-
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
 
 	return nullptr;
+}
+bool Solider::init(CampTypes camp, UnitTypes types, GridVec2 coord,
+	TMXTiledMap* map, GridMap * gridmap, int id)
+{
+	FightUnit::init(camp, types, coord, map, gridmap,id);
+	this->schedule(schedule_selector(Solider::autoAttack));
+	return true;
 }
 Tank*Tank::create(const std::string& filename)
 {
@@ -76,6 +82,50 @@ void Solider::startAttackUpdate()
 void Solider::stopAttackUpdate()
 {
 	this->unschedule(schedule_selector(Solider::attackUpdate));
+}
+void Tank::autoAttack(float fd)
+{
+	if (_autoAttack == true && _underAttack == true && _attackID == 0)
+	{
+		_attackID = _enermyId;
+		_unitManager->attackingUnit[_id] = _enermyId;
+		startAttackUpdate();
+		//if(_unitManager->_unitIdMap.count(_enermyId)>0)
+		//_unitManager->newAttackUnit[_id] = _enermyId;
+	}
+	else
+		if (_autoAttack == true && _attackID == 0)
+		{
+			if (searchNearEnemy())
+			{
+				_unitManager->newAttackUnit[_id] = _attackID;
+				//_unitManager->attackingUnit[_id] = _attackID;
+				//startAttackUpdate();
+			}
+
+		}
+}
+void Solider::autoAttack(float fd)
+{
+	if (_autoAttack == true && _underAttack == true && _attackID == 0)
+	{
+		_attackID = _enermyId;
+		_unitManager->attackingUnit[_id] = _enermyId;
+		startAttackUpdate();
+		//if(_unitManager->_unitIdMap.count(_enermyId)>0)
+			//_unitManager->newAttackUnit[_id] = _enermyId;
+	}
+	else 
+		if (_autoAttack == true && _attackID == 0)
+		{
+			if (searchNearEnemy())
+			{
+				_unitManager->newAttackUnit[_id] = _attackID;
+				//_unitManager->attackingUnit[_id] = _attackID;
+				//startAttackUpdate();
+			}
+
+		}
 }
 /*void Solider::init(CampTypes camp, UnitTypes fightType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id)
 {

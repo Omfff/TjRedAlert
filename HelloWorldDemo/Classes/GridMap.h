@@ -69,9 +69,15 @@ protected:
 	//储存各单位的网格坐标
 	vector <vector<int>> _barrierMap;
 	//存储网格地图上每个格子的状态 0为空 其余的代表unit的id或者地图障碍物体
+	
 	GridRect _worldRect;
 	//（0，0） width=125 height=62
+	GridRect _ladderRect1;
+	GridRect _ladderRect2;
+	GridRect _ladderRect3;
+	GridRect _ladderRect4;
 public:
+	int _findPathMap[125][62];
 	CREATE_FUNC(GridMap);
 	GridMap();
 	//初始化
@@ -102,6 +108,8 @@ public:
 	//获取point附近大小为size且为空的区域的rect
 	friend void setCollisionPos(TMXTiledMap* map,GridMap * gmap);
 	friend Vec2 tileCoordFromPosition(Vec2 pos, TMXTiledMap* map);
+	bool checkBuildingRectPosition(const GridRect & rect)const;
+
 };
 	
 
