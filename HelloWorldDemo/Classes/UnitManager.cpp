@@ -6,6 +6,7 @@
 #include"Fighter.h"
 #include<vector>
 #include<string>
+
 USING_NS_CC;
 using namespace std;
 #define MESSAGECRT GameMessage::Cmd::GameMessage_Cmd_CRT 
@@ -32,7 +33,6 @@ void UnitManager::updateUnitState()
 				int id = receiveMessage.unit_id1();
 				GridVec2  pos = GridVec2(receiveMessage.position().x(), receiveMessage.position().y());
 				Unit * newUnit = creatUnit( CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()),pos, receiveMessage.unit_id1());
-				//_unitIdMap[id] = newUnit;
 			}
 			else if (receiveMessage.cmd() == MESSAGEMOV)
 			{
@@ -301,7 +301,7 @@ void UnitManager::unitAttackUpdate()
 			_unitIdMap[battleUnit.first]->setAttackID(battleUnit.second);
 			_unitIdMap[battleUnit.first]->startAttackUpdate();
 			_unitIdMap[battleUnit.second]->setEnermyId(battleUnit.first);//测试自动攻击
-			_unitIdMap[battleUnit.second]->setUnderAttack(true);
+			_unitIdMap[battleUnit.second]->setUnderAttack(true);//测试
 			//this->schedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate),0.5f);
 		}
 		newAttackUnit.clear();

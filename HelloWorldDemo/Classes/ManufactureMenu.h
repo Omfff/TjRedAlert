@@ -2,7 +2,8 @@
 #define __MANUFACTURE_MENU_H__
 
 #include"cocos2d.h"
-
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 USING_NS_CC;
 
 class ManufactureMenu :public cocos2d::Menu

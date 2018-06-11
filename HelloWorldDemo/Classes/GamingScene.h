@@ -10,8 +10,14 @@
 #include"UnitManager.h"
 #include"ManufactureMenu.h"
 #include"Building.h"
+<<<<<<< HEAD
 
 USING_NS_CC;
+=======
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
+
+>>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 class GamingScene : public cocos2d::Layer
 {
 public:

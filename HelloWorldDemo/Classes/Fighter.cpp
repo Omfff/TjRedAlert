@@ -8,7 +8,6 @@ Solider* Solider::create(const std::string& filename)
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
-
 	return nullptr;
 }
 bool Solider::init(CampTypes camp, UnitTypes types, GridVec2 coord,

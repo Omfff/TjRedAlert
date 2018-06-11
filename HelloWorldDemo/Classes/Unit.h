@@ -6,7 +6,12 @@
 #include "ui/UILoadingBar.h"
 #include "UnitManager.h"
 #include"SystemHeader.h"
+<<<<<<< HEAD
 
+=======
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
+>>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 USING_NS_CC;
 using namespace ui;
 

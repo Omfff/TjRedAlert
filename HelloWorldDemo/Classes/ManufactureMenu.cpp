@@ -71,16 +71,19 @@ void ManufactureMenu::setBuildingCallBack(std::function<void(Ref*)> callBack)
 void ManufactureMenu::setArmyCallBack(std::function<void(Ref*)> callBack)
 {
 	_armyButton->setCallback(callBack);
+
 }
 
 void ManufactureMenu::setGICallBack(std::function<void(Ref*)> callBack)
 {
 	_GIButton->setCallback(callBack);
+	SimpleAudioEngine::getInstance()->playEffect("Music/Unit training.wav");
 }
 
 void ManufactureMenu::setAttackDogCallBack(std::function<void(Ref*)> callBack)
 {
 	_attackDogButton->setCallback(callBack);
+	
 }
 
 void ManufactureMenu::setTankCallBack(std::function<void(Ref*)> callBack)
@@ -91,24 +94,29 @@ void ManufactureMenu::setTankCallBack(std::function<void(Ref*)> callBack)
 void ManufactureMenu::setBaseCallBack(std::function<void(Ref*)> callBack)
 {
 	_baseButton->setCallback(callBack);
+	
 }
 
 void ManufactureMenu::setPowerPlantCallBack(std::function<void(Ref*)> callBack)
 {
 	_powerPlantButton->setCallback(callBack);
+	
 }
 
 void ManufactureMenu::setBarrackCallBack(std::function<void(Ref*)> callBack)
 {
 	_barrackButton->setCallback(callBack);
+	
 }
 
 void ManufactureMenu::setWarFactoryCallBack(std::function<void(Ref*)> callBack)
 {
 	_warFactoryButton->setCallback(callBack);
+	
 }
 
 void ManufactureMenu::setOreRefineryCallBack(std::function<void(Ref*)> callBack)
 {
 	_oreRefineryButton->setCallback(callBack);
+	
 }

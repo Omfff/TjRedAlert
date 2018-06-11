@@ -29,7 +29,7 @@ bool GameMenu::init() {
 		visibleSize.height-Title->getContentSize ().height));
 	this->addChild(Title,1);
 
-	auto Back = Sprite::create("red alert.png");
+	auto Back = Sprite::create("scenes/red alert.png");
 	Back->setAnchorPoint(Vec2::ZERO);
 	this->addChild(Back);
 
@@ -114,6 +114,7 @@ void GameMenu::menuItemStartCallback(Ref*pSender)
 	auto gamingScene = GamingScene::createScene();
 	auto transition = TransitionFadeTR::create(1.0, gamingScene);
 	Director::getInstance()->pushScene(transition);
+
 
 	/*auto PreLoadScene = HelloWorld::createScene();
 	auto transition = TransitionFadeTR::create(1.0, PreLoadScene);
