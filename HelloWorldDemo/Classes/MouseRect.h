@@ -22,7 +22,9 @@ public:
 
 	//covert _touchEndToGL to _touchEndToMap by passing the mapPonit
 	void setTouchEndToMap(cocos2d::Point mapPoint);
+
 	Rect getMouseRect();
+
 	//update mouse renctangle by changing touchEndToMap
 	void update(float f) override;
 	

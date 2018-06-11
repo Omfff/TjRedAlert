@@ -1,20 +1,19 @@
-
 #ifndef __SYSTEM_HEADER_H__
 #define __SYSTEM_HEADER_H__
 
 //Money.h
 const int INITIAL_MONEY = 10000;
-const int MONEY_IN_PERIOD = 100;
+const int MONEY_IN_PERIOD = 0;
 const int PERIOD = 20;
 
 
 //GamingScene.cpp --void scroll()
-const int BOX_EDGE_WIDTH_SMALL = 20;
-const int BOX_EDGE_WIDTH = 40;
-const int BOX_EDGE_HEIGHT_SMALL = 20;
-const int BOX_EDGE_HEIGHT = 40;
+const int BOX_EDGE_WIDTH_SMALL = 30;
+const int BOX_EDGE_WIDTH = 60;
+const int BOX_EDGE_HEIGHT_SMALL = 30;
+const int BOX_EDGE_HEIGHT = 60;
 
-const int SCROLL_DISTANCE = 4;
+const int SCROLL_DISTANCE = 6;
 
 //GamingScene.cpp--bool init()--manufacturemenu
 enum {
@@ -22,7 +21,10 @@ enum {
 	POWER_PLANT_TAG,
 	BARRACK_TAG,
 	WAR_FACTORY_TAG,
-	ORE_REFINERY_TAG
+	ORE_REFINERY_TAG,
+	GI_TAG,
+	ATTACK_DOG_TAG,
+	TANK_TAG
 };
 
 typedef enum {

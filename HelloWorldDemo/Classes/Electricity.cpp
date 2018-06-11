@@ -14,11 +14,11 @@ void Electricity::updateLabel()
 {
 	_electricityString = std::to_string(_electricity);
 	_usedElectricityString = std::to_string(_usedElectricity);
-	_showElectricity = _usedElectricityString+ " / "+_electricityString ;
+	_showElectricity = _usedElectricityString + " / " + _electricityString;
 	setString(_showElectricity);
 }
 
-bool Electricity::checkElectricity(int cost)
+bool Electricity::checkElectricity(int cost) const
 {
 	return (_electricity - _usedElectricity >= cost);
 }
