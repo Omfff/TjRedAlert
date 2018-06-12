@@ -38,6 +38,16 @@ public:
 	//get end point, and call select function
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)override;
 
+	virtual void update(float dt);
+	virtual void update1(float dt);
+	virtual void update2(float dt);
+	
+	virtual void hideloadbar();
+
+	virtual void LoadingBar();
+	virtual void LoadingBar(int i);
+	virtual void LoadingBar(float j);
+
 
 	CREATE_FUNC(GamingScene);
 
@@ -45,8 +55,11 @@ private:
 
 
 	cocos2d::TMXTiledMap* _tiledMap;
-	
-
+	//½ø¶ÈÌõ
+	float cu;
+	int count = 0;
+	Sprite * progressbgSprite = nullptr;
+	Sprite * progressSprite = nullptr;
 
 	//int _playerID;
 	Unit * unit=nullptr;

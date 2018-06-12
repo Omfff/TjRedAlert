@@ -4,6 +4,8 @@
 
 USING_NS_CC;
 
+int i;//记录制造坦克的个数
+float j;//记录制造士兵的个数
 Scene* GamingScene::createScene()
 {
 	auto scene = Scene::create();
@@ -195,11 +197,13 @@ bool GamingScene::init()
 			return false;
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Build.wav");//音效
+
 		buildingAttachedToMouse->onTouchMoved = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
 			target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
 		};
+
 		buildingAttachedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
@@ -228,6 +232,7 @@ bool GamingScene::init()
 			}
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
+
 		buildingAttachedToMouse->setSwallowTouches(true);
 
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse, base);
@@ -302,6 +307,7 @@ bool GamingScene::init()
 			return false;
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Unit training.wav");//音效
+
 		armyAttatchedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
@@ -330,6 +336,7 @@ bool GamingScene::init()
 
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Unit ready.wav");//音效
+
 		armyAttatchedToMouse->setSwallowTouches(true);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse, GI);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse->clone(), attackDog);
@@ -519,4 +526,98 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 
 
 }
+//建筑的进度条
+void GamingScene::LoadingBar() {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
 
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
+
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->scheduleUpdate();
+}
+//坦克的进度条
+void GamingScene::LoadingBar(int i) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
+
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->schedule(schedule_selector(GamingScene::update1), 0, 500 * i, 0.5);
+}
+//士兵的进度条
+void GamingScene::LoadingBar(float j) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
+
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->schedule(schedule_selector(GamingScene::update2), 0, 200 * j, 0.5);
+}
+//建筑类
+void GamingScene::update(float dt) {
+	cu = cu + 0.1f;//0.1（17s)建筑 0.2（8s)坦克 0.5(4s)兵，犬
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		hideloadbar();
+		cu = 0;
+	}
+}
+//坦克
+void GamingScene::update1(float dt) {
+	cu = cu + 0.2f;
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		cu = 0;
+		count++;
+		if (count == i) {
+			hideloadbar();
+			count = 0;
+		}
+	}
+}
+//士兵
+void GamingScene::update2(float dt) {
+	cu = cu + 0.5f;
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		cu = 0;
+		count++;
+		if (count == j) {
+			hideloadbar();
+			count = 0;
+		}
+	}
+}
+
+void GamingScene::hideloadbar() {
+	auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+	progressbgSprite->setVisible(false);
+	progress->setVisible(false);
+}
