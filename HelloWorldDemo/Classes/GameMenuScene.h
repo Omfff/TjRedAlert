@@ -2,12 +2,16 @@
 #define  _GameMenu_Scene_H_
 
 #include "cocos2d.h"
-
+#include "SimpleAudioEngine.h"
+#include "AudioControlScene.h"
+#include "SystemHeader.h"
+using namespace CocosDenshion;
 class GameMenu :public cocos2d::Layer
 {
 public:
 	static cocos2d::Scene* createScene();
 	virtual bool init();
+
 	void menuItemStartCallback(cocos2d::Ref*pSender);
 	void menuItemSetCallback(cocos2d::Ref*pSender);
 	void menuItemQuitCallback(cocos2d::Ref*pSender);
