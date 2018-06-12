@@ -5,13 +5,11 @@
 #include "cocos2d.h"
 #include "ui/UILoadingBar.h"
 #include "UnitManager.h"
+#include"PathFinder.h"
 #include"SystemHeader.h"
-<<<<<<< HEAD
-
-=======
 #include"SimpleAudioEngine.h"
+
 using namespace CocosDenshion;
->>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 USING_NS_CC;
 using namespace ui;
 
@@ -68,6 +66,7 @@ public:
 	UnitManager * _unitManager = nullptr;
 	LoadingBar *_hpBar=nullptr;
 	Sprite * hpBGSprite=nullptr;
+	std::vector<GridVec2> _gridPath;
 	void setUnitManager(UnitManager * uM) { _unitManager = uM; }
 	virtual bool init(CampTypes camp,UnitTypes Type,GridVec2 point, TMXTiledMap* map,GridMap *gridmap , int id=0);
 	//CC_SYNTHESIZE(GridDimen, _unitView, UnitView);
@@ -84,6 +83,16 @@ public:
 	void hideHpBar();
 	void displayHpBar();
 	virtual void deleteUnit() {}
+
+	//brief try to find path
+	virtual void tryToFindPath() {};
+
+	//find a path to the destination
+	virtual std::vector<GridVec2> findPath(const GridVec2 & destination) const { return _gridPath; };
+
+	//optimize path 
+	virtual void optimizePath() {};
+
 	virtual void move();
 	virtual void attack() {}
 	//³õÊ¼»¯ÑªÌõ
@@ -139,6 +148,16 @@ public:
 		TMXTiledMap* map, GridMap * gridmap,int id=0 );
 	//bool setPositionInTiledMap();
 	bool setPositionInGirdMap(GridRect rectPos, int id);
+	
+	//brief try to find path
+	void tryToFindPath();
+
+	//optimize path 
+	void optimizePath();
+
+	//find a path to the destination
+	std::vector<GridVec2> findPath(const GridVec2 & destination);
+
 	void move();
 	virtual void shootBullet();
 	virtual void attack();

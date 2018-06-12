@@ -10,14 +10,13 @@
 #include"UnitManager.h"
 #include"ManufactureMenu.h"
 #include"Building.h"
-<<<<<<< HEAD
+#include"SimpleAudioEngine.h"
+#include"Fighter.h"
+#include<map>
 
 USING_NS_CC;
-=======
-#include"SimpleAudioEngine.h"
 using namespace CocosDenshion;
 
->>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 class GamingScene : public cocos2d::Layer
 {
 public:
@@ -33,6 +32,10 @@ public:
 
 	//press key to change map position
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+	//release key to change _keyStatus
+	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
+
+	void keyPressedToMove(EventKeyboard::KeyCode keyCode);
 
 	//void focusOnBase();
 
@@ -43,6 +46,11 @@ public:
 	//get end point, and call select function
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)override;
 
+	//check if we can manufacture some buildings to set opacity
+	void updateBuildingMenu(float f);
+
+	//check if we can manufacture some fight units to set opacity
+	void updateArmyMenu(float f);
 
 	CREATE_FUNC(GamingScene);
 
@@ -76,7 +84,11 @@ private:
 
 	Layer* _menuSpriteLayer = nullptr;
 
-};
+	//record key status
+	map<EventKeyboard::KeyCode, bool> _keyStatus;
 
+	bool _keyUpdate = true;
+
+};
 
 #endif

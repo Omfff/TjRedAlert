@@ -77,7 +77,8 @@ protected:
 	GridRect _ladderRect3;
 	GridRect _ladderRect4;
 public:
-	int _findPathMap[125][62];
+
+	vector <vector<int>> _findPathMap;
 	CREATE_FUNC(GridMap);
 	GridMap();
 	//≥ı ºªØ

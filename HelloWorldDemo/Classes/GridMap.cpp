@@ -72,9 +72,13 @@ GridMap::GridMap():_worldRect(0, 0, _MAP_WIDTH, _MAP_HEIGHT)
 	_ladderRect2 = GridRect(107,5,4,5);
 	_ladderRect3 = GridRect(107,51,4,5);
 	_ladderRect4 = GridRect(13,51,4,5);
-	for (int i = 0; i < 125; i++)
-		for (int j = 0; j < 62; j++)
-			_findPathMap[i][j] = 0;
+
+	_findPathMap.resize(_MAP_WIDTH);
+	for (auto & e : _findPathMap)
+		e.resize(_MAP_HEIGHT);
+	for (auto & e : _findPathMap)
+		for (auto & ie : e)
+			ie = 0;
 }
 bool GridMap::unitCoordStore(int unitId, const GridVec2 &position)
 {
@@ -284,6 +288,7 @@ void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 
 				gmap->_barrierMap[tileCoord.x][62-tileCoord.y-1] = _NO_PASS;
 				gmap->_findPathMap[(int)tileCoord.x][int(62 - tileCoord.y - 1)] = 1;
+
 				
 			}
 		}

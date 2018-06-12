@@ -10,14 +10,13 @@
 #include"GridMap.h"
 #include"GameMessages.pb.h"
 #include"SystemHeader.h"
-<<<<<<< HEAD
-//#include"Building.h"
-=======
 #include"SimpleAudioEngine.h"
+
 using namespace CocosDenshion;
->>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 using namespace std;
 USING_NS_CC;
+
+
 class Unit;
 class UnitManager;
 
@@ -63,17 +62,15 @@ public:
 	friend GridRect transferRectToGridRect(const Rect & rect);
 	void unitAttackUpdate();
 	void fighterUnitProductionUpdate();
-<<<<<<< HEAD
 	Vec2 getMyBasePos();
-=======
 	virtual void onEnter();
 	virtual void onExit();
->>>>>>> e4b9d7421c74a9f7fe12c9a29ce629af6411627b
 };	
 
 
 
 #endif // !_UNITMANAGER_H
+
 
 
 

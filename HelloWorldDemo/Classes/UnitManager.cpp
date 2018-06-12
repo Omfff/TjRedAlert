@@ -40,7 +40,7 @@ void UnitManager::updateUnitState()
 				if (_unitIdMap.count(id))
 				{
 					Unit * unit = _unitIdMap[id];
-					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//è¿™ä¸ªpositionçš„å‚æ•°éƒ½æ˜¯intçš„
+					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//è¿™ä¸ªpositionçš„å‚æ•°éƒ½æ˜¯intçš?
 					unit->move();
 				}
 				else
@@ -212,31 +212,44 @@ void UnitManager::createAttackMessage(int id1, int id2, int damage)
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
 	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
+	Vec2 destination = Vec2(pos._x, pos._y);
 	if (!_selectedUnitID.empty())
 	{
-		if (idAtPos == 0||idAtPos ==_NO_PASS)
+		if (idAtPos == 0 || idAtPos == _NO_PASS)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (_unitIdMap[unitid]->getUnitType()>=5)//æ˜¯å¯ç§»åŠ¨å•ä½
+				if (_unitIdMap[unitid]->getUnitType() >= 5)//ÊÇ¿ÉÒÆ¶¯µ¥Î»
 				{
-					//å¯»è·¯
-					//äº§ç”Ÿç§»åŠ¨æ¶ˆæ¯
-					if (attackingUnit.count(unitid) > 0)
-					{
-						_unitIdMap[unitid]->stopAttackUpdate();
-						attackingUnit.erase(unitid);
-						_unitIdMap[unitid]->setAttackID(0);
+					if (destination != _unitIdMap[unitid]->getDestination()) {
+						_unitIdMap[unitid]->stopAllActions();
+
+						GridVec2 unitCoord(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32);
+						GridRect unitRect(GridRect(GridVec2(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32), GridDimen(1, 1)));
+						_unitIdMap[unitid]->_battleMap->unitLeavePosition(_unitIdMap[unitid]->getUnitRect());
+						_unitIdMap[unitid]->setUnitCoord(unitCoord);
+						_unitIdMap[unitid]->setUnitRect(unitRect);
+						_unitIdMap[unitid]->_battleMap->unitCoordStore(_unitIdMap[unitid]->getID(), unitRect);
 					}
-						//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
-					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
+
+					_unitIdMap[unitid]->setDestination(destination);
+					_unitIdMap[unitid]->tryToFindPath();
 					_unitIdMap[unitid]->move();
+					//²úÉúÒÆ¶¯ÏûÏ¢
+					/*if (attackingUnit.count(unitid) > 0)
+					{
+					_unitIdMap[unitid]->stopAttackUpdate();
+					_unitIdMap[unitid]->setAttackID(0);
+					}
+					//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
+					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
+					_unitIdMap[unitid]->move();*/
 				}
 			}
 		}
 		else
 		{
-			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ¡
+			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ?
 			{
 				/*deselectAllUnits();
 				_selectedUnitID.push_back(idAtPos);
@@ -262,23 +275,23 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 					}
 				}
 			}
-			else////é€‰æ‹©äº†æ•Œæ–¹å•ä½
+			else////Ñ¡ÔñÁËµÐ·½µ¥Î»
 			{
-				//1æ•Œæ–¹å»ºç­‘ åˆ°è¾¾ æ”»å‡»
-				//2æ•Œæ–¹å…µç§ è·Ÿè¸ª æ”»å‡»
+				//1µÐ·½½¨Öþ µ½´ï ¹¥»÷
+				//2µÐ·½±øÖÖ ¸ú×Ù ¹¥»÷
 				/*for (auto unitid : _selectedUnitID)
 				{
-					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
-					{
-						_unitIdMap[unitid]->setAttackID(idAtPos);
-						_unitIdMap[unitid]->attack();
-						_unitIdMap[idAtPos]->getDamage(100);
-						_unitIdMap[idAtPos]->displayHpBar();
-						if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
-						{
-							destoryUnit(idAtPos);
-						}
-					}
+				if (_unitIdMap[unitid]->getUnitType() >= 5)//ÊÇ¿É¹¥»÷µ¥Î»
+				{
+				_unitIdMap[unitid]->setAttackID(idAtPos);
+				_unitIdMap[unitid]->attack();
+				_unitIdMap[idAtPos]->getDamage(100);
+				_unitIdMap[idAtPos]->displayHpBar();
+				if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
+				{
+				destoryUnit(idAtPos);
+				}
+				}
 				}*/
 			}
 		}
@@ -408,7 +421,12 @@ Unit * UnitManager::getUnitPtr(int id)
 Vec2 UnitManager::getMyBasePos()
 {
 	GridVec2 basePos;
-	if (_myBaseId != 0)
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	if (_myBaseId != 0) {
 		basePos = _unitIdMap[_myBaseId]->getUnitCoord();
-	return Vec2(basePos._x * 32, basePos._y * 32);
+		return Vec2(basePos._x * 32, basePos._y * 32);
+	}
+	else {
+		return Vec2(visibleSize.width / 2, visibleSize.height / 2);
+	}
 }
