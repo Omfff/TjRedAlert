@@ -190,15 +190,15 @@ bool GamingScene::init()
 			
 			if (!_gridMap->checkRectPosition(rect)) {
 				_unitManager->creatProduceMessage(unittype, positionInMap);
-				auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
-				if (tempUnit->getUnitType() < 5)
+				//auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
+				if ((unittype) < 5)
 				{
-					_money->costMoney(COST[tempUnit->getUnitType()]);
-					_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
-					if (POWER[tempUnit->getUnitType()] > 0)
-						_electricity->addElectricity(POWER[tempUnit->getUnitType()]);
+					_money->costMoney(COST[unittype]);
+					_money->addMoneyInPeriod(MONEY_PRODUCE[unittype]);
+					if (POWER[unittype])
+						_electricity->addElectricity(POWER[unittype]);
 					else
-						_electricity->costElectricity(-POWER[tempUnit->getUnitType()]);
+						_electricity->costElectricity(-POWER[unittype]);
 				}
 			
 			}
@@ -370,9 +370,9 @@ void GamingScene::update(float f)
 		}
 	}
 
-	_unitManager->unitAttackUpdate();
+	//_unitManager->unitAttackUpdate();
 	_unitManager->fighterUnitProductionUpdate();
-	//_unitManager->updateUnitState();
+	_unitManager->updateUnitState();
 }
 
 void GamingScene::mapScroll()
