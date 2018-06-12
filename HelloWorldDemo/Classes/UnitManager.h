@@ -11,15 +11,12 @@
 #include"GameMessages.pb.h"
 #include"SystemHeader.h"
 #include"SimpleAudioEngine.h"
-
 using namespace CocosDenshion;
 using namespace std;
 USING_NS_CC;
-
-
 class Unit;
 class UnitManager;
-
+//class BuildingUnit;
 class UnitManager :public Node
 {
 	CC_SYNTHESIZE(GameMessageGroup *, _msgGroup, MessageGrop);
@@ -28,7 +25,6 @@ class UnitManager :public Node
 	CC_SYNTHESIZE(TMXTiledMap *, _tileMap, TileMap);
 	CC_SYNTHESIZE(int, _nextId, NextId);
 	CC_SYNTHESIZE(int, _waitingGINum, WaitingGINum);
-	CC_SYNTHESIZE(int, _myBaseId, MyBaseId);
 	CC_SYNTHESIZE(int, _waitingTankNum, WaitingTankNum);
 	CC_SYNTHESIZE(int, _waitingAttackDogNum, WaitingAttackDogNum);
 	set<int> _selectedUnitID;
@@ -40,6 +36,7 @@ class UnitManager :public Node
 	map<int, vector<UnitTypes>::iterator> _buildingProducingIte;
 	map<int, int> _produceTime;
 	//vector<vector<UnitTypes>::iterator>_deleteFighterProduceSeqIte;
+
 public:
 	vector<UnitTypes>_fighterProduceSeq;
 	map<int, Unit *>_unitIdMap;
@@ -65,12 +62,13 @@ public:
 	Vec2 getMyBasePos();
 	//virtual void onEnter();
 	//virtual void onExit();
+	virtual void onEnter();
+	virtual void onExit();
 };	
 
 
 
 #endif // !_UNITMANAGER_H
-
 
 
 

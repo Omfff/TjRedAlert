@@ -11,10 +11,6 @@
 #include"ManufactureMenu.h"
 #include"Building.h"
 #include"SimpleAudioEngine.h"
-#include"Fighter.h"
-#include<map>
-
-USING_NS_CC;
 using namespace CocosDenshion;
 
 class GamingScene : public cocos2d::Layer
@@ -32,10 +28,6 @@ public:
 
 	//press key to change map position
 	void onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
-	//release key to change _keyStatus
-	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)override;
-
-	void keyPressedToMove(EventKeyboard::KeyCode keyCode);
 
 	//void focusOnBase();
 
@@ -46,11 +38,16 @@ public:
 	//get end point, and call select function
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)override;
 
-	//check if we can manufacture some buildings to set opacity
-	void updateBuildingMenu(float f);
+	virtual void update(float dt);
+	virtual void update1(float dt);
+	virtual void update2(float dt);
+	
+	virtual void hideloadbar();
 
-	//check if we can manufacture some fight units to set opacity
-	void updateArmyMenu(float f);
+	virtual void LoadingBar();
+	virtual void LoadingBar(int i);
+	virtual void LoadingBar(float j);
+
 
 	CREATE_FUNC(GamingScene);
 
@@ -58,8 +55,11 @@ private:
 
 
 	cocos2d::TMXTiledMap* _tiledMap;
-	
-
+	//½ø¶ÈÌõ
+	float cu;
+	int count = 0;
+	Sprite * progressbgSprite = nullptr;
+	Sprite * progressSprite = nullptr;
 
 	//int _playerID;
 	Unit * unit=nullptr;
@@ -84,11 +84,7 @@ private:
 
 	Layer* _menuSpriteLayer = nullptr;
 
-	//record key status
-	map<EventKeyboard::KeyCode, bool> _keyStatus;
-
-	bool _keyUpdate = true;
-
 };
+
 
 #endif

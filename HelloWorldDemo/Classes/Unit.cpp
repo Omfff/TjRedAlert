@@ -16,15 +16,14 @@ Unit* Unit::create(const std::string& filename)
 
 	return nullptr;
 }
-bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id)
+bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap,int id)
 {
 	setUnitType(Type);
 	return true;
 }
-
 void Unit::move()
 {
-	/*float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
+	float moveTime = sqrt(pow((_destination.x / 32.0 - _unitCoord._x), 2) +
 		pow(_destination.y / 32.0 - _unitCoord._y, 2)) / 8;//_moveSpeed;
 	auto actionMove = MoveTo::create(moveTime, _destination);
 	SimpleAudioEngine::getInstance()->playEffect("Music/On my way.wav");//音效
@@ -32,7 +31,7 @@ void Unit::move()
 	_battleMap->unitLeavePosition(_unitRect);
 	setUnitCoord(GridVec2(float(_destination.x / 32.0), float(_destination.y / 32.0)));
 	_unitRect._oriPoint = _unitCoord;
-	_battleMap->unitCoordStore(_id, _unitRect);*/
+	_battleMap->unitCoordStore(_id, _unitRect);
 }
 /*BuildingUnit* BuildingUnit::create(const std::string& filename)
 {
@@ -58,7 +57,6 @@ bool BuildingUnit::init( CampTypes camp,UnitTypes buildingType,GridVec2 point, T
 	setPowerCost(POWER[buildingType]);
 	setMoneyProduce(MONEY_PRODUCE[buildingType]);
 	setUnitSize(SIZES[buildingType]);
-	setProducingState(0);
 	_battleMap = gridmap;
 	_tiledMap = map;
 	int x = point._x / 32.0;//_tiledMap->getTileSize().width;
@@ -98,7 +96,6 @@ void Unit::initHpBar(UnitTypes type)
 }
 void Unit::hideHpBar()
 {
-
 	hpBGSprite->setVisible(false);
 }
 void Unit::displayHpBar()
@@ -176,22 +173,14 @@ bool FightUnit::init(CampTypes camp, UnitTypes types, GridVec2 coord,
 	setAttackSpeed(ATTACK_SPEED[type]);
 	setAttackForce(ATTACK_FORCE[type]);
 	setAttackID(0);
-	setAutoAttack(true);
-	setEnermyId(0);
 	//setAtkIDPosition()
 	setManualAttackScope(MANUAL_ATTACK_RANGE[type]);
 	setAutoAttackScope(AUTO_ATTACK_RANGE[type]);
-	setPositionInGridMap(_unitRect, gridmap);
+
+	setPositionInGirdMap(_unitRect, id);
 	initHpBar(UnitTypes(type));
 	//_tiledMap->addChild(this, 1);
 	return true;
-}
-bool FightUnit::setPositionInGridMap(GridRect rectPos, GridMap * map)
-{
-	if (map->unitCoordStore(_id, rectPos))
-		return true;
-	else
-		return false;
 }
 bool FightUnit::setPositionInGirdMap(GridRect rectPos, int id)
 {
@@ -200,7 +189,6 @@ bool FightUnit::setPositionInGirdMap(GridRect rectPos, int id)
 	else
 		return false;
 }
-
 void FightUnit::tryToFindPath()
 {
 	if (_camp != _unitManager->getPlayerCamp())
@@ -330,13 +318,13 @@ void FightUnit::attack()
 void FightUnit::move()
 {
 	//根据寻路算法找到路径
-	/*GridVec2 destination(_destination.x / 32, _destination.y / 32);
-	if (_battleMap->checkPointPosition(destination)) {
-		destination = _battleMap->getEmptyPointNearby(destination);
-		_destination = GridVec2(destination._x, destination._y);
-	}*/
 	//产生移动的消息
+	
+	float moveTime = sqrt(pow((_destination.x/32.0 - _unitCoord._x), 2) +
+		pow(_destination.y/32.0 - _unitCoord._y, 2))/_moveSpeed;
+	auto actionMove = MoveTo::create(moveTime, _destination);
 	SimpleAudioEngine::getInstance()->playEffect("Music/On my way.wav");//音效
+
 	if (_gridPath.size() == 1) {
 		float distance = sqrt(pow(this->getUnitCoord()._x - _gridPath[0]._x, 2) + pow(this->getUnitCoord()._y - _gridPath[0]._y, 2));
 		float moveTime = distance / (UNIT_MOVE_SPEED[this->getUnitType() - 5] * 3);
@@ -407,4 +395,3 @@ void FightUnit::shootBullet()
 {
 	SimpleAudioEngine::getInstance()->playEffect("Music/Tank attack.wav");//音效
 }
-

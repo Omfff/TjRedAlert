@@ -4,7 +4,6 @@
 #include"Unit.h"
 
 
-
 class Base :public BuildingUnit
 {
 public:
@@ -34,18 +33,15 @@ public:
 
 class Barracks :public BuildingUnit
 {
-	
 public:
-	GridVec2 findEmptyPosToProduce();
+	GridVec2 findEmptyPosToProduceSolider();
 	static Barracks * Barracks::create(const std::string & filename);
-
 };
 
 class WarFactory :public BuildingUnit
 {
 public:
-	GridVec2 findEmptyPosToProduce();
+	GridVec2 findEmptyPosToProduceTank();
 	static WarFactory * WarFactory::create(const std::string &filename);
-
 };
 

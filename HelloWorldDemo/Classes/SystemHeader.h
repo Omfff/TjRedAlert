@@ -1,7 +1,9 @@
 
 #ifndef __SYSTEM_HEADER_H__
 #define __SYSTEM_HEADER_H__
-
+#define SOUND_KEY "sound_key"
+#define MUSIC_KEY "music_key"
+#include "SimpleAudioEngine.h"
 //Money.h
 const int INITIAL_MONEY = 10000;
 const int MONEY_IN_PERIOD = 0;

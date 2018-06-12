@@ -3,7 +3,7 @@
 #include "HelpScene.h"
 
 USING_NS_CC;
-using namespace ui;
+//using namespace ui;
 
 Scene* HelpScene::createScene()
 {
@@ -38,4 +38,5 @@ void HelpScene::menuItemBackCallback(cocos2d::Ref*pSender)
 	auto GM = GameMenu::createScene();
 	auto transition = TransitionTurnOffTiles::create(1.0, GM);
 	Director::getInstance()->pushScene(transition);
+	SimpleAudioEngine::getInstance()->playEffect("Music/Click.wav");
 }

@@ -5,9 +5,11 @@ Solider* Solider::create(const std::string& filename)
 	if (ret && ret->initWithFile(filename))
 	{
 		ret->autorelease();
+
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
+
 	return nullptr;
 }
 bool Solider::init(CampTypes camp, UnitTypes types, GridVec2 coord,

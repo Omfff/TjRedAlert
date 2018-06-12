@@ -6,7 +6,6 @@
 #include"Fighter.h"
 #include<vector>
 #include<string>
-
 USING_NS_CC;
 using namespace std;
 #define MESSAGECRT GameMessage::Cmd::GameMessage_Cmd_CRT 
@@ -16,6 +15,7 @@ using namespace std;
 
 bool UnitManager::init()
 {
+	
 	return true;
 }
 void UnitManager::updateUnitState()
@@ -33,6 +33,7 @@ void UnitManager::updateUnitState()
 				int id = receiveMessage.unit_id1();
 				GridVec2  pos = GridVec2(receiveMessage.position().x(), receiveMessage.position().y());
 				Unit * newUnit = creatUnit( CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()),pos, receiveMessage.unit_id1());
+				//_unitIdMap[id] = newUnit;
 			}
 			else if (receiveMessage.cmd() == MESSAGEMOV)
 			{
@@ -40,6 +41,7 @@ void UnitManager::updateUnitState()
 				if(_unitIdMap.count(id)>0)//if (_unitIdMap[id]!=nullptr)
 				{
 					Unit * unit = _unitIdMap[id];
+<<<<<<< HEAD
 					auto messageMovePath = receiveMessage.path();
 					vector<GridVec2> movePath;
 					int pathPointNum = messageMovePath.path_point_size();
@@ -52,6 +54,9 @@ void UnitManager::updateUnitState()
 						movePath.push_back(point);
 					}
 					unit->setGridPath(movePath);
+=======
+					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//è¿™ä¸ªpositionçš„å‚æ•°éƒ½æ˜¯intçš„
+>>>>>>> 9ae34c7ea39cffbed1688d2060bfea7903ee8fa4
 					unit->move();
 				}
 				else
@@ -96,6 +101,7 @@ void UnitManager::destoryUnit(int id)
 {
 	if(_unitIdMap.count(id)>0)//if (_unitIdMap[id] != nullptr)
 	{
+<<<<<<< HEAD
 		Unit * unit = _unitIdMap[id];
 		if (unit)
 		{
@@ -120,6 +126,18 @@ void UnitManager::destoryUnit(int id)
 			_unitIdMap.erase(id);
 
 		}
+=======
+		if (unit->getUnitType() == WARFACTORY) 
+			_warFactoryId.erase(unit->getID());
+		if (unit->getUnitType() == BARRACKS)
+			_barracksId.erase(unit->getID());
+		unit->removeFromMap();
+		SimpleAudioEngine::getInstance()->playEffect("Music/Unit lost.wav");//éŸ³æ•ˆ
+		//unit->deleteUnit();
+		_tileMap->removeChild(unit);
+		_unitIdMap.erase(id);	
+		
+>>>>>>> 9ae34c7ea39cffbed1688d2060bfea7903ee8fa4
 	}
 }
 //BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY,GI,ATTACKDOG,TANK
@@ -137,29 +155,35 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	{
 		case BASE:
 			unit = Base::create(unitPic);
-			setMyBaseId(id);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//éŸ³æ•ˆ
 			break;
 		case POWERPLANT:
 			unit = PowerPlant::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//éŸ³æ•ˆ
 			break;
 		case BARRACKS:
 			_barracksId[id]=0;
 			unit = Barracks::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//éŸ³æ•ˆ
 			break;
 		case WARFACTORY:
 			_warFactoryId[id]=0;
 			unit = WarFactory::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//éŸ³æ•ˆ
 			break;
 		case OREREFINERY:
 			unit = OreRefinery::create(unitPic);
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//éŸ³æ•ˆ
 			break;
 		case GI:
 			unit = Solider::create("solider.png");
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//éŸ³æ•ˆ
 			break;
 		case ATTACKDOG:
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//éŸ³æ•ˆ
 			break;
 		case TANK:
-			unit = Tank::create("footman_front_0.png");
+			//SimpleAudioEngine::getInstance()->playEffect("Music/Unit complete.wav");//éŸ³æ•ˆ
 			break;
 		default:
 			break;
@@ -262,15 +286,15 @@ void UnitManager::createAttackMessage(int id1, int id2, int damage)
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
 	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
-	Vec2 destination = Vec2(pos._x, pos._y);
 	if (!_selectedUnitID.empty())
 	{
-		if (idAtPos == 0 || idAtPos == _NO_PASS)
+		if (idAtPos == 0||idAtPos ==_NO_PASS)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (_unitIdMap[unitid]->getUnitType() >= 5)//ÊÇ¿ÉÒÆ¶¯µ¥Î»
+				if (_unitIdMap[unitid]->getUnitType()>=5)//æ˜¯å¯ç§»åŠ¨å•ä½
 				{
+<<<<<<< HEAD
 					_unitIdMap[unitid]->stopAttackUpdate();
 					_unitIdMap[unitid]->setAttackID(0);
 					if (destination != _unitIdMap[unitid]->getDestination()) 
@@ -289,19 +313,24 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 					//_unitIdMap[unitid]->move();
 					//²úÉúÒÆ¶¯ÏûÏ¢
 					/*if (attackingUnit.count(unitid) > 0)
+=======
+					//å¯»è·¯
+					//äº§ç”Ÿç§»åŠ¨æ¶ˆæ¯
+					if (attackingUnit.count(unitid) > 0)
+>>>>>>> 9ae34c7ea39cffbed1688d2060bfea7903ee8fa4
 					{
-					_unitIdMap[unitid]->stopAttackUpdate();
-					_unitIdMap[unitid]->setAttackID(0);
+						_unitIdMap[unitid]->stopAttackUpdate();
+						_unitIdMap[unitid]->setAttackID(0);
 					}
-					//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
+						//unschedule(schedule_selector(_unitIdMap[unitid]->attackUpdate));
 					_unitIdMap[unitid]->setDestination(Vec2(pos._x, pos._y));
-					_unitIdMap[unitid]->move();*/
+					_unitIdMap[unitid]->move();
 				}
 			}
 		}
 		else
 		{
-			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ?
+			if (_unitIdMap[idAtPos]->getCamp()==_playerCamp)//é€‰æ‹©äº†æˆ‘æ–¹çš„å•ä½ åˆ™æ˜¾ç¤ºè¡€æ¡
 			{
 				/*deselectAllUnits();
 				_selectedUnitID.push_back(idAtPos);
@@ -341,8 +370,9 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 					}
 				}
 			}
-			else////Ñ¡ÔñÁËµĞ·½µ¥Î»
+			else////é€‰æ‹©äº†æ•Œæ–¹å•ä½
 			{
+<<<<<<< HEAD
 				//1µĞ·½½¨Öş µ½´ï ¹¥»÷
 				//2µĞ·½±øÖÖ ¸ú×Ù ¹¥»÷
 				
@@ -385,6 +415,24 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 					//2µĞ·½±øÖÖ ¸ú×Ù ¹¥»÷
 				}
 				
+=======
+				//1æ•Œæ–¹å»ºç­‘ åˆ°è¾¾ æ”»å‡»
+				//2æ•Œæ–¹å…µç§ è·Ÿè¸ª æ”»å‡»
+				/*for (auto unitid : _selectedUnitID)
+				{
+					if (_unitIdMap[unitid]->getUnitType() >= 5)//æ˜¯å¯æ”»å‡»å•ä½
+					{
+						_unitIdMap[unitid]->setAttackID(idAtPos);
+						_unitIdMap[unitid]->attack();
+						_unitIdMap[idAtPos]->getDamage(100);
+						_unitIdMap[idAtPos]->displayHpBar();
+						if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
+						{
+							destoryUnit(idAtPos);
+						}
+					}
+				}*/
+>>>>>>> 9ae34c7ea39cffbed1688d2060bfea7903ee8fa4
 			}
 		}
 	}
@@ -405,8 +453,6 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 			attackingUnit[battleUnit.first] = battleUnit.second;
 			_unitIdMap[battleUnit.first]->setAttackID(battleUnit.second);
 			_unitIdMap[battleUnit.first]->startAttackUpdate();
-			_unitIdMap[battleUnit.second]->setEnermyId(battleUnit.first);//æµ‹è¯•è‡ªåŠ¨æ”»å‡»
-			_unitIdMap[battleUnit.second]->setUnderAttack(true);//æµ‹è¯•
 			//this->schedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate),0.5f);
 		}
 		newAttackUnit.clear();
@@ -419,24 +465,12 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		{
 			if (_unitIdMap[ite->second] != nullptr&&_unitIdMap[ite->second]->getCurrentHp() <= 0)
 			{
-				if (_unitIdMap[ite->first] == nullptr)
-				{
-					ite = attackingUnit.erase(ite);
-				}
-				else
-				{
-					_unitIdMap[ite->first]->stopAttackUpdate();
-					//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
-					_unitIdMap[ite->first]->setAttackID(0);
-					destoryUnit(ite->second);
-					ite = attackingUnit.erase(ite);
-				}
-				
-				//deleUnitId.push_back(ite->first);
-			}
-			else if (_unitIdMap[ite->first] == nullptr)
-			{
+				_unitIdMap[ite->first]->stopAttackUpdate();
+				//this->unschedule(schedule_selector(_unitIdMap[battleUnit.first]->attackUpdate));
+				_unitIdMap[ite->first]->setAttackID(0);
+				destoryUnit(ite->second);
 				ite = attackingUnit.erase(ite);
+				//deleUnitId.push_back(ite->first);
 			}
 			else if (_unitIdMap[ite->second] == nullptr)
 			{
@@ -451,29 +485,51 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 			}
 		}
 	}
+<<<<<<< HEAD
 }*/
+=======
+
+}
+>>>>>>> 9ae34c7ea39cffbed1688d2060bfea7903ee8fa4
 void UnitManager::fighterUnitProductionUpdate()
 {
 	auto ite = _fighterProduceSeq.begin();
 	int mark = 0;
 	while (ite != _fighterProduceSeq.end())
 	{
-		if ((*ite == GI || *ite == ATTACKDOG) && _barracksId.empty() != true)
+		if (*ite==GI&& _barracksId.empty() != true)
 		{
 			for (auto & id : _barracksId)
 			{
-				if (_unitIdMap[id.first]->getProducingState() == 0)
+				if (id.second == 0)
 				{
-					_unitIdMap[id.first]->startProduceUnit(*ite);
-					if (*ite == GI)
-						_waitingGINum--;
-					else
-						_waitingAttackDogNum--;
-					ite = _fighterProduceSeq.erase(ite);
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(GI, GridVec2(producePos._x / 32, producePos._y/32));
+					creatUnit(_playerCamp, GI, producePos);
+					_waitingGINum--;
+					id.second = 1;
 					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
 					break;
 				}
-			}	
+			}
+		}
+		else if(*ite==ATTACKDOG&& _barracksId.empty() != true)
+		{
+			for (auto & id : _barracksId)
+			{
+				if (id.second == 0)
+				{
+					GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceSolider();
+					creatProduceMessage(ATTACKDOG, GridVec2(producePos._x / 32, producePos._y/32));
+					creatUnit(_playerCamp, ATTACKDOG, producePos);
+					_waitingAttackDogNum--;
+					id.second = 1;
+					mark = 1;
+					ite = _fighterProduceSeq.erase(ite);
+					break;
+				}
+			}
 		}
 		else //(*ite == TANK && _warFactoryId.empty() != true)
 		{
@@ -481,12 +537,15 @@ void UnitManager::fighterUnitProductionUpdate()
 			{
 				for (auto & id : _warFactoryId)
 				{
-					if (_unitIdMap[id.first]->getProducingState() == 0)
+					if (id.second == 0)
 					{
-						_unitIdMap[id.first]->startProduceUnit(*ite);
-						ite = _fighterProduceSeq.erase(ite);
-						mark = 1;
+						GridVec2 producePos = _unitIdMap[id.first]->findEmptyPosToProduceTank();
+						creatProduceMessage(TANK, GridVec2(producePos._x / 32, producePos._y / 32));
+						creatUnit(_playerCamp, TANK, producePos);
 						_waitingTankNum--;
+						id.second = 1;
+						mark = 1;
+						ite = _fighterProduceSeq.erase(ite);
 						break;
 					}
 				}
@@ -500,10 +559,7 @@ void UnitManager::fighterUnitProductionUpdate()
 }
 GridRect transferRectToGridRect(const Rect & rect)
 {
-	GridVec2 originPoint;
-	originPoint._x = rect.origin.x / 32.0;
-	originPoint._y = rect.origin.y / 32.0;
-	return GridRect(originPoint,
+	return GridRect(GridVec2((float)(rect.origin.x) / 32.0, (float)(rect.origin.y / 32.0)),
 		GridDimen(rect.size.width/32.0, rect.size.height/32.0));
 }
 Unit * UnitManager::getUnitPtr(int id)
@@ -513,15 +569,12 @@ Unit * UnitManager::getUnitPtr(int id)
 	else
 		return nullptr;
 }
-Vec2 UnitManager::getMyBasePos()
-{
-	GridVec2 basePos;
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	if (_myBaseId != 0) {
-		basePos = _unitIdMap[_myBaseId]->getUnitCoord();
-		return Vec2(basePos._x * 32, basePos._y * 32);
-	}
-	else {
-		return Vec2(visibleSize.width / 2, visibleSize.height / 2);
-	}
+void UnitManager::onEnter() {
+	Layer::onEnter();
+	SimpleAudioEngine::getInstance()->preloadEffect("Music/Unit lost.wav");
+	
+}
+void UnitManager::onExit() {
+	Layer::onExit();
+	SimpleAudioEngine::getInstance()->stopAllEffects();
 }

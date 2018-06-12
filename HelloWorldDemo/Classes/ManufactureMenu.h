@@ -1,10 +1,9 @@
-
 #ifndef __MANUFACTURE_MENU_H__
 #define __MANUFACTURE_MENU_H__
 
 #include"cocos2d.h"
-#include"SystemHeader.h"
-
+#include"SimpleAudioEngine.h"
+using namespace CocosDenshion;
 USING_NS_CC;
 
 class ManufactureMenu :public cocos2d::Menu
@@ -28,22 +27,21 @@ public:
 
 	void setBuildingCallBack(std::function<void(Ref*)>);
 	void setArmyCallBack(std::function<void(Ref*)>);
-	
 
-	MenuItemImage* _buildingButton;
-	MenuItemImage* _armyButton;
+	cocos2d::MenuItemImage* _buildingButton;
+	cocos2d::MenuItemImage* _armyButton;
 
 
-	MenuItemImage* _GIButton;
-	MenuItemImage* _attackDogButton;
+	cocos2d::MenuItemImage* _GIButton;
+	cocos2d::MenuItemImage* _attackDogButton;
 
-	MenuItemImage* _tankButton;
+	cocos2d::MenuItemImage* _tankButton;
 
-	MenuItemImage* _baseButton;
-	MenuItemImage* _powerPlantButton;
-	MenuItemImage* _barrackButton;
-	MenuItemImage* _warFactoryButton;
-	MenuItemImage* _oreRefineryButton;
+	cocos2d::MenuItemImage* _baseButton;
+	cocos2d::MenuItemImage* _powerPlantButton;
+	cocos2d::MenuItemImage* _barrackButton;
+	cocos2d::MenuItemImage* _warFactoryButton;
+	cocos2d::MenuItemImage* _oreRefineryButton;
 
 };
 

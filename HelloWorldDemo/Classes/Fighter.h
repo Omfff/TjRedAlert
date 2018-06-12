@@ -15,9 +15,6 @@ public:
 	void attackUpdate(float dt);
 	void startAttackUpdate();
 	void stopAttackUpdate();
-	void autoAttack(float fd);
-	bool init(CampTypes camp, UnitTypes types, GridVec2 coord,
-		TMXTiledMap* map, GridMap * gridmap, int id=0);
 };
 class Tank :public FightUnit
 {
@@ -29,5 +26,4 @@ public:
 	void attackUpdate(float dt);
 	void startAttackUpdate();
 	void stopAttackUpdate();
-	void autoAttack(float fd);
 };

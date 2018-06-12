@@ -1,8 +1,11 @@
 
+
 #include"GamingScene.h"
 
 USING_NS_CC;
 
+int i;//记录制造坦克的个数
+float j;//记录制造士兵的个数
 Scene* GamingScene::createScene()
 {
 	auto scene = Scene::create();
@@ -33,6 +36,12 @@ bool GamingScene::init()
 	setCollisionPos(_tiledMap, _gridMap);
 	_gridMap->setVisible(false);
 
+	/*auto color = CCLayerColor::create(ccc4(255, 255, 255, 255), 4000,1984 );
+	color->setPosition(0, 0);
+	_tiledMap->addChild(color, 9);*/
+
+	
+
 	_msgs = new GameMessageGroup;
 
 	_unitManager = UnitManager::create();
@@ -42,6 +51,16 @@ bool GamingScene::init()
 	_unitManager->setTileMap(_tiledMap);
 	_unitManager->setNextId(RED);
 	addChild(_unitManager);
+	
+	auto unit1 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	/*auto unit2 =_unitManager->creatUnit(RED,GI,Vec2(visibleSize.width/4.2,visibleSize.height/3.2));
+	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 4.2, visibleSize.height / 3.2));
+	auto unit3 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 4, visibleSize.height / 3));
+	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 4, visibleSize.height / 3));
+	auto unit4 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 4.9, visibleSize.height / 3.9));
+	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 4.9, visibleSize.height / 3.9));
+	auto unit5 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 3, visibleSize.height / 3));*/
 
 	_menuSpriteLayer = Layer::create();
 	addChild(_menuSpriteLayer, 2);
@@ -53,49 +72,69 @@ bool GamingScene::init()
 		_menuSpriteLayer->removeAllChildren();
 
 		auto base = Sprite::create("units/Base(red).png");
-		base->setPosition(Director::getInstance()->getVisibleSize().width - 200, 
-						  Director::getInstance()->getVisibleSize().height * 0.8);
+		base->setPosition(Director::getInstance()->getVisibleSize().width - 200,
+			Director::getInstance()->getVisibleSize().height * 0.8);
 		//base->setPosition(100, 100);
 		base->setScale(1);
-		//base->setAnchorPoint(Vec2(0, 0));
-		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
-		if (_unitManager->getMyBaseId()) {
+		if (!_money->checkMoney(2500)) {
 			base->setOpacity(100);
 		}
+		else {
+			base->setOpacity(255);
+		}
+		_menuSpriteLayer->addChild(base, 10, BASE_TAG);
 
 		auto powerPlant = Sprite::create("units/PowerPlant(red).png");
 		powerPlant->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-								Director::getInstance()->getVisibleSize().height * 0.7);
+			Director::getInstance()->getVisibleSize().height * 0.7);
 		//powerPlant->setPosition(200, 200);
 		powerPlant->setScale(1);
-		//powerPlant->setAnchorPoint(Vec2(0, 0));
+		if (!_money->checkMoney(800)) {
+			powerPlant->setOpacity(100);
+		}
+		else {
+			powerPlant->setOpacity(255);
+		}
 		_menuSpriteLayer->addChild(powerPlant, 10, POWER_PLANT_TAG);
 
 		auto barrack = Sprite::create("units/Barrack(red).png");
 		barrack->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-							 Director::getInstance()->getVisibleSize().height * 0.6);
+			Director::getInstance()->getVisibleSize().height * 0.6);
 		//barrack->setPosition(300, 300);
 		barrack->setScale(1);
-		//barrack->setAnchorPoint(Vec2(0, 0));
+		if (!_money->checkMoney(800) || !_electricity->checkElectricity(10)) {
+			barrack->setOpacity(100);
+		}
+		else {
+			barrack->setOpacity(255);
+		}
 		_menuSpriteLayer->addChild(barrack, 10, BARRACK_TAG);
 
 		auto warFactory = Sprite::create("units/WarFactory(red).png");
 		warFactory->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-								Director::getInstance()->getVisibleSize().height * 0.5);
+			Director::getInstance()->getVisibleSize().height * 0.5);
 		//warFactory->setPosition(400, 400);
 		warFactory->setScale(1);
-		//warFactory->setAnchorPoint(Vec2(0, 0));
+		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(50)) {
+			warFactory->setOpacity(100);
+		}
+		else {
+			warFactory->setOpacity(255);
+		}
 		_menuSpriteLayer->addChild(warFactory, 10, WAR_FACTORY_TAG);
 
 		auto oreRefinery = Sprite::create("units/OreRefinery(red).png");
 		oreRefinery->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-								 Director::getInstance()->getVisibleSize().height * 0.4);
+			Director::getInstance()->getVisibleSize().height * 0.4);
 		//oreRefinery->setPosition(500, 500);
 		oreRefinery->setScale(1);
-		//oreRefinery->setAnchorPoint(Vec2(0, 0));
+		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(40)) {
+			oreRefinery->setOpacity(100);
+		}
+		else {
+			oreRefinery->setOpacity(255);
+		}
 		_menuSpriteLayer->addChild(oreRefinery, 10, ORE_REFINERY_TAG);
-
-		schedule(schedule_selector(GamingScene::updateBuildingMenu));
 
 		auto buildingAttachedToMouse = EventListenerTouchOneByOne::create();
 		buildingAttachedToMouse->onTouchBegan = [&](Touch* touch, Event* event)->bool
@@ -126,10 +165,10 @@ bool GamingScene::init()
 			Rect oreRefineryRect = Rect(0, 0, oreRefinerySize.width, oreRefinerySize.height);
 			Vec2 oreRefineryLocation = _menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->convertToNodeSpace(touch->getLocation());
 
-			unschedule(schedule_selector(GamingScene::updateBuildingMenu));
-			if (rect.containsPoint(locationInNode) && target->getOpacity() == 255) {
+
+			if (rect.containsPoint(locationInNode)) {
 				target->setOpacity(50);
-				target->setScale(1.0);
+				target->setScale(2.0);
 				if (!baseRect.containsPoint(baseLocation)) {
 					_menuSpriteLayer->removeChildByTag(BASE_TAG);
 				}
@@ -158,36 +197,24 @@ bool GamingScene::init()
 			return false;
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Build.wav");//音效
+
 		buildingAttachedToMouse->onTouchMoved = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
-			if (target->getOpacity() == 50) {
-				target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
-				Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
-				Size size = target->getContentSize();
-				//Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
-				Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
-				if (_gridMap->checkRectPosition(rect)) {
-					target->setColor(Color3B::RED);
-				}
-				else {
-					target->setColor(Color3B(255, 255, 255));
-				}
-			}
-
+			target->setPosition(_menuSpriteLayer->convertToNodeSpace(touch->getLocation()));
 		};
+
 		buildingAttachedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
-			Vec2 positionInMap =_tiledMap->convertToNodeSpace( touch->getLocation());
+			Vec2 positionInMap = _tiledMap->convertToNodeSpace(touch->getLocation());
 			Size size = target->getContentSize();
-			//Rect rect = Rect((positionInMap.x - size.width / 2) / 32.0, (positionInMap.y - size.height / 2) / 32.0, size.width / 32.0, size.height / 32.0);
 			Rect rect = Rect(positionInMap.x / 32.0, positionInMap.y / 32.0, size.width / 32.0, size.height / 32.0);
 
 			//target->setOpacity(255);
 			UnitTypes unittype = UnitTypes(target->getTag() - 101);
 			_menuSpriteLayer->removeChildByTag(target->getTag());
-			
+
 			if (!_gridMap->checkRectPosition(rect)) {
 				_unitManager->creatProduceMessage(unittype, positionInMap);
 				//auto tempUnit=_unitManager->creatUnit(_unitManager->getPlayerCamp(),unittype,positionInMap);
@@ -200,10 +227,11 @@ bool GamingScene::init()
 					else
 						_electricity->costElectricity(-POWER[unittype]);
 				}
-			
+
 			}
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//音效
+
 		buildingAttachedToMouse->setSwallowTouches(true);
 
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(buildingAttachedToMouse, base);
@@ -218,25 +246,32 @@ bool GamingScene::init()
 		auto GIFrame = SpriteFrame::create("units/GI(red).png", Rect(0, 0, 35, 37));
 		auto GI = Sprite::createWithSpriteFrame(GIFrame);
 		GI->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-						Director::getInstance()->getVisibleSize().height * 0.5);
+			Director::getInstance()->getVisibleSize().height * 0.5);
 		GI->setScale(2);
+		if (!_money->checkMoney(150)) {
+			GI->setOpacity(100);
+		}
 		_menuSpriteLayer->addChild(GI, 10, GI_TAG);
 
 		auto attackDogFrame = SpriteFrame::create("units/AttackDog(red).png", Rect(0, 0, 49, 50));
 		auto attackDog = Sprite::createWithSpriteFrame(attackDogFrame);
 		attackDog->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-							   Director::getInstance()->getVisibleSize().height * 0.4);
+			Director::getInstance()->getVisibleSize().height * 0.4);
 		attackDog->setScale(1.4);
+		if (!_money->checkMoney(150)) {
+			attackDog->setOpacity(100);
+		}
 		_menuSpriteLayer->addChild(attackDog, 10, ATTACK_DOG_TAG);
 
 		auto tankFrame = SpriteFrame::create("units/Tank(red).png", Rect(0, 0, 35, 37));
 		auto tank = Sprite::Sprite::createWithSpriteFrame(tankFrame);
 		tank->setPosition(Director::getInstance()->getVisibleSize().width - 200,
-						  Director::getInstance()->getVisibleSize().height * 0.28);
+			Director::getInstance()->getVisibleSize().height * 0.28);
 		tank->setScale(2);
+		if (!_money->checkMoney(300)) {
+			tank->setOpacity(100);
+		}
 		_menuSpriteLayer->addChild(tank, 10, TANK_TAG);
-
-		schedule(schedule_selector(GamingScene::updateArmyMenu));
 
 		auto armyAttatchedToMouse = EventListenerTouchOneByOne::create();
 		armyAttatchedToMouse->onTouchBegan = [&](Touch* touch, Event* event)->bool
@@ -271,6 +306,7 @@ bool GamingScene::init()
 			return false;
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Unit training.wav");//音效
+
 		armyAttatchedToMouse->onTouchEnded = [&](Touch* touch, Event* event)
 		{
 			auto target = static_cast<Sprite*>(event->getCurrentTarget());
@@ -280,20 +316,26 @@ bool GamingScene::init()
 
 			UnitTypes unittype = UnitTypes(target->getTag() - 101);
 
-			if (_money->checkMoney(COST[unittype]))
+			_unitManager->_fighterProduceSeq.push_back(unittype);
+			if (int(unittype) == 5)
+				_unitManager->setWaitingGINum(_unitManager->getWaitingGINum() + 1);
+			else if (int(unittype) == 6)
+				_unitManager->setWaitingAttackDogNum(_unitManager->getWaitingAttackDogNum() + 1);
+			else
+				_unitManager->setWaitingTankNum(_unitManager->getWaitingTankNum() + 1);
+			/*if (!_gridMap->checkRectPosition(rect)) {
+			_unitManager->creatProduceMessage(unittype, positionInMap);
+			auto tempUnit = _unitManager->creatUnit(_unitManager->getPlayerCamp(), unittype, positionInMap);
+			if (tempUnit->getUnitType() >= 5 && tempUnit->getUnitType() < 8)
 			{
-				_unitManager->_fighterProduceSeq.push_back(unittype);
-				_money->costMoney(COST[unittype]);
-				if (int(unittype) == 5)
-					_unitManager->setWaitingGINum(_unitManager->getWaitingGINum() + 1);
-				else if (int(unittype) == 6)
-					_unitManager->setWaitingAttackDogNum(_unitManager->getWaitingAttackDogNum() + 1);
-				else
-					_unitManager->setWaitingTankNum(_unitManager->getWaitingTankNum() + 1);
+			_money->costMoney(COST[tempUnit->getUnitType()]);
+			//_money->addMoneyInPeriod(MONEY_PRODUCE[tempUnit->getUnitType()]);
 			}
+			}*/
 
 		};
 		SimpleAudioEngine::getInstance()->playEffect("Music/Unit ready.wav");//音效
+
 		armyAttatchedToMouse->setSwallowTouches(true);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse, GI);
 		Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(armyAttatchedToMouse->clone(), attackDog);
@@ -302,25 +344,20 @@ bool GamingScene::init()
 
 	addChild(_manufactureMenu, 10);
 
-	auto unit1 = _unitManager->creatUnit(RED, GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
-	_unitManager->creatProduceMessage(GI, Vec2(visibleSize.width / 2, visibleSize.height / 2));
-
-	/*auto unit2 = _unitManager->creatUnit(RED, GI, Vec2(3 * visibleSize.width / 4, 3 * visibleSize.height / 4));
-	_unitManager->creatProduceMessage(GI, Vec2(3 * visibleSize.width / 4, 3 * visibleSize.height / 4));*/
-
 	auto moneyIcon = Sprite::create("ui/money/gold.png");
 	moneyIcon->setPosition(visibleSize.width - 140, 20);
 	moneyIcon->setScale(0.04);
 	addChild(moneyIcon, 1);
 
 	_money = Money::create();
-	_money->setPosition(visibleSize.width - 80, 20);
+	_money->setPosition(visibleSize.width - 100, 20);
 	_money->schedule(schedule_selector(Money::update));
 	addChild(_money, 1);
 	
 	_electricity = Electricity::create();
-	_electricity->setPosition(visibleSize.width - 80, 60);
-	_electricity->setScale(0.42);
+	//_electricity->setPosition(visibleSize.width - 100, 80);
+	_electricity->setPosition(visibleSize.width - 100, 80);
+	_electricity->setScale(0.5);
 	addChild(_electricity, 1);
 
 
@@ -346,15 +383,10 @@ bool GamingScene::init()
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseMoveEvent, this);
 
-	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_W, false));
-	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_A, false));
-	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_S, false));
-	_keyStatus.insert(make_pair(EventKeyboard::KeyCode::KEY_D, false));
+
 	auto keyBoardListener = EventListenerKeyboard::create();
 	keyBoardListener->onKeyPressed = CC_CALLBACK_2(GamingScene::onKeyPressed, this);
-	keyBoardListener->onKeyReleased = CC_CALLBACK_2(GamingScene::onKeyReleased, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyBoardListener, this);
-	
 
 
 	return true;
@@ -371,6 +403,7 @@ void GamingScene::update(float f)
 	}
 
 	//_unitManager->unitAttackUpdate();
+
 	_unitManager->fighterUnitProductionUpdate();
 	_unitManager->updateUnitState();
 }
@@ -416,93 +449,42 @@ void GamingScene::mapScroll()
 
 void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event) 
 {
+	auto mapPosition = _tiledMap->getPosition();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Point focusPosition = _unitManager->getMyBasePos();
-	Size size = _tiledMap->getContentSize();
 
-	switch (keyCode)
-	{
-	case EventKeyboard::KeyCode::KEY_SPACE:
-		focusPosition -= visibleSize / 2;
-		if (_tiledMap->getContentSize().width < focusPosition.x + visibleSize.width) {
-			focusPosition.x = _tiledMap->getContentSize().width - visibleSize.width;
-		}
-		if (_tiledMap->getContentSize().height < focusPosition.y + visibleSize.height) {
-			focusPosition.y = _tiledMap->getContentSize().height - visibleSize.height;
-		}
-		if (focusPosition.x < 0) {
-			focusPosition = 0;
-		}
-		if (focusPosition.y < 0) {
-			focusPosition.y = 0;
-		}
-		focusPosition = Point(0, 0) - focusPosition;
-		_tiledMap->setPosition(focusPosition);
-		break;
-	case EventKeyboard::KeyCode::KEY_W:
-		_keyStatus[EventKeyboard::KeyCode::KEY_W] = true;
-		break;
-	case EventKeyboard::KeyCode::KEY_A:
-		_keyStatus[EventKeyboard::KeyCode::KEY_A] = true;
-		break;
-	case EventKeyboard::KeyCode::KEY_S:
-		_keyStatus[EventKeyboard::KeyCode::KEY_S] = true;
-		break;
-	case EventKeyboard::KeyCode::KEY_D:
-		_keyStatus[EventKeyboard::KeyCode::KEY_D] = true;
-		break;
-	default:
-		break;
-	}
-
-}
-
-void GamingScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event * event)
-{
-	_keyStatus[keyCode] = false;
-}
-
-void GamingScene::keyPressedToMove(EventKeyboard::KeyCode keyCode)
-{
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	Size size = _tiledMap->getContentSize();
-
+	//W-UP, S-DOWN, A-LEFT, D-RIGHT
 	switch (keyCode)
 	{
 	case EventKeyboard::KeyCode::KEY_W:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, 5))) {
-			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(0, -5)));
-			if (_tiledMap->getPosition().y <= visibleSize.height - size.height + 10) {
-			_tiledMap->stopAllActions();
-			}
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, 50) + visibleSize)) {
+			mapPosition += Vec2(0, -50);
+			_tiledMap->setPosition(mapPosition);
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_A:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(-5, 0))) {
-			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(5, 0)));
-			if (_tiledMap->getPosition().x >= -10) {
-			_tiledMap->stopAllActions();
-			}
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(-50, 0))) {
+			mapPosition += Vec2(50, 0);
+			_tiledMap->setPosition(mapPosition);
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_S:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, -5))) {
-			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(0, 5)));
-			if (_tiledMap->getPosition().y >= -10) {
-			_tiledMap->stopAllActions();
-			}
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(0, -50))) {
+			mapPosition += Vec2(0, 50);
+			_tiledMap->setPosition(mapPosition);
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_D:
-		if (_tiledMap->getBoundingBox().containsPoint(Vec2(5, 0))) {
-			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(-5, 0)));
-			if (_tiledMap->getPosition().x <= visibleSize.width - size.width + 10) {
-			_tiledMap->stopAllActions();
-			}
+		if (_tiledMap->getBoundingBox().containsPoint(Vec2(50, 0) + visibleSize)) {
+			mapPosition += Vec2(-50, 0);
+			_tiledMap->setPosition(mapPosition);
 		}
 		break;
+	/*case EventKeyboard::KeyCode::KEY_SPACE:
+		focusOnBase();*/
+
 	default:
 		break;
+
 	}
 }
 
@@ -551,86 +533,98 @@ void GamingScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 
 
 }
+//建筑的进度条
+void GamingScene::LoadingBar() {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
 
-void GamingScene::updateBuildingMenu(float f)
-{
-	if (!_menuSpriteLayer->getChildrenCount()) {
-		unschedule(schedule_selector(GamingScene::updateBuildingMenu));
-	}
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
 
-	if (_menuSpriteLayer->getChildByTag(BASE_TAG) && !_unitManager->getMyBaseId()) {
-		if (!_money->checkMoney(2500)) {
-			_menuSpriteLayer->getChildByTag(BASE_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(BASE_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)) {
-		if (!_money->checkMoney(800)) {
-			_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(POWER_PLANT_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(BARRACK_TAG)) {
-		if (!_money->checkMoney(800) || !_electricity->checkElectricity(10)) {
-			_menuSpriteLayer->getChildByTag(BARRACK_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(BARRACK_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)) {
-		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(50)) {
-			_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(WAR_FACTORY_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)) {
-		if (!_money->checkMoney(2000) || !_electricity->checkElectricity(40)) {
-			_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(ORE_REFINERY_TAG)->setOpacity(255);
-		}
-	}
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->scheduleUpdate();
+}
+//坦克的进度条
+void GamingScene::LoadingBar(int i) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
 
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
+
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->schedule(schedule_selector(GamingScene::update1), 0, 500 * i, 0.5);
+}
+//士兵的进度条
+void GamingScene::LoadingBar(float j) {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
+	progressbgSprite = Sprite::create("slider grey.png");
+	progressbgSprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置还要改一下
+	this->addChild(progressbgSprite);
+
+	auto progress = LoadingBar::create("slider green.png");
+	progress->setDirection(LoadingBar::Direction::LEFT);
+	progress->setTag(100);
+	progress->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));//位置
+	this->addChild(progress);
+	this->schedule(schedule_selector(GamingScene::update2), 0, 200 * j, 0.5);
+}
+//建筑类
+void GamingScene::update(float dt) {
+	cu = cu + 0.1f;//0.1（17s)建筑 0.2（8s)坦克 0.5(4s)兵，犬
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		hideloadbar();
+		cu = 0;
+	}
+}
+//坦克
+void GamingScene::update1(float dt) {
+	cu = cu + 0.2f;
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		cu = 0;
+		count++;
+		if (count == i) {
+			hideloadbar();
+			count = 0;
+		}
+	}
+}
+//士兵
+void GamingScene::update2(float dt) {
+	cu = cu + 0.5f;
+	if (cu <= 100) {
+		auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+		progress->setPercent(cu);
+	}
+	else {
+		cu = 0;
+		count++;
+		if (count == j) {
+			hideloadbar();
+			count = 0;
+		}
+	}
 }
 
-void GamingScene::updateArmyMenu(float f)
-{
-	if (_menuSpriteLayer->getChildrenCount()) {
-		unschedule(schedule_selector(GamingScene::updateArmyMenu));
-	}
-
-	if (_menuSpriteLayer->getChildByTag(GI_TAG)) {
-		if (!_money->checkMoney(150)) {
-			_menuSpriteLayer->getChildByTag(GI_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(GI_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)) {
-		if (!_money->checkMoney(150)) {
-			_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(ATTACK_DOG_TAG)->setOpacity(255);
-		}
-	}
-	if (_menuSpriteLayer->getChildByTag(TANK_TAG)) {
-		if (!_money->checkMoney(300)) {
-			_menuSpriteLayer->getChildByTag(TANK_TAG)->setOpacity(100);
-		}
-		else {
-			_menuSpriteLayer->getChildByTag(TANK_TAG)->setOpacity(255);
-		}
-	}
-
+void GamingScene::hideloadbar() {
+	auto progress = static_cast<LoadingBar*>(this->getChildByTag(100));
+	progressbgSprite->setVisible(false);
+	progress->setVisible(false);
 }
-
