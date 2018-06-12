@@ -37,10 +37,21 @@ void UnitManager::updateUnitState()
 			else if (receiveMessage.cmd() == MESSAGEMOV)
 			{
 				int id = receiveMessage.unit_id1();
-				if (_unitIdMap.count(id))
+				if(_unitIdMap.count(id)>0)//if (_unitIdMap[id]!=nullptr)
 				{
 					Unit * unit = _unitIdMap[id];
-					unit->setDestination(Vec2(receiveMessage.position().x()*32.0,receiveMessage.position().y()*32.0));//杩欎釜position鐨勫弬鏁伴兘鏄痠nt鐨?
+					auto messageMovePath = receiveMessage.path();
+					vector<GridVec2> movePath;
+					int pathPointNum = messageMovePath.path_point_size();
+					for (int i = 0; i < pathPointNum; i++)
+					{
+						GridVec2 point;
+						auto pathPoint = messageMovePath.path_point(i);
+						point._x = pathPoint.x();
+						point._y = pathPoint.y();
+						movePath.push_back(point);
+					}
+					unit->setGridPath(movePath);
 					unit->move();
 				}
 				else
@@ -55,18 +66,26 @@ void UnitManager::updateUnitState()
 					int unitId1 = receiveMessage.unit_id1();
 					int unitId2 = receiveMessage.unit_id2();
 					int damage = receiveMessage.damage();
-					Unit * unit = _unitIdMap[unitId1];
-					if (receiveMessage.camp() == _playerCamp)
+					_unitIdMap[unitId1]->attack();
+					if (_unitIdMap.count(unitId2)>0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
 					{
-						if (!unit->getDamage(damage))
+						_unitIdMap[unitId2]->getDamage(damage);
+						if (_unitIdMap[unitId2]->getCurrentHp() <= 0)
 						{
-							destoryUnit(unitId1);
+							destoryUnit(unitId2);
+							_unitIdMap[unitId1]->setAttackID(0);
+							_unitIdMap[unitId1]->stopAttackUpdate();
 						}
 						else
-						{
-
-						}
+							if (_unitIdMap[unitId2]->getCamp() == getUnitCamp(unitId2))
+							{
+								_unitIdMap[unitId2]->setEnermyId(unitId1);//自动攻击
+								_unitIdMap[unitId2]->setUnderAttack(true);//自动攻击
+								_unitIdMap[unitId2]->displayHpBar();
+							}
 					}
+					else
+						_unitIdMap[unitId1]->stopAttackUpdate();
 				}
 			}
 		}
@@ -75,18 +94,32 @@ void UnitManager::updateUnitState()
 }
 void UnitManager::destoryUnit(int id)
 {
-	Unit * unit = _unitIdMap[id];
-	if (unit)
+	if(_unitIdMap.count(id)>0)//if (_unitIdMap[id] != nullptr)
 	{
-		if (unit->getUnitType() == WARFACTORY)
-			_warFactoryId.erase(unit->getID());
-		if (unit->getUnitType() == BARRACKS)
-			_barracksId.erase(unit->getID());
-		unit->removeFromMap();
-		//unit->deleteUnit();
-		_tileMap->removeChild(unit);
-		_unitIdMap.erase(id);	
-		
+		Unit * unit = _unitIdMap[id];
+		if (unit)
+		{
+			if (unit->getUnitType() == WARFACTORY)
+				_warFactoryId.erase(unit->getID());
+			if (unit->getUnitType() == BARRACKS)
+				_barracksId.erase(unit->getID());
+			if (unit->getUnitType() >= 5 && unit->getAttackID() != 0)
+			{
+				int attackId = unit->getAttackID();
+				if (_unitIdMap.count(attackId)>0&&_unitIdMap[attackId]->getCamp() == _playerCamp)//_unitIdMap[attackId] != nullptr &&
+				{
+					_unitIdMap[attackId]->setEnermyId(0);
+					_unitIdMap[attackId]->setUnderAttack(false);
+				}
+			}
+			if (_selectedUnitID.count(id) > 0)
+				_selectedUnitID.erase(id);
+			unit->removeFromMap();
+			//unit->deleteUnit();
+			_tileMap->removeChild(unit);
+			_unitIdMap.erase(id);
+
+		}
 	}
 }
 //BASE ,POWERPLANT,BARRACKS,WARFACTORY,OREREFINERY,GI,ATTACKDOG,TANK
@@ -140,17 +173,27 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 }
 GridVec2 UnitManager::getUnitPos(int id)
 {
-	Unit *unit = _unitIdMap[id];
-	if (unit)
-		return unit->getUnitCoord();
+	if (_unitIdMap.count(id) > 0)
+	{
+		Unit *unit = _unitIdMap[id];
+		if (unit)
+			return unit->getUnitCoord();
+		else
+			return GridVec2(-1, -1);
+	}
 	else
 		return GridVec2(-1, -1);
 }
 CampTypes UnitManager::getUnitCamp(int id)
 {
-	Unit * unit = _unitIdMap[id];
-	if (unit)
-		return (unit->getCamp());
+	if (_unitIdMap.count(id))
+	{
+		Unit * unit = _unitIdMap[id];
+		if (unit)
+			return (unit->getCamp());
+		else
+			return NULLCAMP;
+	}
 	else
 		return NULLCAMP;
 }
@@ -162,7 +205,7 @@ void UnitManager::selectUnits(const GridRect &range)
 	{
 		if (_unitIdMap[id]->getCamp() == _playerCamp)
 		{
-			_selectedUnitID.push_back(id);
+			_selectedUnitID.insert(id);
 			_unitIdMap[id]->displayHpBar();//hpbar
 		}
 	}
@@ -189,20 +232,27 @@ void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
 	posPoint->set_y( pos._y);
 	//鎬庝箞璁剧疆鍧愭爣锛燂紵
 }
-void UnitManager::creatMoveMessage(int id, const Vec2 & pos)
+void UnitManager::creatMoveMessage(int id, vector<GridVec2> &path )
 {
 	auto newMessage = _msgGroup->add_game_message();
 	newMessage->set_camp(_playerCamp);
 	newMessage->set_cmd(MESSAGEMOV);
 	newMessage->set_unit_id1(id);
-	GridPoint * posPoint = newMessage->mutable_position();
-	posPoint->set_x(pos.x);
-	posPoint->set_y(pos.y);
+	GridPath * movePath = newMessage->mutable_path();
+	for (auto pathPoint : path)
+	{
+		auto pointPos = movePath->add_path_point();
+		pointPos->set_x(pathPoint._x);
+		pointPos->set_y(pathPoint._y);
+	}
+	//GridPoint * posPoint = newMessage->mutable_position();
+	//posPoint->set_x(pos.x);
+	//posPoint->set_y(pos.y);
 }
 void UnitManager::createAttackMessage(int id1, int id2, int damage)
 {
 	auto newMessage = _msgGroup->add_game_message();
-	//newMessage->set_camp(_playerCamp);
+	newMessage->set_camp(_playerCamp);
 	newMessage->set_cmd(MESSAGEATK);
 	newMessage->set_unit_id1(id1);
 	newMessage->set_unit_id2(id2);
@@ -221,9 +271,11 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 			{
 				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可移动单位
 				{
-					if (destination != _unitIdMap[unitid]->getDestination()) {
+					_unitIdMap[unitid]->stopAttackUpdate();
+					_unitIdMap[unitid]->setAttackID(0);
+					if (destination != _unitIdMap[unitid]->getDestination()) 
+					{
 						_unitIdMap[unitid]->stopAllActions();
-
 						GridVec2 unitCoord(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32);
 						GridRect unitRect(GridRect(GridVec2(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32), GridDimen(1, 1)));
 						_unitIdMap[unitid]->_battleMap->unitLeavePosition(_unitIdMap[unitid]->getUnitRect());
@@ -234,7 +286,7 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 
 					_unitIdMap[unitid]->setDestination(destination);
 					_unitIdMap[unitid]->tryToFindPath();
-					_unitIdMap[unitid]->move();
+					//_unitIdMap[unitid]->move();
 					//产生移动消息
 					/*if (attackingUnit.count(unitid) > 0)
 					{
@@ -254,24 +306,38 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 				/*deselectAllUnits();
 				_selectedUnitID.push_back(idAtPos);
 				_unitIdMap[idAtPos]->displayHpBar();*/
-				for (auto unitid : _selectedUnitID)
+				if (_unitIdMap[idAtPos]->getUnitType() >=0)
 				{
-					if (_unitIdMap[unitid]->getUnitType() >= 5)//鏄彲鏀诲嚮鍗曚綅
+					for (auto unitid : _selectedUnitID)
 					{
-						if (_unitIdMap[idAtPos] != nullptr)
+						if (_unitIdMap[unitid]->getUnitType() >= 5)
 						{
-							newAttackUnit[unitid] = idAtPos;
-
-							/*_unitIdMap[unitid]->setAttackID(idAtPos);
-							_unitIdMap[unitid]->attack();
-							_unitIdMap[idAtPos]->getDamage(100);
-							_unitIdMap[idAtPos]->displayHpBar();
-							if (_unitIdMap[idAtPos]->getCurrentHp() <= 0)
+							int distanceX = abs(getUnitPos(idAtPos)._x - getUnitPos(unitid)._x);
+							int distanceY = abs(getUnitPos(idAtPos)._y - getUnitPos(unitid)._y);
+							if ( distanceX > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._width / 2
+								||  distanceY > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._height / 2)
 							{
-								destoryUnit(idAtPos);
-							}*/
+								//移动到建筑单位附近
+								_unitIdMap[unitid]->stopAttackUpdate();
+								_unitIdMap[unitid]->setAttackID(idAtPos);
+								if (destination != _unitIdMap[unitid]->getDestination())
+								{
+									_unitIdMap[unitid]->stopAllActions();
+									GridVec2 unitCoord(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32);
+									GridRect unitRect(GridRect(GridVec2(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32), GridDimen(1, 1)));
+									_unitIdMap[unitid]->_battleMap->unitLeavePosition(_unitIdMap[unitid]->getUnitRect());
+									_unitIdMap[unitid]->setUnitCoord(unitCoord);
+									_unitIdMap[unitid]->setUnitRect(unitRect);
+									_unitIdMap[unitid]->_battleMap->unitCoordStore(_unitIdMap[unitid]->getID(), unitRect);
+								}
+
+								_unitIdMap[unitid]->setDestination(destination);
+								_unitIdMap[unitid]->tryToFindPath();
+								_unitIdMap[unitid]->move();
+							}
+							_unitIdMap[unitid]->setAttackID(idAtPos);
+							_unitIdMap[unitid]->startAttackUpdate();
 						}
-						
 					}
 				}
 			}
@@ -279,25 +345,51 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 			{
 				//1敌方建筑 到达 攻击
 				//2敌方兵种 跟踪 攻击
-				/*for (auto unitid : _selectedUnitID)
+				
+				if (_unitIdMap[idAtPos]->getUnitType() < 5)
 				{
-				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可攻击单位
-				{
-				_unitIdMap[unitid]->setAttackID(idAtPos);
-				_unitIdMap[unitid]->attack();
-				_unitIdMap[idAtPos]->getDamage(100);
-				_unitIdMap[idAtPos]->displayHpBar();
-				if (_unitIdMap[idAtPos]->getCurrentHp() == 0)
-				{
-				destoryUnit(idAtPos);
+					for (auto unitid : _selectedUnitID)
+					{
+						if (_unitIdMap[unitid]->getUnitType() >= 5)
+						{
+							if (abs(getUnitPos(idAtPos)._x - getUnitPos(unitid)._x) > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._width / 2
+								&& abs(getUnitPos(idAtPos)._y - getUnitPos(unitid)._y) > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._height / 2)
+							{
+								//移动到建筑单位附近
+								_unitIdMap[unitid]->stopAttackUpdate();
+								_unitIdMap[unitid]->setAttackID(idAtPos);
+								if (destination != _unitIdMap[unitid]->getDestination())
+								{
+									_unitIdMap[unitid]->stopAllActions();
+									GridVec2 unitCoord(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32);
+									GridRect unitRect(GridRect(GridVec2(_unitIdMap[unitid]->getPosition().x / 32, _unitIdMap[unitid]->getPosition().y / 32), GridDimen(1, 1)));
+									_unitIdMap[unitid]->_battleMap->unitLeavePosition(_unitIdMap[unitid]->getUnitRect());
+									_unitIdMap[unitid]->setUnitCoord(unitCoord);
+									_unitIdMap[unitid]->setUnitRect(unitRect);
+									_unitIdMap[unitid]->_battleMap->unitCoordStore(_unitIdMap[unitid]->getID(), unitRect);
+								}
+
+								_unitIdMap[unitid]->setDestination(destination);
+								_unitIdMap[unitid]->tryToFindPath();
+								_unitIdMap[unitid]->move();
+							}
+							_unitIdMap[unitid]->setAttackID(idAtPos);
+							_unitIdMap[unitid]->startAttackUpdate();
+							//_unitIdMap[idAtPos]->setEnermyId(unitid);//测试自动攻击
+							//_unitIdMap[idAtPos]->setUnderAttack(true);//测试自动攻击
+						}
+					}
 				}
+				else
+				{
+					//2敌方兵种 跟踪 攻击
 				}
-				}*/
+				
 			}
 		}
 	}
 }
-void UnitManager::unitAttackUpdate()
+/*void UnitManager::unitAttackUpdate()
 {
 	if (!newAttackUnit.empty())
 	{
@@ -359,7 +451,7 @@ void UnitManager::unitAttackUpdate()
 			}
 		}
 	}
-}
+}*/
 void UnitManager::fighterUnitProductionUpdate()
 {
 	auto ite = _fighterProduceSeq.begin();
@@ -416,7 +508,10 @@ GridRect transferRectToGridRect(const Rect & rect)
 }
 Unit * UnitManager::getUnitPtr(int id)
 {
-	return _unitIdMap[id];
+	if (_unitIdMap.count(id) > 0)
+		return _unitIdMap[id];
+	else
+		return nullptr;
 }
 Vec2 UnitManager::getMyBasePos()
 {
