@@ -97,7 +97,6 @@ void Unit::initHpBar(UnitTypes type)
 }
 void Unit::hideHpBar()
 {
-
 	hpBGSprite->setVisible(false);
 }
 void Unit::displayHpBar()
