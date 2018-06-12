@@ -61,12 +61,13 @@ class Unit:public Sprite
 	CC_SYNTHESIZE(UnitTypes, _producingUnitType, ProducingUnitType);
 	CC_SYNTHESIZE(int, _producingState, ProducingState);
 	CC_SYNTHESIZE(int, _enermyId, EnermyId);
+	CC_SYNTHESIZE(std::vector<GridVec2>, _gridPath, GridPath);
 	//CC_SYNTHESIZE(UnitManager*£¬_unitManager, unitManager);
 public:
 	UnitManager * _unitManager = nullptr;
 	LoadingBar *_hpBar=nullptr;
 	Sprite * hpBGSprite=nullptr;
-	std::vector<GridVec2> _gridPath;
+	//std::vector<GridVec2> _gridPath;
 	void setUnitManager(UnitManager * uM) { _unitManager = uM; }
 	virtual bool init(CampTypes camp,UnitTypes Type,GridVec2 point, TMXTiledMap* map,GridMap *gridmap , int id=0);
 	//CC_SYNTHESIZE(GridDimen, _unitView, UnitView);
@@ -164,7 +165,7 @@ public:
 	//void initHpBar(UnitTypes type) {}
 	bool setPositionInGridMap(GridRect rectPos, GridMap * map) ;
 	//virtual void autoAttack();
-	bool searchNearEnemy();
+	int searchNearEnemy();
 	//virtual bool setPosition();
 	
 	//void autoAttackUpdate();

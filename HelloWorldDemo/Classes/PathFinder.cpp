@@ -174,23 +174,21 @@ void PathFinder::checkSurroundGrid(Grid & grid)
 	for (int i = 0; i < 8; ++i) {
 		auto x = grid.getXPosition() + DIRECTION[i][0];
 		auto y = grid.getYPosition() + DIRECTION[i][1];
-		if (x >= 0 && x < _mapWidth && y >= 0 && y <= _mapHeight && checkCorner(grid, _mapGrid[x][y])
-			&& isAvailable(_mapGrid[x][y]) && _mapGrid[x][y].getStatus() == UNOCCUPIED) {
-			if (!isInOpenList(_mapGrid[x][y]) && !isInCloseList(_mapGrid[x][y])) {
-				_mapGrid[x][y].setGValue(calculateEuclideanDistance(_mapGrid[x][y], grid));
-				_mapGrid[x][y].setHValue(calculateManhattanDistance(_mapGrid[x][y], *_end));
-				_mapGrid[x][y].setFValue(_mapGrid[x][y].getGValue() + _mapGrid[x][y].getHValue());
-
-				_mapGrid[x][y].setStatus(INOPENLIST);
-				_mapGrid[x][y].setParent(&grid);
-				_openList.push_back(&_mapGrid[x][y]);
-			}
-			else if (isInOpenList(_mapGrid[x][y])) {
+		if (x >= 0 && x < _mapWidth && y >= 0 && y < _mapHeight && !checkCorner(grid, _mapGrid[x][y]) && isAvailable(_mapGrid[x][y])) {
+			_mapGrid[x][y].setGValue(calculateEuclideanDistance(_mapGrid[x][y], grid));
+			_mapGrid[x][y].setHValue(calculateManhattanDistance(_mapGrid[x][y], *_end));
+			_mapGrid[x][y].setFValue(_mapGrid[x][y].getGValue() + _mapGrid[x][y].getHValue());
+			if (isInOpenList(_mapGrid[x][y])) {
 				if (calculateEuclideanDistance(_mapGrid[x][y], grid) < _mapGrid[x][y].getGValue()) {
 					_mapGrid[x][y].setGValue(calculateEuclideanDistance(_mapGrid[x][y], grid));
 					_mapGrid[x][y].setFValue(_mapGrid[x][y].getGValue() + _mapGrid[x][y].getHValue());
 					_mapGrid[x][y].setParent(&grid);
 				}
+			}
+			else {
+				_mapGrid[x][y].setStatus(INOPENLIST);
+				_mapGrid[x][y].setParent(&grid);
+				_openList.push_back(&_mapGrid[x][y]);
 			}
 		}
 	}
@@ -216,6 +214,7 @@ void PathFinder::generatePath()
 		_path.push_back(GridVec2(grid->getXPosition(), grid->getYPosition()));
 		grid = grid->getParent();
 	}
+	//_path.push_back(GridVec2(_start->getXPosition(), _start->getYPosition()));
 }
 
 std::vector<GridVec2> PathFinder::getPath()

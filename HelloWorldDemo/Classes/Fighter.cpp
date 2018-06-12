@@ -17,6 +17,13 @@ bool Solider::init(CampTypes camp, UnitTypes types, GridVec2 coord,
 	this->schedule(schedule_selector(Solider::autoAttack));
 	return true;
 }
+bool Tank::init(CampTypes camp, UnitTypes types, GridVec2 coord,
+	TMXTiledMap* map, GridMap * gridmap, int id)
+{
+	FightUnit::init(camp, types, coord, map, gridmap, id);
+	this->schedule(schedule_selector(Solider::autoAttack));
+	return true;
+}
 Tank*Tank::create(const std::string& filename)
 {
 	Tank *ret = new (std::nothrow) Tank();
@@ -43,10 +50,28 @@ void Tank::shootBullet()
 }
 void Tank::attackUpdate(float dt)
 {
-	_unitManager->createAttackMessage(_id, _attackID, _attackForce);
-	attack();
-	_unitManager->_unitIdMap[_attackID]->getDamage(_attackForce);
-	_unitManager->_unitIdMap[_attackID]->displayHpBar();
+	if (_unitManager->_unitIdMap.count(_attackID)>0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
+	{
+		_unitManager->createAttackMessage(_id, _attackID, _attackForce);
+		/*attack();
+		if (_unitManager->_unitIdMap.count(_attackID)>0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
+		{
+			_unitManager->_unitIdMap[_attackID]->getDamage(_attackForce);
+			if (_unitManager->_unitIdMap[_attackID]->getCurrentHp() <= 0)
+			{
+				_unitManager->destoryUnit(_attackID);
+				setAttackID(0);
+				stopAttackUpdate();
+			}
+			else
+				if (_unitManager->_unitIdMap[_attackID]->getCamp() == _unitManager->getPlayerCamp())
+					_unitManager->_unitIdMap[_attackID]->displayHpBar();
+		}
+		else
+			stopAttackUpdate();*/
+	}
+	else
+		stopAttackUpdate();
 }
 void Tank::startAttackUpdate()
 {
@@ -69,10 +94,28 @@ void Solider::shootBullet()
 }
 void Solider::attackUpdate(float dt)
 {
-	_unitManager->createAttackMessage(_id, _attackID, _attackForce);
-	attack();
-	_unitManager->_unitIdMap[_attackID]->getDamage(_attackForce);
-	_unitManager->_unitIdMap[_attackID]->displayHpBar();
+	if(_unitManager->_unitIdMap.count(_attackID)>0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
+	{
+		_unitManager->createAttackMessage(_id, _attackID, _attackForce);
+		//attack();
+		/*if (_unitManager->_unitIdMap.count(_attackID)>0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
+		{
+			_unitManager->_unitIdMap[_attackID]->getDamage(_attackForce);
+			if (_unitManager->_unitIdMap[_attackID]->getCurrentHp() <= 0)
+			{
+				_unitManager->destoryUnit(_attackID);
+				setAttackID(0);
+				stopAttackUpdate();
+			}
+			else
+				if (_unitManager->_unitIdMap[_attackID]->getCamp() == _unitManager->getPlayerCamp())
+					_unitManager->_unitIdMap[_attackID]->displayHpBar();
+		}
+		else
+			stopAttackUpdate();*/
+	}
+	else
+		stopAttackUpdate();
 }
 void Solider::startAttackUpdate()
 {
@@ -84,44 +127,60 @@ void Solider::stopAttackUpdate()
 }
 void Tank::autoAttack(float fd)
 {
-	if (_autoAttack == true && _underAttack == true && _attackID == 0)
+	if (_autoAttack == true && _underAttack == true && _attackID == 0)//如果敌人被毁灭，underattack改成false
 	{
-		_attackID = _enermyId;
-		_unitManager->attackingUnit[_id] = _enermyId;
-		startAttackUpdate();
+		if (_unitManager->_unitIdMap.count(_enermyId)>0//[_enermyId] != nullptr
+			&& abs(_unitCoord._x - _unitManager->getUnitPos(_enermyId)._x) <= _autoAttackScope._width / 2
+			&& abs(_unitCoord._y - _unitManager->getUnitPos(_enermyId)._y) <= _autoAttackScope._height / 2)
+		{
+			_attackID = _enermyId;
+			_unitManager->attackingUnit[_id] = _enermyId;
+			startAttackUpdate();
+		}
 		//if(_unitManager->_unitIdMap.count(_enermyId)>0)
 		//_unitManager->newAttackUnit[_id] = _enermyId;
 	}
 	else
 		if (_autoAttack == true && _attackID == 0)
 		{
-			if (searchNearEnemy())
+			int attackId = searchNearEnemy();
+			if (attackId)
 			{
-				_unitManager->newAttackUnit[_id] = _attackID;
+				setAttackID(attackId);
+				startAttackUpdate();
+				//_unitManager->newAttackUnit[_id] = _attackID;
 				//_unitManager->attackingUnit[_id] = _attackID;
-				//startAttackUpdate();
+				//
 			}
 
 		}
 }
 void Solider::autoAttack(float fd)
 {
-	if (_autoAttack == true && _underAttack == true && _attackID == 0)
+	if (_autoAttack == true && _underAttack == true && _attackID == 0)//如果敌人被毁灭，underattack改成false
 	{
-		_attackID = _enermyId;
-		_unitManager->attackingUnit[_id] = _enermyId;
-		startAttackUpdate();
+		if (_unitManager->_unitIdMap.count(_enermyId)>0//[_enermyId] != nullptr
+			&& abs(_unitCoord._x - _unitManager->getUnitPos(_enermyId)._x) <= _autoAttackScope._width/2
+			&& abs(_unitCoord._y - _unitManager->getUnitPos(_enermyId)._y) <= _autoAttackScope._height/2)
+		{
+			_attackID = _enermyId;
+			_unitManager->attackingUnit[_id] = _enermyId;//
+			startAttackUpdate();
+		}
 		//if(_unitManager->_unitIdMap.count(_enermyId)>0)
 			//_unitManager->newAttackUnit[_id] = _enermyId;
 	}
 	else 
-		if (_autoAttack == true && _attackID == 0)
-		{
-			if (searchNearEnemy())
+		if (_autoAttack == true && _attackID == 0)	
+		{ 
+			int attackId = searchNearEnemy();
+			if (attackId)
 			{
-				_unitManager->newAttackUnit[_id] = _attackID;
+				setAttackID(attackId);
+				startAttackUpdate();
+				//_unitManager->newAttackUnit[_id] = _attackID;
 				//_unitManager->attackingUnit[_id] = _attackID;
-				//startAttackUpdate();
+				//
 			}
 
 		}

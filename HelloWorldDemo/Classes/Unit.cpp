@@ -71,7 +71,6 @@ bool BuildingUnit::init( CampTypes camp,UnitTypes buildingType,GridVec2 point, T
 	initHpBar(buildingType);
 	return true;
 }
-
 bool BuildingUnit::setPositionInGridMap(GridRect rectPos, GridMap * map)
 {
 	if (map->unitCoordStore(_id, rectPos))
@@ -139,6 +138,7 @@ void Unit::removeFromMap()
 }
 bool Unit::getDamage(int hurt)
 {
+	SimpleAudioEngine::getInstance()->playEffect("Music/Solider explosion.wav");
 	setCurrentHp(_currentHp - hurt);
 	if (_currentHp <= 0)
 	{
@@ -149,12 +149,9 @@ bool Unit::getDamage(int hurt)
 	else
 	{
 		float percent = (float)_currentHp / (float)_health;
-		_hpBar->setPercent(percent*100);
+		_hpBar->setPercent(percent * 100);
 		return true;
 	}
-}
-void Unit::getDamage() {
-	SimpleAudioEngine::getInstance()->playEffect("Music/Solider explosion.wav");
 }
 bool FightUnit::init(CampTypes camp, UnitTypes types, GridVec2 coord,
 	TMXTiledMap* map, GridMap * gridmap, int id)
@@ -218,7 +215,7 @@ void FightUnit::tryToFindPath()
 	}
 	_gridPath = findPath(destination);
 	optimizePath();
-
+	_unitManager->creatMoveMessage(_id, _gridPath);
 }
 
 std::vector<GridVec2> FightUnit::findPath(const GridVec2 & destination)
@@ -281,10 +278,21 @@ void FightUnit::optimizePath()
 		_gridPath.push_back(grid);
 	}
 }
-bool FightUnit::searchNearEnemy()
+int FightUnit::searchNearEnemy()
 {
-	auto  autoAtkRect = GridRect(GridVec2(_unitCoord._x - _autoAttackScope._width/ 2, _unitCoord._y - _autoAttackScope._height/ 2 ),
-		_autoAttackScope);
+	GridVec2 autoAtkRectPoint = GridVec2((_unitCoord._x - _autoAttackScope._width / 2 )< 0 ? 0 : (_unitCoord._x - _autoAttackScope._width / 2),
+								(_unitCoord._y - _autoAttackScope._height / 2) < 0? 0 : (_unitCoord._y - _autoAttackScope._height / 2));
+	GridDimen attackSize;
+	if (_unitCoord._x + _autoAttackScope._width / 2 >= _MAP_WIDTH)
+		attackSize._width = _autoAttackScope._width - ((_unitCoord._x + _autoAttackScope._width / 2) - _MAP_WIDTH + 1);
+	else
+		attackSize._width = _autoAttackScope._width;
+	if (_unitCoord._y + _autoAttackScope._height / 2 >= _MAP_HEIGHT)
+		attackSize._height = _autoAttackScope._height - ((_unitCoord._y + _autoAttackScope._height / 2) - _MAP_HEIGHT + 1);
+	else
+		attackSize._height = _autoAttackScope._height;
+	auto  autoAtkRect = GridRect(autoAtkRectPoint,attackSize);
+	int attackId;
 	auto  unitIDs = _battleMap->getUnitIdAt(autoAtkRect);
 	int distance = 0;
 	int minDistance = 10000;
@@ -293,23 +301,23 @@ bool FightUnit::searchNearEnemy()
 		for (auto itsID : unitIDs)
 		{
 			int camp=_unitManager->getUnitCamp(itsID);
-			if (camp!= 0 && camp != _camp)//&&itsID!=_id )//
+			if (camp!= 0 && itsID != _id)////camp != _camp)
 			{
 				GridVec2 enermyPos=_unitManager->getUnitPos(itsID);
 				distance = (enermyPos._x - _unitCoord._x)*(enermyPos._x - _unitCoord._x) +
 							(enermyPos._y - _unitCoord._y)*(enermyPos._y - _unitCoord._y);
 				if (distance < minDistance)
 				{
-					_attackID = itsID;
+					attackId = itsID;
 					mark = 1;
 					//_autoAttack = true;
 				}
 			}
 		}
 	if (mark == 1)
-		return true;
+		return attackId;
 	else
-		return false;
+		return 0;
 }
 void FightUnit::attack()
 {
@@ -389,8 +397,8 @@ void BuildingUnit::produceUpdate(float ft)
 			_producingState = 0;
 			_produceProcess = 0;
 			GridVec2 producePos = findEmptyPosToProduce();
-			_unitManager->creatProduceMessage(_producingUnitType, GridVec2(producePos._x / 32, producePos._y / 32));
-			_unitManager->creatUnit(_unitManager->getPlayerCamp(), _producingUnitType, producePos);
+			_unitManager->creatProduceMessage(_producingUnitType, GridVec2(producePos._x , producePos._y ));
+			//_unitManager->creatUnit(_unitManager->getPlayerCamp(), _producingUnitType, producePos);
 			stopProduceUnit();
 		}
 	}
