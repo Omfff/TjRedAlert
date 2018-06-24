@@ -2,7 +2,8 @@
 
 bool ManufactureMenu::init()
 {
-	if (!Menu::init()) {
+	if (!Menu::init()) 
+	{
 		return false;
 	}
 
@@ -12,7 +13,6 @@ bool ManufactureMenu::init()
 	_buildingButton->setAnchorPoint(Vec2(1, 0.5));
 	_buildingButton->setScale(0.6);
 	_buildingButton->setPosition(visibleSize.width, visibleSize.height * 0.4);
-	//buildingButton->setPosition(getContentSize().width, getContentSize().height - _buildingButton->getContentSize().height);
 
 	_armyButton = MenuItemImage::create("ui/menu/NormalArmyButton.png", "ui/menu/SelectedArmyButton.png");
 	_armyButton->setAnchorPoint(Vec2(1, 0.5));
@@ -35,44 +35,4 @@ void ManufactureMenu::setBuildingCallBack(std::function<void(Ref*)> callBack)
 void ManufactureMenu::setArmyCallBack(std::function<void(Ref*)> callBack)
 {
 	_armyButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setGICallBack(std::function<void(Ref*)> callBack)
-{
-	_GIButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setAttackDogCallBack(std::function<void(Ref*)> callBack)
-{
-	_attackDogButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setTankCallBack(std::function<void(Ref*)> callBack)
-{
-	_tankButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setBaseCallBack(std::function<void(Ref*)> callBack)
-{
-	_baseButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setPowerPlantCallBack(std::function<void(Ref*)> callBack)
-{
-	_powerPlantButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setBarrackCallBack(std::function<void(Ref*)> callBack)
-{
-	_barrackButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setWarFactoryCallBack(std::function<void(Ref*)> callBack)
-{
-	_warFactoryButton->setCallback(callBack);
-}
-
-void ManufactureMenu::setOreRefineryCallBack(std::function<void(Ref*)> callBack)
-{
-	_oreRefineryButton->setCallback(callBack);
 }

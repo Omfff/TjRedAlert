@@ -57,6 +57,7 @@ public:
 	//return path of grid pinoit
 	std::vector<GridVec2> getPath();
 
+	std::vector<std::vector<Grid>> _mapGrid;
 private:
 
 	//select next grid with the smallest F Value
@@ -88,7 +89,6 @@ private:
 
 	int _mapWidth;
 	int _mapHeight;
-	std::vector<std::vector<Grid>> _mapGrid;
 	Grid* _start;
 	Grid* _end;
 	std::vector<Grid *> _openList;

@@ -56,19 +56,6 @@ bool HelloWorld::init()
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
-    /////////////////////////////
-	/*auto moneyIcon = Sprite::create("ui/money/money.jpg");
-	moneyIcon->setPosition(visibleSize.width - 120, 20);
-	moneyIcon->setScale(0.04);
-	addChild(moneyIcon, 1);
-
-	auto money = Money::create();
-	money->setPosition(visibleSize.width - 80, 20);
-	money->schedule(schedule_selector(Money::update));
-	addChild(money, 1);*/
-
-
-
     return true;
 }
 

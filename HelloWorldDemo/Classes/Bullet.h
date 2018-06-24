@@ -6,8 +6,8 @@
 #include"Building.h"
 
 
-#define _GI_BULLET_SPEED 10;
-#define _TANK_BULLET_SPEED 20;
+#define _GI_BULLET_SPEED 5;
+#define _TANK_BULLET_SPEED 8;
 USING_NS_CC;
 class Unit;
 class Bullet :public Sprite

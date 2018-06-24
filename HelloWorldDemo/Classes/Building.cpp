@@ -1,22 +1,7 @@
 #include"Building.h"
 
 USING_NS_CC;
-/*bool Base::getDamage(int hurt)
-{
-	if(!Unit::getDamage(hurt))
-	{
-		Unit::removeFromMap();
-		//_tiledMap->removeChild(this);
-		return false;
-	}
-	return true;
-}
-*/
 
-/*void Base::update(float f)
-{
-	getDamage(100);
-}*/
 Base* Base::create(const std::string& filename)
 {
 	Base *ret = new (std::nothrow) Base();
@@ -88,12 +73,12 @@ WarFactory *  WarFactory::create(const std::string& filename)
 
 	return nullptr;
 }
-GridVec2 Barracks::findEmptyPosToProduceSolider()
+GridVec2 Barracks::findEmptyPosToProduce()
 {
 	GridVec2 tempPos = _battleMap->getEmptyPointNearby(_unitCoord);
 	return GridVec2(tempPos._x * 32, tempPos._y * 32);
 }
-GridVec2 WarFactory::findEmptyPosToProduceTank()
+GridVec2 WarFactory::findEmptyPosToProduce()
 {
 	GridVec2 tempPos = _battleMap->getEmptyPointNearby(_unitCoord);
 	return GridVec2(tempPos._x * 32, tempPos._y * 32);

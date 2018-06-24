@@ -1,7 +1,4 @@
 #include "AppDelegate.h"
-
-
-
 #include "GameMenuScene.h"
 
 
@@ -26,8 +23,8 @@ USING_NS_CC;
 
 
 
-static cocos2d::Size designResolutionSize = cocos2d::Size(960, 640);
-static cocos2d::Size smallResolutionSize = cocos2d::Size(960, 640);
+static cocos2d::Size designResolutionSize = cocos2d::Size(1280, 768);
+static cocos2d::Size smallResolutionSize = cocos2d::Size(1280, 768);
 
 
 static cocos2d::Size mediumResolutionSize = cocos2d::Size(1024, 768);

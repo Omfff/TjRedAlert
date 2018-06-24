@@ -5,7 +5,7 @@
 #include"SystemHeader.h"
 #include<string>
 
-class Money:public cocos2d::LabelBMFont
+class Money:public cocos2d::LabelTTF
 {
 public:
 
@@ -38,6 +38,8 @@ public:
 	//when some buidings are destroyed, decrease money increase in specific time
 	void cutMoneyInPeriod(int cut);
 
+	int getMoneyInPeriod() { return _moneyInPeriod; }
+
 private:
 	int _money = 0;
 	int _time = 0;
@@ -47,7 +49,7 @@ private:
 	int _moneyInPeriod = MONEY_IN_PERIOD;
 	//money increase period
 	int _period = PERIOD;
-
+	
 };
 
 

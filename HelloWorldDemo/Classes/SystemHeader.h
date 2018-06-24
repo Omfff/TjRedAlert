@@ -2,18 +2,19 @@
 #define __SYSTEM_HEADER_H__
 
 //Money.h
-const int INITIAL_MONEY = 10000;
-const int MONEY_IN_PERIOD = 0;
-const int PERIOD = 20;
+const int INITIAL_MONEY = 6000;
+const int MONEY_IN_PERIOD = 50;
+const int PERIOD = 120;
 
 
 //GamingScene.cpp --void scroll()
-const int BOX_EDGE_WIDTH_SMALL = 30;
-const int BOX_EDGE_WIDTH = 60;
-const int BOX_EDGE_HEIGHT_SMALL = 30;
-const int BOX_EDGE_HEIGHT = 60;
+const int BOX_EDGE_WIDTH_SMALL = 50;
+const int BOX_EDGE_WIDTH = 100;
+const int BOX_EDGE_HEIGHT_SMALL = 50;
+const int BOX_EDGE_HEIGHT = 100;
 
 const int SCROLL_DISTANCE = 6;
+
 
 //GamingScene.cpp--bool init()--manufacturemenu
 enum {
@@ -52,6 +53,9 @@ enum { UNOCCUPIED, OCCUPIED, START, END, INOPENLIST, INCLOSELIST };
 const int DIRECTION[8][2] = { { 1, 0 },{ 1, -1 },{ 0, -1 },{ -1, -1 },{ -1, 0 },{ -1, 1 },{ 0, 1 },{ 1, 1 } };
 const int STRAIGHT_PATH = 10;
 const int OBLIQUE_PATH = 14;
+
+//choose different resources according to camp
+
 
 #endif // !__SYSTEM_HEADER_H__
 

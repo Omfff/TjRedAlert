@@ -4,12 +4,13 @@
 #include"Unit.h"
 
 
+
 class Base :public BuildingUnit
 {
 public:
 	//CREATE_FUNC(Base);
 	static Base* Base::create(const std::string& filename);
-	bool init( CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id=0);
+	bool _stdcall init( CampTypes camp, UnitTypes buildingType, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id=0);
 	//bool getDamage(int hurt);
 };
 
@@ -33,15 +34,18 @@ public:
 
 class Barracks :public BuildingUnit
 {
+	
 public:
-	GridVec2 findEmptyPosToProduceSolider();
+	GridVec2 findEmptyPosToProduce();
 	static Barracks * Barracks::create(const std::string & filename);
+
 };
 
 class WarFactory :public BuildingUnit
 {
 public:
-	GridVec2 findEmptyPosToProduceTank();
+	GridVec2 findEmptyPosToProduce();
 	static WarFactory * WarFactory::create(const std::string &filename);
+
 };
 
