@@ -40,15 +40,15 @@ bool GameMenu::init() {
 	auto start_label = MenuItemImage::create("/Picture/MenuItems/ButtonStart.png",
 		"/Picture/MenuItems/ButtonStartSelected.png",
 		CC_CALLBACK_1(GameMenu::menuItemStartCallback, this));
-	auto credits_label = MenuItemImage::create("/Picture/MenuItems/ButtonCredit.png",
-		"/Picture/MenuItems/ButtonCreditSelected.png",
-		CC_CALLBACK_1(GameMenu::menuItemSetCallback, this));
+	auto help_label = MenuItemImage::create("/Picture/MenuItems/ButtonHelp.png",
+		"/Picture/MenuItems/ButtonHelpSelected.png",
+		CC_CALLBACK_1(GameMenu::menuItemHelpCallback, this));
 	auto quit_label = MenuItemImage::create("/Picture/MenuItems/ButtonQuit.png",
 		"/Picture/MenuItems/ButtonQuitSelected.png",
 		CC_CALLBACK_1(GameMenu::menuItemQuitCallback, this));
 
 
-	auto menu = Menu::create(start_label, credits_label, quit_label, NULL);
+	auto menu = Menu::create(start_label, help_label, quit_label, NULL);
 	menu->setPosition(Vec2(origin.x + visibleSize.width / 2,
 		origin.y + visibleSize.height / 2));
 
