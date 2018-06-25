@@ -22,6 +22,13 @@ bool operator==(const GridVec2 & point1, const GridVec2 & point2)
 	else
 		return false;
 }
+bool operator <(const GridVec2 & point1, const GridVec2 & point2)
+{
+	if ((point1._x*point1._x + point1._y*point1._y) < (point2._x*point2._x + point2._y*point2._y))
+		return true;
+	else
+		return false;
+}
 bool operator ==(const GridDimen & size1, const GridDimen & size2)
 {
 	if (size1._height == size2._height&&size1._width == size2._width)
@@ -45,11 +52,17 @@ bool GridRect::containsPoint(const GridVec2 & point)const
 		return false;
 }
 bool GridRect::intersectsRect(const GridRect & rect)const
-{
-	if (rect.containsPoint(_oriPoint) && containsPoint(rect._oriPoint))
-		return true;
-	else
-		return false;
+{ 
+	int x, y;
+	for(x=rect._oriPoint._x;x<rect._oriPoint._x+rect._dimen._width;x++)
+		for (y = rect._oriPoint._y; y < rect._oriPoint._y + rect._dimen._height; y++)
+		{
+			if (containsPoint(GridVec2(x, y)))
+				return true;
+			else
+				continue;
+		}
+	return false;
 }
 bool GridRect::insideRect(const GridRect & rect)const
 {
@@ -194,8 +207,10 @@ int GridMap::getUnitIdAt(const GridVec2& position)const
 set<int> GridMap::getUnitIdAt(const GridRect & range)const
 {
 	set<int> idGroup;
-	for (int xBegin = range._oriPoint._x; xBegin <= range._oriPoint._x + range._dimen._width; xBegin++)
-		for (int yBegin = range._oriPoint._y; yBegin <=range._oriPoint._y + range._dimen._height; yBegin++)
+	int xEnd = (range._oriPoint._x + range._dimen._width) > _MAP_WIDTH ? _MAP_WIDTH : (range._oriPoint._x + range._dimen._width);
+	int yEnd = (range._oriPoint._y + range._dimen._height) > _MAP_HEIGHT ? _MAP_HEIGHT : (range._oriPoint._y + range._dimen._height);
+	for (int xBegin = range._oriPoint._x; xBegin <=xEnd; xBegin++)
+		for (int yBegin = range._oriPoint._y; yBegin <=yEnd; yBegin++)
 		{
 			if (_barrierMap[xBegin][yBegin] != 0&& _barrierMap[xBegin][yBegin] != _NO_PASS)
 			{
@@ -285,7 +300,8 @@ void setCollisionPos(TMXTiledMap* map,GridMap * gmap)
 				gmap->addChild(barrier);
 
 				gmap->_barrierMap[tileCoord.x][62-tileCoord.y-1] = _NO_PASS;
-				gmap->_findPathMap[tileCoord.x][62 - tileCoord.y - 1] = 1;
+				gmap->_findPathMap[(int)tileCoord.x][int(62 - tileCoord.y - 1)] = 1;
+
 				
 			}
 		}
@@ -295,4 +311,19 @@ Vec2 tileCoordFromPosition(Vec2 pos, TMXTiledMap* map)
 	int x = pos.x / map->getTileSize().width;
 	int y = ((map->getMapSize().height * map->getTileSize().height) - pos.y) / map->getTileSize().height;
 	return Vec2(x, y);
+}
+GridVec2 GridMap::getNewDestination(const GridVec2 & position,const map<GridVec2,int> & destination) const
+{
+	for (int i = 1; i <= _MAP_HEIGHT + _MAP_HEIGHT; i++)
+	{
+		GridVec2 tempPoint = position + GridVec2(-i, 0);
+		for (int oritat = 0; oritat<4; oritat++)
+			for (int k = 1; k <= i; k++)
+			{
+				tempPoint = tempPoint + orientations[oritat];
+				if (!checkPointPosition(tempPoint) && destination.count(tempPoint)==0 )
+					return tempPoint;
+			}
+	}
+	return GridVec2(-100, -100);
 }

@@ -15,7 +15,8 @@ Scene* AudioControl::createScene()
 }
 
 bool AudioControl::init() {
-	if (!Layer::init()) {
+	if (!Layer::init()) 
+	{
 		return false;
 	}
 	Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -31,52 +32,6 @@ bool AudioControl::init() {
 	auto Sound_Text = Text::create("Sound", "Times New Roman", 36);
 	Sound_Text->setPosition(Vec2(visibleSize.width*0.4, visibleSize.height*0.4));
 	this->addChild(Sound_Text);
-	
-	/*auto Music_Slider = Slider::create();
-	Music_Slider->loadBarTexture("sliderTrack.png");
-	Music_Slider->setScale(0.5);
-	Music_Slider->loadSlidBallTextures("sliderThumb.png", "sliderThumb.png", "");
-	Music_Slider->setScale(0.4);
-	Music_Slider->loadProgressBarTexture("sliderProgress.png");
-	Music_Slider->setScale(0.5);
-	float MusicPercent = UserDefault::getInstance()->getFloatForKey("musicPercent");
-	if (MusicPercent == 0.0f) {
-		MusicPercent = 100.0f;
-	}
-	Music_Slider->setPercent(MusicPercent);
-	Music_Slider->setPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.7));
-	Music_Slider->addEventListener([=](Ref* pSender, Slider::EventType type) {
-		if (type == Slider::EventType::ON_PERCENTAGE_CHANGED)
-		{
-			int percent = Music_Slider->getPercent();
-			SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(float(percent) / 100);
-			UserDefault::getInstance()->setFloatForKey("(MusicPercent", percent);
-		}
-	});
-	this->addChild(Music_Slider);
-
-	auto Effects_Slider = Slider::create();
-	Effects_Slider->loadBarTexture("sliderTrack.png");
-	Effects_Slider->setScale(0.5);
-	Effects_Slider->loadSlidBallTextures("sliderThumb.png", "sliderThumb.png", "");
-	Effects_Slider->setScale(0.5);
-	Effects_Slider->loadProgressBarTexture("sliderProgress.png");
-	Effects_Slider->setScale(0.5);
-	float EffectPercent = UserDefault::getInstance()->getFloatForKey("effectPercent");
-	if (EffectPercent == 0.0f) {
-		EffectPercent = 100.0f;
-	}
-	Effects_Slider->setPercent(EffectPercent);
-	Effects_Slider->setPosition(Vec2(visibleSize.width*0.5, visibleSize.height*0.4));
-	Effects_Slider->addEventListener([=](Ref* pSender, Slider::EventType type) {
-		if (type == Slider::EventType::ON_PERCENTAGE_CHANGED)
-		{
-			int Percent = Effects_Slider->getPercent();
-			SimpleAudioEngine::getInstance()->setEffectsVolume(float(Percent) / 100);
-			UserDefault::getInstance()->setFloatForKey("effectPercent", Percent);
-		}
-	});
-	this->addChild(Effects_Slider);*/
 
 	MenuItemFont::setFontName("Times New Roman");
 	MenuItemFont::setFontSize(36);

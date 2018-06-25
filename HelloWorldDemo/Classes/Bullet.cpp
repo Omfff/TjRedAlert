@@ -2,7 +2,8 @@
 Bullet* Bullet::create(const std::string& filename)
 {
 	Bullet* ret = new Bullet();
-	if (ret && ret->initWithFile(filename)) {
+	if (ret && ret->initWithFile(filename)) 
+	{
 		ret->autorelease();
 		return ret;
 	}
@@ -20,7 +21,7 @@ bool Bullet::initWithTarget(FightUnit* sender, int target)
 	{
 		_speed = _TANK_BULLET_SPEED;
 	}
-	setPosition(Point(sender->getUnitCoord()._x * 32, sender->getUnitCoord()._y * 32));// + Point(0, sender->getContentSize().height / 2));
+	setPosition(Point(sender->getUnitCoord()._x * 32+16, sender->getUnitCoord()._y * 32+16));// + Point(0, sender->getContentSize().height / 2));
 	_tiledMap->addChild(this,11);
 	_targetId = target;
 	_target = _unitManager->getUnitPtr(target);
@@ -36,14 +37,15 @@ void Bullet::update(float dt)
 		this->removeFromParentAndCleanup(true);
 		return;
 	}
-	double distanceX = getPosition().x / 32.0 - _target->getUnitCoord()._x;
-	double distanceY = getPosition().y / 32.0 - _target->getUnitCoord()._y;
-	if (!(distanceX>=0&& distanceX <= _target->getUnitSize()._width&&distanceY >= 0 && distanceY <= _target->getUnitSize()._height))
-	 {
-		float distance = ccpDistance(getPosition(), _target->getPosition() + Vec2(0, _target->getContentSize().height));
+	double distanceX = getPosition().x  - _target->getUnitCoord()._x*32;
+	double distanceY = getPosition().y  - _target->getUnitCoord()._y*32;
+	if (!(distanceX> _target->getUnitSize()._width * 32 * 0.25 && distanceX <= _target->getUnitSize()._width * 32 * 0.75
+		&&distanceY > _target->getUnitSize()._height * 32 * 0.25 && distanceY <= _target->getUnitSize()._height * 32 * 0.75))
+	{
+		float distance = ccpDistance(getPosition(), _target->getPosition()); //+ Vec2(0, _target->getContentSize().height));
 		float t = distance / _speed;
 		float speed_x = (_target->getPositionX() - getPositionX()) / t;
-		float speed_y = (_target->getPositionY() + _target->getContentSize().height / 2 - getPositionY()) / t;
+		float speed_y = (_target->getPositionY() - getPositionY()) / t;
 		setPositionX(getPositionX() + speed_x);
 		setPositionY(getPositionY() + speed_y);
 	}

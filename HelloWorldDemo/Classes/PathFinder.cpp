@@ -80,12 +80,16 @@ PathFinder::PathFinder(std::vector<std::vector<int>> & barrierMap, int x1, int y
 	_mapGrid.assign(_mapWidth, column);
 
 	for(int i = 0; i < _mapWidth; ++i)
-		for (int j = 0; j < _mapHeight; ++j) {
+		for (int j = 0; j < _mapHeight; ++j) 
+		{
 			_mapGrid[i][j].setXPosition(i);
 			_mapGrid[i][j].setYPosition(j);
-			if (barrierMap[i][j] == UNOCCUPIED) {
+			if (barrierMap[i][j] == UNOCCUPIED) 
+			{
 				_mapGrid[i][j].setStatus(UNOCCUPIED);
-			} else {
+			} 
+			else 
+			{
 				_mapGrid[i][j].setStatus(OCCUPIED);
 			}
 		}
@@ -100,8 +104,10 @@ Grid* PathFinder::selectNextGrid()
 {
 	Grid * nextGrid = _openList[0];
 
-	for (auto p : _openList) {
-		if (p->getFValue() < nextGrid->getFValue()) {
+	for (auto p : _openList) 
+	{
+		if (p->getFValue() < nextGrid->getFValue()) 
+		{
 			nextGrid = p;
 		}
 	}
@@ -111,7 +117,8 @@ Grid* PathFinder::selectNextGrid()
 
 bool PathFinder::isInOpenList(Grid & grid)
 {
-	if (grid.getStatus() == INOPENLIST) {
+	if (grid.getStatus() == INOPENLIST) 
+	{
 		return true;
 	}
 	return false;
@@ -119,7 +126,8 @@ bool PathFinder::isInOpenList(Grid & grid)
 
 bool PathFinder::isInCloseList(Grid & grid)
 {
-	if (grid.getStatus() == INCLOSELIST || grid.getStatus() == START) {
+	if (grid.getStatus() == INCLOSELIST || grid.getStatus() == START) 
+	{
 		return true;
 	}
 	return false;
@@ -128,14 +136,16 @@ bool PathFinder::isInCloseList(Grid & grid)
 void PathFinder::removeFromOpenList(Grid * grid)
 {
 	std::vector<Grid *>::iterator iter = find(_openList.begin(), _openList.end(), grid);
-	if (iter != _openList.end()){
+	if (iter != _openList.end())
+	{
 		_openList.erase(iter);
 	}
 }
 
 int PathFinder::calculateEuclideanDistance(Grid & grid1, Grid & grid2)
 {
-	if (grid1.getXPosition() == grid2.getXPosition() || grid1.getYPosition() == grid2.getYPosition()) {
+	if (grid1.getXPosition() == grid2.getXPosition() || grid1.getYPosition() == grid2.getYPosition()) 
+	{
 		return grid2.getGValue() + STRAIGHT_PATH;
 	}
 	return grid2.getGValue() + OBLIQUE_PATH;
@@ -148,10 +158,12 @@ int PathFinder::calculateManhattanDistance(Grid & grid1, Grid & grid2)
 
 bool PathFinder::isAvailable(Grid & grid)
 {
-	if (isInCloseList(grid)) {
+	if (isInCloseList(grid)) 
+	{
 		return false;
 	}
-	else if (grid.getStatus() == OCCUPIED) {
+	else if (grid.getStatus() == OCCUPIED) 
+	{
 		return false;
 	}
 	return true;
@@ -159,11 +171,13 @@ bool PathFinder::isAvailable(Grid & grid)
 
 bool PathFinder::checkCorner(Grid & grid1, Grid & grid2)
 {
-	if (grid1.getXPosition() == grid2.getXPosition() || grid1.getYPosition() == grid2.getYPosition()) {
+	if (grid1.getXPosition() == grid2.getXPosition() || grid1.getYPosition() == grid2.getYPosition()) 
+	{
 		return false;
 	}
 	else if (_mapGrid[grid1.getXPosition()][grid2.getYPosition()].getStatus() == OCCUPIED
-		|| _mapGrid[grid2.getXPosition()][grid1.getYPosition()].getStatus() == OCCUPIED) {
+		|| _mapGrid[grid2.getXPosition()][grid1.getYPosition()].getStatus() == OCCUPIED) 
+	{
 		return true;
 	}
 	return false;
@@ -174,18 +188,22 @@ void PathFinder::checkSurroundGrid(Grid & grid)
 	for (int i = 0; i < 8; ++i) {
 		auto x = grid.getXPosition() + DIRECTION[i][0];
 		auto y = grid.getYPosition() + DIRECTION[i][1];
-		if (x >= 0 && x < _mapWidth && y >= 0 && y < _mapHeight && !checkCorner(grid, _mapGrid[x][y]) && isAvailable(_mapGrid[x][y])) {
+		if (x >= 0 && x < _mapWidth && y >= 0 && y < _mapHeight && !checkCorner(grid, _mapGrid[x][y]) && isAvailable(_mapGrid[x][y])) 
+		{
 			_mapGrid[x][y].setGValue(calculateEuclideanDistance(_mapGrid[x][y], grid));
 			_mapGrid[x][y].setHValue(calculateManhattanDistance(_mapGrid[x][y], *_end));
 			_mapGrid[x][y].setFValue(_mapGrid[x][y].getGValue() + _mapGrid[x][y].getHValue());
-			if (isInOpenList(_mapGrid[x][y])) {
-				if (calculateEuclideanDistance(_mapGrid[x][y], grid) < _mapGrid[x][y].getGValue()) {
+			if (isInOpenList(_mapGrid[x][y]))
+			{
+				if (calculateEuclideanDistance(_mapGrid[x][y], grid) < _mapGrid[x][y].getGValue()) 
+				{
 					_mapGrid[x][y].setGValue(calculateEuclideanDistance(_mapGrid[x][y], grid));
 					_mapGrid[x][y].setFValue(_mapGrid[x][y].getGValue() + _mapGrid[x][y].getHValue());
 					_mapGrid[x][y].setParent(&grid);
 				}
 			}
-			else {
+			else 
+			{
 				_mapGrid[x][y].setStatus(INOPENLIST);
 				_mapGrid[x][y].setParent(&grid);
 				_openList.push_back(&_mapGrid[x][y]);
@@ -198,7 +216,8 @@ void PathFinder::searchPath()
 {
 	Grid * currentGrid = nullptr;
 	_openList.push_back(_start);
-	while (_end->getStatus() != INCLOSELIST && !_openList.empty()) {
+	while (_end->getStatus() != INCLOSELIST && !_openList.empty()) 
+	{
 		currentGrid = selectNextGrid();
 		checkSurroundGrid(*currentGrid);
 		currentGrid->setStatus(INCLOSELIST);
@@ -210,7 +229,8 @@ void PathFinder::searchPath()
 void PathFinder::generatePath()
 {
 	Grid * grid = _end;
-	while (grid->getParent() != nullptr) {
+	while (grid->getParent() != nullptr) 
+	{
 		_path.push_back(GridVec2(grid->getXPosition(), grid->getYPosition()));
 		grid = grid->getParent();
 	}

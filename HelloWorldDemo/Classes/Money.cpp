@@ -5,12 +5,13 @@ bool Money::init()
 	_money = INITIAL_MONEY;
 	_moneyString = std::to_string(_money);
 
-	return initWithString(_moneyString, "fonts/MoneyFont.fnt");
+	return initWithString(_moneyString, "fonts/MakerFelt.ttf", 32);
 }
 
 void Money::update(float f)
 {
-	if (++_time % _period == 0) {
+	if (++_time % _period == 0) 
+	{
 		_money += _moneyInPeriod;
 		updateMoneyLabel();
 	}

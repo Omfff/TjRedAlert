@@ -6,12 +6,15 @@
 #include<map>
 #include<vector>
 #include<set>
+//#include"unitManager.h"
 USING_NS_CC;
 #define _MAP_WIDTH 125
 #define _MAP_HEIGHT 62
 #define _NO_PASS 10086
 using namespace std;
 
+
+//class UnitManager;
 
 //将cocos自带的vec2（float）转为类型为int的坐标值
 //并重载了加减乘等号运算符
@@ -27,6 +30,7 @@ public:
 	friend GridVec2 operator +(const GridVec2 & point1,const GridVec2 &point2);
 	friend GridVec2 operator -(const GridVec2 & point1, const GridVec2 &point2);
 	friend bool operator ==(const GridVec2 & point1, const GridVec2 & point2);
+	friend bool operator < (const GridVec2 & point1, const GridVec2 & point2);
 };
 //将cocos自带的size类型转化为int的dimen
 //重载了==运算符
@@ -65,6 +69,7 @@ public:
 class GridMap:public Layer
 {
 protected:
+	//UnitManager * _unitManager;
 	map<int, GridVec2> _unitCoord;
 	//储存各单位的网格坐标
 	vector <vector<int>> _barrierMap;
@@ -77,6 +82,7 @@ protected:
 	GridRect _ladderRect3;
 	GridRect _ladderRect4;
 public:
+
 	vector <vector<int>> _findPathMap;
 	CREATE_FUNC(GridMap);
 	GridMap();
@@ -110,6 +116,8 @@ public:
 	friend Vec2 tileCoordFromPosition(Vec2 pos, TMXTiledMap* map);
 	bool checkBuildingRectPosition(const GridRect & rect)const;
 
+	//get destination beside occupied destination
+	GridVec2 getNewDestination(const GridVec2 & position,const map<GridVec2,int> & destination) const;
 };
 	
 

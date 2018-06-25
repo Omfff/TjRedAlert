@@ -2,16 +2,32 @@
 
 bool Electricity::init()
 {
-	_electricity = 100;
+	_electricity = 50;
 	_usedElectricity = 0;
 	_electricityString = std::to_string(_electricity);
 	_usedElectricityString = std::to_string(_usedElectricity);
 	_showElectricity = _usedElectricityString + "/" + _electricityString;
-	return initWithString(_showElectricity, "fonts/BMFont.fnt");
+	return initWithString(_showElectricity, "fonts/Maker Felt.ttf", 32);
 }
 
 void Electricity::updateLabel()
 {
+	if (_electricity < _usedElectricity)
+	{
+		_unitManager->stopAllBuildingUnitUpdate();
+		_tempMoneyInPeriod = _money->getMoneyInPeriod();
+		_money->setMoneyInPeriod(MONEY_IN_PERIOD);
+		powerOff = 1;
+	}
+	else
+	{
+		if (powerOff == 1)
+		{
+			_unitManager->startAllBuildingUnitUpdate();
+			_money->setMoneyInPeriod(_tempMoneyInPeriod);
+			powerOff = 0;
+		}
+	}
 	_electricityString = std::to_string(_electricity);
 	_usedElectricityString = std::to_string(_usedElectricity);
 	_showElectricity = _usedElectricityString + " / " + _electricityString;

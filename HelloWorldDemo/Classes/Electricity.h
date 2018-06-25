@@ -2,8 +2,11 @@
 #define __ELECTRICITY_H__
 
 #include"cocos2d.h"
+#include"UnitManager.h"
+#include"Money.h"
 
-class Electricity:public cocos2d::LabelBMFont
+class UnitManager;
+class Electricity:public cocos2d::LabelTTF
 {
 public:
 
@@ -43,8 +46,15 @@ private:
 	//combine _usedElectricityString with _electricityString
 	std::string _showElectricity;
 
+	CC_SYNTHESIZE(UnitManager*, _unitManager, unitManager);
+	CC_SYNTHESIZE(Money*, _money, money);
+
+	int _tempMoneyInPeriod = MONEY_IN_PERIOD;
+	
+	int powerOff=0;
+
 };
 
 
-#endif // !__ELECTRICITY_H__
+#endif 
 
