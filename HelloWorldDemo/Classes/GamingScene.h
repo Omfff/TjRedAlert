@@ -15,9 +15,14 @@
 #include"SocketServer.h"
 #include"SocketClient.h"
 #include<map>
+#include"MiniMap.h"
+#include "extensions/cocos-ext.h"
+#include "ui/CocosGUI.h"
 
 USING_NS_CC;
+USING_NS_CC_EXT;
 using namespace CocosDenshion;
+using namespace ui;
 
 class GamingScene : public cocos2d::Layer
 {
@@ -58,12 +63,18 @@ public:
 
 	void updateFightUnitWaitingNum(float dt);
 
+	void onExit();
+
+	void textFieldEvent(Ref *pSender, TextField::EventType type);
+
 private:
 	socket_server * _socketServer;
 	boost::shared_ptr<talk_to_server> _socketClient;
 
 	cocos2d::TMXTiledMap* _tiledMap;
-	
+
+	MiniMap * _miniMap;
+
 	//Unit * unit=nullptr;
 	UnitManager * _unitManager= nullptr;
 	GridMap * _gridMap= nullptr;
@@ -95,6 +106,13 @@ private:
 	LabelBMFont *  _tankWaitingNum;
 	LabelBMFont *  _attackdogWaitingNum;
 
+	std::string frameName;
+
+	EditBox * chat_in_box;
+	Text*_displayValueLabel;
+	TextField * textField;
+	string cMessage;
+	bool _isTyping=false;
 
 };
 

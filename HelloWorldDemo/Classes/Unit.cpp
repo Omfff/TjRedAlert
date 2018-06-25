@@ -4,6 +4,17 @@
 //#include"Building.h"
 #include"UnitManager.h"
 USING_NS_CC;
+
+const string CHOOSE_RESOURCES[8][5] =
+{ { "", "units/Base(red).png", "units/Base(blue).png", "units/Base(green).png", "units/Base(yellow).png" },
+{ "", "units/PowerPlant(red).png", "units/PowerPlant(blue).png", "units/PowerPlant(green).png", "units/PowerPlant(yellow).png" },
+{ "", "units/Barrack(red).png", "units/Barrack(blue).png", "units/Barrack(green).png", "units/Barrack(yellow).png" },
+{ "", "units/WarFactory(red).png", "units/WarFactory(blue).png", "units/WarFactory(green).png", "units/WarFactory(yellow).png" },
+{ "", "units/OreRefinery(red).png", "units/OreRefinery(blue).png", "units/OreRefinery(green).png", "units/OreRefinery(yellow).png" },
+{ "", "units/GI(red).png", "units/GI(blue).png", "units/GI(green).png", "units/GI(yellow).png" },
+{ "", "units/AttackDog(red).png", "units/AttackDog(blue).png", "units/AttackDog(green).png", "units/AttackDog(yellow).png" },
+{ "", "units/Tank(red).png", "units/Tank(blue).png", "units/Tank(green).png", "units/Tank(yellow).png" } };
+
 Unit* Unit::create(const std::string& filename)
 {
 	Unit *ret = new (std::nothrow) Unit();
@@ -19,6 +30,14 @@ Unit* Unit::create(const std::string& filename)
 bool Unit::init(CampTypes camp, UnitTypes Type, GridVec2 point, TMXTiledMap* map, GridMap *gridmap, int id)
 {
 	setUnitType(Type);
+
+
+	/*animationCache->addAnimation(baseAnimation, "BASE");
+	animationCache->addAnimation(powerPlantAnimation, "POWERPLANT");
+	animationCache->addAnimation(barrackAnimation, "BARRACK");
+	animationCache->addAnimation(warFactoryAnimation, "WARFACTORY");
+	animationCache->addAnimation(oreRefineryAnimation, "OREREFINERY");*/
+
 	return true;
 }
 
@@ -95,6 +114,33 @@ void BuildingUnit::updateBuildingBar(float dt)
 		if(_camp==_unitManager->getPlayerCamp())
 			SimpleAudioEngine::getInstance()->playEffect("Music/Construction complete.wav");//ÒôÐ§
 		setOpacity(255);
+		//AnimationCache * animationCache = AnimationCache::sharedAnimationCache();
+		auto animation = Animation::create();
+		switch (this->getUnitType())
+		{
+		case BASE:
+			animation = AnimationCache::getInstance()->getAnimation("BASE");
+			//animation = animationCache->animationByName("BASE");
+			//Animation * animation = animationCache->animationByName("BASE");
+			break;
+		case POWERPLANT:
+			animation = AnimationCache::getInstance()->getAnimation("POWERPLANT");
+			break;
+		case BARRACKS:
+			animation = AnimationCache::getInstance()->getAnimation("BARRACK");
+			break;
+		case WARFACTORY:
+			animation = AnimationCache::getInstance()->getAnimation("WARFACTORY");
+			break;
+		case OREREFINERY:
+			animation = AnimationCache::getInstance()->getAnimation("OREREFINERY");
+			break;
+		default:
+			break;
+		}
+		auto action = Animate::create(animation);
+		auto sequence = Sequence::create(action, CallFunc::create([&]() {this->setTexture(CHOOSE_RESOURCES[this->getUnitType()][this->getCamp()]); }), NULL);
+		this->runAction(sequence);
 
 		if(_camp==_unitManager->getPlayerCamp())
 		{

@@ -145,6 +145,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, damage_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, position_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, path_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, chat_message_),
   ~0u,  // no _has_bits_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GridPoint, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -167,9 +168,9 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::GameMessage)},
-  { 13, -1, sizeof(::GridPoint)},
-  { 20, -1, sizeof(::GridPath)},
-  { 26, -1, sizeof(::GameMessageGroup)},
+  { 14, -1, sizeof(::GridPoint)},
+  { 21, -1, sizeof(::GridPath)},
+  { 27, -1, sizeof(::GameMessageGroup)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -201,19 +202,20 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\022GameMessages.proto\"\332\001\n\013GameMessage\022\035\n\003"
+      "\n\022GameMessages.proto\"\371\001\n\013GameMessage\022\035\n\003"
       "cmd\030\001 \001(\0162\020.GameMessage.Cmd\022\020\n\010unit_id1\030"
       "\002 \001(\005\022\020\n\010unit_id2\030\003 \001(\005\022\014\n\004camp\030\004 \001(\005\022\021\n"
       "\tunit_type\030\005 \001(\005\022\016\n\006damage\030\006 \001(\005\022\034\n\010posi"
       "tion\030\007 \001(\0132\n.GridPoint\022\027\n\004path\030\010 \001(\0132\t.G"
-      "ridPath\" \n\003Cmd\022\007\n\003CRT\020\000\022\007\n\003MOV\020\001\022\007\n\003ATK\020"
-      "\002\"!\n\tGridPoint\022\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\"*\n\010"
-      "GridPath\022\036\n\npath_point\030\001 \003(\0132\n.GridPoint"
-      "\"6\n\020GameMessageGroup\022\"\n\014game_message\030\001 \003"
-      "(\0132\014.GameMessageb\006proto3"
+      "ridPath\022\024\n\014chat_message\030\t \001(\t\")\n\003Cmd\022\007\n\003"
+      "CRT\020\000\022\007\n\003MOV\020\001\022\007\n\003ATK\020\002\022\007\n\003CHT\020\003\"!\n\tGrid"
+      "Point\022\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\"*\n\010GridPath\022"
+      "\036\n\npath_point\030\001 \003(\0132\n.GridPoint\"6\n\020GameM"
+      "essageGroup\022\"\n\014game_message\030\001 \003(\0132\014.Game"
+      "Messageb\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 384);
+      descriptor, 415);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "GameMessages.proto", &protobuf_RegisterTypes);
 }
@@ -238,6 +240,7 @@ bool GameMessage_Cmd_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -248,6 +251,7 @@ bool GameMessage_Cmd_IsValid(int value) {
 const GameMessage_Cmd GameMessage::CRT;
 const GameMessage_Cmd GameMessage::MOV;
 const GameMessage_Cmd GameMessage::ATK;
+const GameMessage_Cmd GameMessage::CHT;
 const GameMessage_Cmd GameMessage::Cmd_MIN;
 const GameMessage_Cmd GameMessage::Cmd_MAX;
 const int GameMessage::Cmd_ARRAYSIZE;
@@ -270,6 +274,7 @@ const int GameMessage::kUnitTypeFieldNumber;
 const int GameMessage::kDamageFieldNumber;
 const int GameMessage::kPositionFieldNumber;
 const int GameMessage::kPathFieldNumber;
+const int GameMessage::kChatMessageFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 GameMessage::GameMessage()
@@ -285,6 +290,10 @@ GameMessage::GameMessage(const GameMessage& from)
       _internal_metadata_(NULL),
       _cached_size_(0) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
+  chat_message_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.chat_message().size() > 0) {
+    chat_message_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.chat_message_);
+  }
   if (from.has_position()) {
     position_ = new ::GridPoint(*from.position_);
   } else {
@@ -302,6 +311,7 @@ GameMessage::GameMessage(const GameMessage& from)
 }
 
 void GameMessage::SharedCtor() {
+  chat_message_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&position_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&damage_) -
       reinterpret_cast<char*>(&position_)) + sizeof(damage_));
@@ -314,6 +324,7 @@ GameMessage::~GameMessage() {
 }
 
 void GameMessage::SharedDtor() {
+  chat_message_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete position_;
   if (this != internal_default_instance()) delete path_;
 }
@@ -347,6 +358,7 @@ void GameMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  chat_message_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (GetArenaNoVirtual() == NULL && position_ != NULL) {
     delete position_;
   }
@@ -480,6 +492,22 @@ bool GameMessage::MergePartialFromCodedStream(
         break;
       }
 
+      // string chat_message = 9;
+      case 9: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(74u /* 74 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_chat_message()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "GameMessage.chat_message"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -549,6 +577,16 @@ void GameMessage::SerializeWithCachedSizes(
       8, *this->path_, output);
   }
 
+  // string chat_message = 9;
+  if (this->chat_message().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "GameMessage.chat_message");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      9, this->chat_message(), output);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
@@ -608,6 +646,17 @@ void GameMessage::SerializeWithCachedSizes(
         8, *this->path_, deterministic, target);
   }
 
+  // string chat_message = 9;
+  if (this->chat_message().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "GameMessage.chat_message");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        9, this->chat_message(), target);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), target);
@@ -625,6 +674,13 @@ size_t GameMessage::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()));
   }
+  // string chat_message = 9;
+  if (this->chat_message().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->chat_message());
+  }
+
   // .GridPoint position = 7;
   if (this->has_position()) {
     total_size += 1 +
@@ -709,6 +765,10 @@ void GameMessage::MergeFrom(const GameMessage& from) {
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (from.chat_message().size() > 0) {
+
+    chat_message_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.chat_message_);
+  }
   if (from.has_position()) {
     mutable_position()->::GridPoint::MergeFrom(from.position());
   }
@@ -759,6 +819,7 @@ void GameMessage::Swap(GameMessage* other) {
 }
 void GameMessage::InternalSwap(GameMessage* other) {
   using std::swap;
+  chat_message_.Swap(&other->chat_message_);
   swap(position_, other->position_);
   swap(path_, other->path_);
   swap(cmd_, other->cmd_);

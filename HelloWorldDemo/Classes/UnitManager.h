@@ -15,11 +15,14 @@
 #include"SocketServer.h"
 #include"Electricity.h"
 #include"Money.h"
-
+#include "extensions/cocos-ext.h" 
+#include "ui/CocosGUI.h"
 
 using namespace CocosDenshion;
 using namespace std;
+using namespace ui;
 USING_NS_CC;
+USING_NS_CC_EXT;
 
 
 
@@ -33,9 +36,12 @@ class GridRect;
 class BuildingUnit;
 class FightUnit;
  
+const string campString[5] = { "","RED","BLUE","GREEN","YELLOW" };
 
 class UnitManager :public Node
 {
+	CC_SYNTHESIZE(TextField *, _textField, textField);
+	CC_SYNTHESIZE(Text*, chat_out_box, ChatOutBox);
 	CC_SYNTHESIZE(Money *, _money, money);
 	CC_SYNTHESIZE(Electricity*, _electricity, electricity);
 	CC_SYNTHESIZE(GameMessageGroup *, _msgGroup, MessageGrop);
@@ -87,6 +93,7 @@ public:
 	Vec2 getMyBasePos();
 	void stopAllBuildingUnitUpdate();
 	void startAllBuildingUnitUpdate();
+	void createChatMessage(std::string);
 	//virtual void onEnter();
 	//virtual void onExit();
 	void win();

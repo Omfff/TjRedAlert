@@ -1,4 +1,4 @@
-
+﻿
 #include"UnitManager.h"
 #include"GameMessages.pb.h"
 #include"Building.h"
@@ -13,6 +13,7 @@ using namespace std;
 #define MESSAGEEMP GameMessage::Cmd::GameMessage_Cmd_EMP 
 #define MESSAGEMOV GameMessage::Cmd::GameMessage_Cmd_MOV
 #define MESSAGEATK GameMessage::Cmd::GameMessage_Cmd_ATK
+#define MESSAGECHT GameMessage::Cmd::GameMessage_Cmd_CHT
 
 bool UnitManager::init()
 {
@@ -35,17 +36,17 @@ void UnitManager::updateUnitState()
 	{
 		for (int i = 0; i < receiveMessNum; i++)
 		{
-			auto receiveMessage=_msgGroup->game_message(i);
+			auto receiveMessage = _msgGroup->game_message(i);
 			if (receiveMessage.cmd() == MESSAGECRT)
 			{
 				int id = receiveMessage.unit_id1();
 				GridVec2  pos = GridVec2(receiveMessage.position().x(), receiveMessage.position().y());
-				Unit * newUnit = creatUnit( CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()),pos, receiveMessage.unit_id1());
+				Unit * newUnit = creatUnit(CampTypes(receiveMessage.camp()), UnitTypes(receiveMessage.unit_type()), pos, receiveMessage.unit_id1());
 			}
 			else if (receiveMessage.cmd() == MESSAGEMOV)
 			{
 				int id = receiveMessage.unit_id1();
-				if(_unitIdMap.count(id)>0)//if (_unitIdMap[id]!=nullptr)
+				if (_unitIdMap.count(id)>0)//if (_unitIdMap[id]!=nullptr)
 				{
 					Unit * unit = _unitIdMap[id];
 					auto messageMovePath = receiveMessage.path();
@@ -69,38 +70,50 @@ void UnitManager::updateUnitState()
 					log("empty _unitIdMap doesn't contain receiveMessage.unit_id1 ,the cmd mov is wrong !");
 				}
 			}
-			else
+
+			else if (receiveMessage.cmd() == MESSAGEATK)//unit1收到unit2攻击
 			{
-				if (receiveMessage.cmd() == MESSAGEATK)//unit1收到unit2攻击
+				int unitId1 = receiveMessage.unit_id1();
+				int unitId2 = receiveMessage.unit_id2();
+				int damage = receiveMessage.damage();
+				if (_unitIdMap.count(unitId1) > 0)
 				{
-					int unitId1 = receiveMessage.unit_id1();
-					int unitId2 = receiveMessage.unit_id2();
-					int damage = receiveMessage.damage();
-					if (_unitIdMap.count(unitId1) > 0)
+					_unitIdMap[unitId1]->setAttackID(unitId2);
+					_unitIdMap[unitId1]->attack();
+					if (_unitIdMap.count(unitId2) > 0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
 					{
-						_unitIdMap[unitId1]->setAttackID(unitId2);
-						_unitIdMap[unitId1]->attack();
-						if (_unitIdMap.count(unitId2) > 0)//if (_unitManager->_unitIdMap[_attackID]!=nullptr)
+						_unitIdMap[unitId2]->getDamage(damage);
+						if (_unitIdMap[unitId2]->getCurrentHp() <= 0)
 						{
-							_unitIdMap[unitId2]->getDamage(damage);
-							if (_unitIdMap[unitId2]->getCurrentHp() <= 0)
-							{
-								destoryUnit(unitId2);
-								_unitIdMap[unitId1]->setAttackID(0);
-								_unitIdMap[unitId1]->stopAttackUpdate();
-							}
-							else
-								if (_unitIdMap[unitId2]->getCamp() == getUnitCamp(unitId2))
-								{
-									_unitIdMap[unitId2]->setEnermyId(unitId1);//�Զ�����
-									_unitIdMap[unitId2]->setUnderAttack(true);//�Զ�����
-									_unitIdMap[unitId2]->displayHpBar();
-								}
+							destoryUnit(unitId2);
+							_unitIdMap[unitId1]->setAttackID(0);
+							_unitIdMap[unitId1]->stopAttackUpdate();
 						}
 						else
-							_unitIdMap[unitId1]->stopAttackUpdate();
+							if (_unitIdMap[unitId2]->getCamp() == getUnitCamp(unitId2))
+							{
+								_unitIdMap[unitId2]->setEnermyId(unitId1);//ؔ֯٥ܷ
+								_unitIdMap[unitId2]->setUnderAttack(true);//ؔ֯٥ܷ
+								_unitIdMap[unitId2]->displayHpBar();
+							}
 					}
+					else
+						_unitIdMap[unitId1]->stopAttackUpdate();
+				}
 
+			}
+
+			else
+			{
+				if (receiveMessage.cmd() == MESSAGECHT)
+				{
+					static int timer = 0;
+					if (timer++ % 8 == 0) {
+						chat_out_box->setString(campString[receiveMessage.camp()] + ":" + receiveMessage.chat_message());
+					}
+					else {
+						chat_out_box->setString(chat_out_box->getString() + "\n" + campString[receiveMessage.camp()] + ":" + receiveMessage.chat_message());
+					}
 				}
 			}
 		}
@@ -127,10 +140,10 @@ void UnitManager::destoryUnit(int id)
 				{
 					_unitIdMap[attackId]->setEnermyId(0);
 					_unitIdMap[attackId]->setUnderAttack(false);
-					_unitIdMap[attackId]->setAutoAttack(true);//δ����
+					_unitIdMap[attackId]->setAutoAttack(true);//未测试
 				}
 			}
-			if (unit->getUnitType() < 5 && unit->getEnermyId() != 0 && _unitIdMap.count(unit->getEnermyId()) > 0)//δ����
+			if (unit->getUnitType() < 5 && unit->getEnermyId() != 0 && _unitIdMap.count(unit->getEnermyId()) > 0)//未测试
 			{
 				_unitIdMap[unit->getEnermyId()]->setAttackID(0);
 				_unitIdMap[unit->getEnermyId()]->setAutoAttack(true);
@@ -237,7 +250,7 @@ Unit * UnitManager::creatUnit(CampTypes camp, UnitTypes type, const  GridVec2& p
 	if (camp == _playerCamp)
 	{
 		if (type > 5)
-			SimpleAudioEngine::getInstance()->playEffect("Music/Unit ready.wav");//��Ч
+			SimpleAudioEngine::getInstance()->playEffect("Music/Unit ready.wav");//音效
 	}
 	if(type<5)
 		unit->buildingUpdate();
@@ -298,12 +311,12 @@ void UnitManager::creatProduceMessage(UnitTypes unitType,const GridVec2 &pos)
 	newMessage->set_camp(_playerCamp);
 	newMessage->set_cmd(MESSAGECRT);
 	newMessage->set_unit_type(unitType);
-	newMessage->set_unit_id1(_nextId);//单位id的设置？？？
+	newMessage->set_unit_id1(_nextId);//鍗曚綅id鐨勮缃紵锛燂紵
 	_nextId += 4;
 	GridPoint * posPoint =newMessage->mutable_position();
 	posPoint->set_x(  pos._x);
 	posPoint->set_y( pos._y);
-	//怎么设置坐标？？
+	//鎬庝箞璁剧疆鍧愭爣锛燂紵
 }
 void UnitManager::creatMoveMessage(int id, vector<GridVec2> &path )
 {
@@ -331,7 +344,16 @@ void UnitManager::createAttackMessage(int id1, int id2, int damage)
 	newMessage->set_unit_id2(id2);
 	newMessage->set_damage(damage);
 }
-//本地移动和攻击的消息怎么生成？？
+void UnitManager::createChatMessage(std::string cM)
+{
+	//_textField->setText("");
+	auto newMessage = _msgGroup->add_game_message();
+	newMessage->set_camp(_playerCamp);
+	newMessage->set_cmd(MESSAGECHT);
+	newMessage->set_chat_message(cM);
+
+}
+//鏈湴绉诲姩鍜屾敾鍑荤殑娑堟伅鎬庝箞鐢熸垚锛燂紵
 void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 {
 	int idAtPos = _gridMap->getUnitIdAt(GridVec2(pos._x / 32, pos._y / 32));
@@ -342,7 +364,7 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		{
 			for (auto unitid : _selectedUnitID)
 			{
-				if (_unitIdMap[unitid]->getUnitType() >= 5)//�ǿ��ƶ���λ
+				if (_unitIdMap[unitid]->getUnitType() >= 5)//是可移动单位
 				{
 					_unitIdMap[unitid]->stopAttackUpdate();
 					_unitIdMap[unitid]->setAttackID(0);
@@ -369,17 +391,17 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 		else
 		{
 			if (_unitIdMap[idAtPos]->getCamp() == _playerCamp
-				&&_unitIdMap[idAtPos]->getIsBuilding()==false)//选择了我方的单位 则显示血�?
+				&&_unitIdMap[idAtPos]->getIsBuilding()==false)//閫夋嫨浜嗘垜鏂圭殑鍗曚綅 鍒欐樉绀鸿鏉?
 			{
 				deselectAllUnits();
 				_selectedUnitID.push_back(idAtPos);
 				_unitIdMap[idAtPos]->displayHpBar();
 
 			}
-			else////ѡ���˵з���λ
+			else////选择了敌方单位
 			{
-				//1�з����� ���� ����
-				//2�з����� ���� ����
+				//1敌方建筑 到达 攻击
+				//2敌方兵种 跟踪 攻击
 				if (_unitIdMap[idAtPos]->getUnitType() >= 0)//if (_unitIdMap[idAtPos]->getUnitType() < 5)
 				{
 					if (_unitIdMap[idAtPos]->getUnitType() < 5
@@ -394,7 +416,7 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 							if (distanceX > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._width / 2
 								|| distanceY > AUTO_ATTACK_RANGE[_unitIdMap[unitid]->getUnitType() - 5]._height / 2)
 							{
-								//�ƶ���������λ����
+								//移动到建筑单位附近
 								_unitIdMap[unitid]->stopAttackUpdate();
 								_unitIdMap[unitid]->setAttackID(idAtPos);
 								if (_unitIdMap[unitid]->getActionManager()->getNumberOfRunningActionsInTarget(_unitIdMap[unitid]))
@@ -426,7 +448,7 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 				}
 				else
 				{
-					//2�з����� ���� ����
+					//2敌方兵种 跟踪 攻击
 				}
 			}
 		}
@@ -435,7 +457,7 @@ void UnitManager::choosePosOrUnit(const GridVec2 & pos)
 	{
 		if (idAtPos != 0 && idAtPos != _NO_PASS&&
 			_unitIdMap.count(idAtPos)>0&&
-			_unitIdMap[idAtPos]->getCamp() == _playerCamp)//选择了我方的单位 则显示血�?
+			_unitIdMap[idAtPos]->getCamp() == _playerCamp)//閫夋嫨浜嗘垜鏂圭殑鍗曚綅 鍒欐樉绀鸿鏉?
 		{
 			if (_unitIdMap[idAtPos]->getUnitType() < 5 && _unitIdMap[idAtPos]->getIsBuilding() == true)
 				return;

@@ -25,10 +25,10 @@ const int MONEY_PRODUCE[5] = {50,0,0,0,100};
 //每种建筑单位的SIZE
 const GridDimen SIZES[5] = { GridDimen(6,4),GridDimen(4,4),
 GridDimen(4,4),GridDimen(6,4),GridDimen(6,4) };
-const int FIGHTER_HEALTH[3] = {400,400,1200};
+const int FIGHTER_HEALTH[3] = {400,200,1200};
 const GridDimen FIGHTER_SIZES[3] = { GridDimen(1,1),GridDimen(1,1),GridDimen(1,1) };
 const float UNIT_MOVE_SPEED[3] = { 8,12,6 };
-const int ATTACK_FORCE[3] = { 20,20,80 };
+const int ATTACK_FORCE[3] = { 30,20,80 };
 const int ATTACK_SPEED[3] = { 0,0,0 };
 const GridDimen AUTO_ATTACK_RANGE[3] = { GridDimen(8,8),GridDimen(12,12),GridDimen(16,16) };
 const int MANUAL_ATTACK_RANGE[3] = { 0,0,0 };
@@ -39,7 +39,7 @@ const string FIGHTER_BG_BAR[3] = { "20150914105931941.png","20150914105931941.pn
 const int PRODUCEGITIME = 360;
 const int PRODUCEATTACKDOGTIME = 240;
 const int PRODUCETANKTIME = 720;
-const float BUILDINGTIME[5] = { 0.2,0.1,0.1,0.08,0.08 };
+const float BUILDINGTIME[5] = { 0.25,0.2,0.2,0.15,0.15 };
 //BASE 8s,POWERPLANT 17s,BARRACKS 20s,WARFACTORY 40s,OREREFINERY 40s
 
 class Unit;

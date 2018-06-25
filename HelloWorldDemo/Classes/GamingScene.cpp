@@ -48,6 +48,35 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
+	auto background = Sprite::create("button1.png");
+	background->setPosition(Vec2(origin.x + 125, origin.y + 132));
+	this->addChild(background, 10);
+
+	_displayValueLabel = Text::create("CHAT MESSAGE", "/fonts/Marker Felt.ttf", 30);
+	_displayValueLabel->setPosition(Vec2(origin.x + 100, origin.y + 90));
+	this->addChild(_displayValueLabel, 10);
+
+	textField = TextField::create("Please input message here!", "Arial", 18);
+	textField->setAnchorPoint(Vec2(0, 0));
+	textField->setPosition(Vec2(origin.x + 15, origin.y + 120));
+	textField->setMaxLength(15);
+	textField->setMaxLengthEnabled(true);
+	textField->addEventListener(CC_CALLBACK_2(GamingScene::textFieldEvent, this));
+	//Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(
+	this->addChild(textField, 10);
+
+	/*chat_in_box = EditBox::create(Size(255, 40), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"));
+	chat_in_box->setPosition(Vec2(origin.x+130, origin.y + 120));
+	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
+	chat_in_box->setFontSize(22);
+	chat_in_box->setMaxLength(20);
+	this->addChild(chat_in_box,10 );*/
+
+	auto chat_out_box = Text::create("", "Arial", 18);
+	chat_out_box->setAnchorPoint(Vec2(0, 0));
+	chat_out_box->setPosition(Vec2(origin.x + 10, origin.y + 170));
+	chat_out_box->setTextHorizontalAlignment(TextHAlignment::LEFT);
+	this->addChild(chat_out_box, 10);
 
 	_tiledMap = TMXTiledMap::create("maps/TjRedAlertMap(1).tmx");
 	_tiledMap->setAnchorPoint(Vec2(0, 0));
@@ -78,6 +107,91 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 	setCollisionPos(_tiledMap, _gridMap);
 	_gridMap->setVisible(false);
 
+	_miniMap = MiniMap::create("scenes/MiniMap.png");
+	_miniMap->setAnchorPoint(Vec2(0, 0));
+	_miniMap->setPosition(0, visibleSize.height - _miniMap->_miniMapHeight);
+	switch (CampTypes(_socketClient->getCamp()))
+	{
+	case RED:
+		_miniMap->_drawRectNode->drawRect(Vec2(0, 0) , Vec2(visibleSize.width, visibleSize.height) * 3 / 32, Color4F::RED);
+		break;
+	case BLUE:
+		_miniMap->_drawRectNode->drawRect(Vec2(_miniMap->_miniMapWidth - visibleSize.width * 3 / 32, _miniMap->_miniMapHeight - visibleSize.height * 3 / 32), 
+			Vec2(_miniMap->_miniMapWidth, _miniMap->_miniMapHeight), Color4F::BLUE);
+		break;
+	case GREEN:
+		_miniMap->_drawRectNode->drawRect(Vec2(0, _miniMap->_miniMapHeight - visibleSize.height * 3 / 32),
+			Vec2(visibleSize.width * 3 / 32, _miniMap->_miniMapHeight), Color4F::GREEN);
+		break;
+	case YELLOW:
+		_miniMap->_drawRectNode->drawRect(Vec2(_miniMap->_miniMapWidth - visibleSize.width * 3 / 32, 0),
+			Vec2(_miniMap->_miniMapWidth, visibleSize.height * 3 / 32), Color4F::YELLOW);
+		break;
+	default:
+		break;
+	}
+	addChild(_miniMap, 200);
+
+	auto rectListner = EventListenerTouchOneByOne::create();
+	rectListner->onTouchBegan = [&](cocos2d::Touch* touch, cocos2d::Event* event)->bool
+	{
+		auto visibleSize = Director::getInstance()->getVisibleSize();
+		if (_miniMap->getBoundingBox().containsPoint(touch->getLocation()))
+		{
+			return true;
+		}
+	};
+	rectListner->onTouchEnded = [&](cocos2d::Touch* touch, cocos2d::Event* event)
+	{
+		auto visibleSize = Director::getInstance()->getVisibleSize();
+		if (_miniMap->getBoundingBox().containsPoint(touch->getLocation()))
+		{
+			Point focusPosition = _miniMap->convertToNodeSpaceAR(touch->getLocation()) * 32 / 3;
+			focusPosition -= visibleSize / 2;
+			if (_tiledMap->getContentSize().width < focusPosition.x + visibleSize.width)
+			{
+				focusPosition.x = _tiledMap->getContentSize().width - visibleSize.width;
+			}
+			if (_tiledMap->getContentSize().height < focusPosition.y + visibleSize.height)
+			{
+				focusPosition.y = _tiledMap->getContentSize().height - visibleSize.height;
+			}
+			if (focusPosition.x < 0)
+			{
+				focusPosition.x = 0;
+			}
+			if (focusPosition.y < 0)
+			{
+				focusPosition.y = 0;
+			}
+			focusPosition = Point(0, 0) - focusPosition;
+			_tiledMap->setPosition(focusPosition);
+			_miniMap->_drawRectNode->clear();
+			switch (_unitManager->getPlayerCamp())
+			{
+			case RED:
+				_miniMap->_drawRectNode->drawRect(_miniMap->convertToNodeSpaceAR(touch->getLocation()) - visibleSize * 3 / 64, 
+					_miniMap->convertToNodeSpaceAR(touch->getLocation()) + visibleSize * 3 / 64, Color4F::RED);
+				break;
+			case BLUE:
+				_miniMap->_drawRectNode->drawRect(_miniMap->convertToNodeSpaceAR(touch->getLocation()) - visibleSize * 3 / 64,
+					_miniMap->convertToNodeSpaceAR(touch->getLocation()) + visibleSize * 3 / 64, Color4F::BLUE);
+				break;
+			case GREEN:
+				_miniMap->_drawRectNode->drawRect(_miniMap->convertToNodeSpaceAR(touch->getLocation()) - visibleSize * 3 / 64,
+					_miniMap->convertToNodeSpaceAR(touch->getLocation()) + visibleSize * 3 / 64, Color4F::GREEN);
+				break;
+			case YELLOW:
+				_miniMap->_drawRectNode->drawRect(_miniMap->convertToNodeSpaceAR(touch->getLocation()) - visibleSize * 3 / 64,
+					_miniMap->convertToNodeSpaceAR(touch->getLocation()) + visibleSize * 3 / 64, Color4F::YELLOW);
+				break;
+			default:
+				break;
+			}
+		}
+	};
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(rectListner, this);
+
 	_msgs = new GameMessageGroup;
 
 	_unitManager = UnitManager::create();
@@ -88,6 +202,8 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 	_unitManager->setNextId(CampTypes(_socketClient->getCamp()));
 	_unitManager->_socketServer = _socketServer;
 	_unitManager->_socketClient = _socketClient;
+	_unitManager->setChatOutBox(chat_out_box);
+	_unitManager->settextField(textField);
 	_unitManager->setMyBaseId(0);
 
 	addChild(_unitManager);
@@ -98,15 +214,10 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 	_manufactureMenu = ManufactureMenu::create();
 	_manufactureMenu->setPosition(Vec2(origin.x + visibleSize.width - 20, origin.y + visibleSize.height / 2));
 
-	
-
-
 	_manufactureMenu->setBuildingCallBack([&](Ref*) 
 	{
 		unschedule(schedule_selector(GamingScene::updateFightUnitWaitingNum));
 		_menuSpriteLayer->removeAllChildren();
-
-		
 
 		auto base = Sprite::create(CHOOSE_RESOURCES[BASE][_socketClient->getCamp()]);
 		base->setPosition(Director::getInstance()->getVisibleSize().width - 200, 
@@ -392,6 +503,54 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 
 	addChild(_manufactureMenu, 10);
 
+	auto baseAnimation = Animation::create();
+	auto powerPlantAnimation = Animation::create();
+	auto barrackAnimation = Animation::create();
+	auto warFactoryAnimation = Animation::create();
+	auto oreRefineryAnimation = Animation::create();
+
+	for (int i = 0; i <= 27; ++i)
+	{
+		frameName = "units/Base/base_" + to_string(i) + ".png";
+		baseAnimation->addSpriteFrameWithFileName(frameName);
+	}
+
+	for (int i = 0; i <= 23; ++i)
+	{
+		frameName = "units/PowerPlant/powerplant_" + to_string(i) + ".png";
+		powerPlantAnimation->addSpriteFrameWithFileName(frameName);
+	}
+
+	for (int i = 0; i <= 23; ++i)
+	{
+		frameName = "units/Barrack/barrack_" + to_string(i) + ".png";
+		barrackAnimation->addSpriteFrameWithFileName(frameName);
+	}
+
+	for (int i = 0; i <= 23; ++i)
+	{
+		frameName = "units/WarFactory/warFactory_" + to_string(i) + ".png";
+		warFactoryAnimation->addSpriteFrameWithFileName(frameName);
+	}
+
+	for (int i = 0; i <= 23; ++i)
+	{
+		frameName = "units/OreRefinery/orerefinery_" + to_string(i) + ".png";
+		oreRefineryAnimation->addSpriteFrameWithFileName(frameName);
+	}
+
+	baseAnimation->setDelayPerUnit(0.1f);
+	powerPlantAnimation->setDelayPerUnit(0.1f);
+	barrackAnimation->setDelayPerUnit(0.1f);
+	warFactoryAnimation->setDelayPerUnit(0.1f);
+	oreRefineryAnimation->setDelayPerUnit(0.1f);
+
+	AnimationCache::getInstance()->addAnimation(baseAnimation, "BASE");
+	AnimationCache::getInstance()->addAnimation(powerPlantAnimation, "POWERPLANT");
+	AnimationCache::getInstance()->addAnimation(barrackAnimation, "BARRACK");
+	AnimationCache::getInstance()->addAnimation(warFactoryAnimation, "WARFACTORY");
+	AnimationCache::getInstance()->addAnimation(oreRefineryAnimation, "OREREFINERY");
+
 
 
 	auto moneyIcon = Sprite::create("ui/money/money.png");
@@ -456,6 +615,9 @@ bool GamingScene::init(socket_server * socketServer, boost::shared_ptr<talk_to_s
 
 void GamingScene::update(float f)
 {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 	mapScroll();
 
 	for (auto keyCode : _keyStatus) 
@@ -470,6 +632,32 @@ void GamingScene::update(float f)
 	if(_electricity->powerOff==0)
 		_unitManager->fighterUnitProductionUpdate(f);
 	_unitManager->updateUnitState();
+
+	_miniMap->_drawDotNode->clear();
+	for (auto unit : _unitManager->_unitIdMap)
+	{
+		_miniMap->drawUnit(unit.second);
+	}
+	_miniMap->_drawRectNode->clear();
+	switch (CampTypes(_socketClient->getCamp()))
+	{
+	case RED:
+		_miniMap->_drawRectNode->drawRect(-_tiledMap->getPosition() * 3 / 32, (-_tiledMap->getPosition() + visibleSize) * 3 / 32, Color4F::RED);
+		break;
+	case BLUE:
+		_miniMap->_drawRectNode->drawRect(-_tiledMap->getPosition() * 3 / 32, (-_tiledMap->getPosition() + visibleSize) * 3 / 32, Color4F::BLUE);
+		break;
+	case GREEN:
+		_miniMap->_drawRectNode->drawRect(-_tiledMap->getPosition() * 3 / 32, (-_tiledMap->getPosition() + visibleSize) * 3 / 32, Color4F::GREEN);
+		break;
+	case YELLOW:
+		_miniMap->_drawRectNode->drawRect(-_tiledMap->getPosition() * 3 / 32, (-_tiledMap->getPosition() + visibleSize) * 3 / 32, Color4F::YELLOW);
+		break;
+	default:
+		break;
+	}
+	
+
 }
 
 void GamingScene::mapScroll()
@@ -520,7 +708,28 @@ void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 
 	switch (keyCode)
 	{
+	case  EventKeyboard::KeyCode::KEY_ENTER:
+		/*if(cM!=""&&cM.length()>1&& cM != "\n")
+		_unitManager->createChatMessage(cM);
+		chat_in_box->setText("");*/
+		/*if (value.length() > 0)
+		{
+		_unitManager->createChatMessage(value);
+		textField ->cleanup();
+		}
+		break;*/
+		if (_isTyping == true)
+		{
+			cMessage = textField->getString();
+			if(cMessage.length()>0&&cMessage!="")
+				_unitManager->createChatMessage(cMessage);
+			textField->setText("");
+			cMessage == "";
+		}
+		break;
 	case EventKeyboard::KeyCode::KEY_SPACE:
+		if (_isTyping == true)
+			break;
 		focusPosition -= visibleSize / 2;
 		if (_tiledMap->getContentSize().width < focusPosition.x + visibleSize.width) 
 		{
@@ -542,15 +751,23 @@ void GamingScene::onKeyPressed(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d:
 		_tiledMap->setPosition(focusPosition);
 		break;
 	case EventKeyboard::KeyCode::KEY_W:
+		if (_isTyping == true)
+			break;
 		_keyStatus[EventKeyboard::KeyCode::KEY_W] = true;
 		break;
 	case EventKeyboard::KeyCode::KEY_A:
+		if (_isTyping == true)
+			break;
 		_keyStatus[EventKeyboard::KeyCode::KEY_A] = true;
 		break;
 	case EventKeyboard::KeyCode::KEY_S:
+		if (_isTyping == true)
+			break;
 		_keyStatus[EventKeyboard::KeyCode::KEY_S] = true;
 		break;
 	case EventKeyboard::KeyCode::KEY_D:
+		if (_isTyping == true)
+			break;
 		_keyStatus[EventKeyboard::KeyCode::KEY_D] = true;
 		break;
 	default:
@@ -577,8 +794,9 @@ void GamingScene::keyPressedToMove(EventKeyboard::KeyCode keyCode)
 			_tiledMap->runAction(MoveBy::create(0.2f, Vec2(0, -5)));
 			if (_tiledMap->getPosition().y <= visibleSize.height - size.height + 10) 
 			{
-			_tiledMap->stopAllActions();
+				_tiledMap->stopAllActions();
 			}
+			//if(_miniMap->_drawRectNode->runAction(MoveBy::create(0.2f, )))
 		}
 		break;
 	case EventKeyboard::KeyCode::KEY_A:
@@ -774,3 +992,47 @@ void GamingScene::updateFightUnitWaitingNum(float dt)
 	
 }
 
+void GamingScene::onExit()
+{
+	Layer::onExit();
+
+	AnimationCache::getInstance()->purgeSharedAnimationCache();
+	AnimationCache::getInstance()->removeAnimationByName("BASE");
+	AnimationCache::getInstance()->removeAnimationByName("POWERPLANT");
+	AnimationCache::getInstance()->removeAnimationByName("WARFACTORY");
+	AnimationCache::getInstance()->removeAnimationByName("BARRACK");
+	AnimationCache::getInstance()->removeAnimationByName("OREREFINERY");
+
+	AnimationCache::destroyInstance();
+
+
+
+
+}
+void GamingScene::textFieldEvent(Ref *pSender, TextField::EventType type)
+{
+	switch (type)
+	{
+	case TextField::EventType::ATTACH_WITH_IME:
+		_displayValueLabel->setString("INPUT BEGIN");
+		_isTyping = true;
+		break;
+	case TextField::EventType::DETACH_WITH_IME:
+	{
+		std::string values;
+		_displayValueLabel->setString("CHAT HERE!");
+		values = textField->getString();
+		//cMessage = "";
+		if (values.length() > 0)
+		{
+			_unitManager->createChatMessage(values);
+			textField->setText("");
+		}
+		_isTyping = false;
+	}
+	break;
+	default:
+		break;
+	}
+
+}
